@@ -1,14 +1,22 @@
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
+import { cors } from 'hono/cors'
 import { PrismaClient } from '@prisma/client'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Redis } from 'ioredis'
 import "./bigint-extension"
 import authRoute from './api/auth.js'
+import { handleSocket } from './socket/chat.js'
+import { Server } from 'socket.io'
+import { createMiddleware } from 'hono/factory'
+import type { socketParam } from './type.js'
 
 const app = new OpenAPIHono()
 const prisma = new PrismaClient()
+
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000'
+app.use('/*', cors({origin: [corsOrigin]}))
 
 app.get('/swagger', swaggerUI({ url: '/doc' }))
 app.doc('/doc', { info: { title: 'API', version: 'v1' }, openapi: '3.1.0'})
@@ -62,11 +70,13 @@ app.get('/', async (c) => {
 // Start here
 app.route('/api', authRoute)
 
-
-const port = 3000
+const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 4000;
 console.log(`Server is running on http://localhost:${port}`)
 
-serve({
+const server = serve({
   fetch: app.fetch,
   port
 })
+
+const io = new Server(server, {cors: {origin: corsOrigin}});
+handleSocket(io)

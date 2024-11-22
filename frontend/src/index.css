@@ -9,3 +9,7 @@ body {
 a {
   @apply text-blue-500;
 }
+
+button {
+  @apply bg-blue-500
+}

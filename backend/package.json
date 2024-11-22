@@ -1,12 +1,22 @@
 {
   "name": "wbd-backend",
-  "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "dev": "nodemon src/index.ts"
   },
-  "author": "WBD",
-  "license": "ISC",
-  "description": ""
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.18.0",
+    "@prisma/client": "^5.22.0",
+    "hono": "^4.6.11",
+    "ioredis": "^5.4.1",
+    "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.1"
+  }
 }

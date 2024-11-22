@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Source Sans 3", sans-serif;
+}
+
+a {
+  @apply text-blue-500;
+}

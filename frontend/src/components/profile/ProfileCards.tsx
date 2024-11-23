@@ -1,11 +1,11 @@
 import React from 'react';
 import EditIcon from '../../assets/images/edit-icon.svg';
 
-interface ProfileDetailsProps {
+interface ProfileCardsProps {
   accessLevel: "owner" | "connected" | "notConnected" | "public";
 }
 
-const ProfileDetails: React.FC<ProfileDetailsProps> = ({
+const ProfileCards: React.FC<ProfileCardsProps> = ({
   accessLevel,
 }) => {
   const isPublic = accessLevel === "public";
@@ -20,7 +20,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           {(isOwner || isConnected) && (
             <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Post</h3>
+                <h3 className="text-xl font-semibold">Post</h3>
                 {isOwner && (
                   <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
                     <img
@@ -40,7 +40,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           {/* Experience Card */}
           <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Experience</h3>
+              <h3 className="text-xl font-semibold">Experience</h3>
               {isOwner && (
                 <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
                   <img
@@ -60,7 +60,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
           {(isOwner || isConnected) && (
             <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Skills</h3>
+                <h3 className="text-xl font-semibold">Skills</h3>
                 {isOwner && (
                   <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
                     <img
@@ -82,4 +82,4 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   );
 };
 
-export default ProfileDetails;
+export default ProfileCards;

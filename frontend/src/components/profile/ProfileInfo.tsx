@@ -2,7 +2,7 @@ import React from 'react';
 import EditIcon from '../../assets/images/edit-icon.svg';
 import MessageIcon from '../../assets/images/message.svg';
 
-interface ProfileCardProps {
+interface ProfileInfoProps {
   banner: string;
   name: string;
   photo: string;
@@ -11,7 +11,7 @@ interface ProfileCardProps {
   accessLevel: "public" | "owner" | "connected" | "notConnected";
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({
+const ProfileInfo: React.FC<ProfileInfoProps> = ({
   banner,
   name,
   photo,
@@ -44,7 +44,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       
       <div className="px-6 pb-6">
         <div className="flex justify-between items-center mt-20">
-          <h2 className="text-xl font-semibold text-left">{name}</h2>
+          <h2 className="text-2xl font-semibold text-left">{name}</h2>
           {isOwner && (
             <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
               <img
@@ -91,4 +91,4 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
-export default ProfileCard;
+export default ProfileInfo;

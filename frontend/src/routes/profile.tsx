@@ -1,6 +1,6 @@
 import React from 'react';
-import ProfileCard from '../components/profile/ProfileCard';
-import ProfileDetails from '../components/profile/ProfileDetails';
+import ProfileInfo from '../components/profile/ProfileInfo';
+import ProfileCards from '../components/profile/ProfileCards';
 
 type AccessLevel = "public" | "owner" | "connected" | "notConnected";
 
@@ -21,7 +21,7 @@ const Profile: React.FC<ProfileProps> = ({ accessLevel = "connected" }) => {
   return (
     <div className="min-h-screen">
       <div className="">
-        <ProfileCard
+        <ProfileInfo
           banner={profileData.banner}
           photo={profileData.photo}
           name={profileData.name}
@@ -29,7 +29,7 @@ const Profile: React.FC<ProfileProps> = ({ accessLevel = "connected" }) => {
           connections={profileData.connections}
           accessLevel={accessLevel}
         />
-        <ProfileDetails
+        <ProfileCards
           accessLevel={accessLevel}
         />
       </div>

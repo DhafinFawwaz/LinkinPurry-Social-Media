@@ -41,7 +41,7 @@ app.openapi(
       username: z.string(),
       email: z.string().email(),
       name: z.string(),
-      password: z.string().min(8)
+      password: z.string().min(8, "Password must be at least 8 characters").regex(/[A-Za-z]/, "Password must contain at least one letter").regex(/\d/, "Password must contain at least one number")
     }),
     responses: {
       200: DefaultJsonResponse("Register to an account", {

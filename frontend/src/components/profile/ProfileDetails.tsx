@@ -1,4 +1,5 @@
 import React from 'react';
+import EditIcon from '../../assets/images/edit-icon.svg';
 
 interface ProfileDetailsProps {
   accessLevel: "owner" | "connected" | "notConnected" | "public";
@@ -7,25 +8,75 @@ interface ProfileDetailsProps {
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({
   accessLevel,
 }) => {
+  const isPublic = accessLevel === "public";
   const isOwner = accessLevel === "owner";
+  const isConnected = accessLevel === "connected";
 
   return (
-    // <div className="bg-white border border-gray-300 rounded-lg relative mx-60">
-    <div>
-      {accessLevel !== "public" && (
-        <div className="bg-white border border-gray-300 rounded-lg relative mx-60 mt-4 p-6">
-          <h3 className="text-lg font-semibold">Additional Info</h3>
-          <p className="text-gray-600">This section is visible based on access level.</p>
-        </div>
-      )}
+    <div className="mb-6 mx-80">
+      {!isPublic && (
+        <>
+          {/* Postingan relevan?*/}
+          {(isOwner || isConnected) && (
+            <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Post</h3>
+                {isOwner && (
+                  <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
+                    <img
+                      src={EditIcon}
+                      alt="Edit Icon"
+                      className="w-[24px] h-[24px]"
+                    />
+                  </button>
+                )}
+              </div>
+              <p className="text-gray-600 mt-2">
+                Postingan relevan goes here.... (dinamis kah?)
+              </p>
+            </div>
+          )}
 
-      {isOwner && (
-        <div className="bg-white border border-gray-300 rounded-lg relative mx-60 mt-4 p-6">
-        {/* <div className="mt-4"> */}
-          <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
-            Edit Details
-          </button>
-        </div>
+          {/* Experience Card */}
+          <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Experience</h3>
+              {isOwner && (
+                <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
+                  <img
+                    src={EditIcon}
+                    alt="Edit Icon"
+                    className="w-[24px] h-[24px]"
+                  />
+                </button>
+              )}
+            </div>
+            <p className="text-gray-600 mt-2">
+              Isinya list card pengalaman kerja 
+            </p>
+          </div>
+
+          {/* Skills Card (for isConnected or owner) */}
+          {(isOwner || isConnected) && (
+            <div className="bg-white border border-gray-300 rounded-lg relative mt-4 p-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Skills</h3>
+                {isOwner && (
+                  <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
+                    <img
+                      src={EditIcon}
+                      alt="Edit Icon"
+                      className="w-[24px] h-[24px]"
+                    />
+                  </button>
+                )}
+              </div>
+              <p className="text-gray-600 mt-2">
+                Isinya list card keterampilan
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -9,10 +9,7 @@ interface ProfileProps {
     accessLevel?: AccessLevel;
 }
 
-const Profile: React.FC<ProfileProps> = ({ accessLevel = "notConnected" }) => {
-  const isOwner = accessLevel === "owner";
-  const isConnected = accessLevel === "connected";
-
+const Profile: React.FC<ProfileProps> = ({ accessLevel = "connected" }) => {
   const profileData = {
     name: "Ucok Baba Manihot",
     banner: "",
@@ -31,8 +28,6 @@ const Profile: React.FC<ProfileProps> = ({ accessLevel = "notConnected" }) => {
           description={profileData.description}
           connections={profileData.connections}
           accessLevel={accessLevel}
-          isOwner={isOwner}     
-          isConnected={isConnected}
         />
         <ProfileDetails
           accessLevel={accessLevel}

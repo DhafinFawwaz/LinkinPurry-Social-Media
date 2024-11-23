@@ -1,4 +1,6 @@
 import React from 'react';
+import EditIcon from '../../assets/images/edit-icon.svg';
+import MessageIcon from '../../assets/images/message.svg';
 
 interface ProfileCardProps {
   banner: string;
@@ -7,8 +9,6 @@ interface ProfileCardProps {
   description: string;
   connections: number;
   accessLevel: "public" | "owner" | "connected" | "notConnected";
-  isOwner: boolean;
-  isConnected: boolean;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -18,11 +18,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   description,
   connections,
   accessLevel,
-  isOwner,
-  isConnected,
 }) => {
+  const isPublic = accessLevel === "public";
+  const isOwner = accessLevel === "owner";
+  const isConnected = accessLevel === "connected";
+
   return (
-    <div className="bg-white border border-gray-300 rounded-lg relative mx-60">
+    <div className="bg-white border border-gray-300 rounded-lg relative mx-80">
       {/* Banner */}
       <div className="h-48 relative">
         <img
@@ -41,7 +43,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       />
       
       <div className="px-6 pb-6">
-        <h2 className="text-xl font-semibold text-left mt-20">{name}</h2>
+        <div className="flex justify-between items-center mt-20">
+          <h2 className="text-xl font-semibold text-left">{name}</h2>
+          {isOwner && (
+            <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
+              <img
+                src={EditIcon}
+                alt="Edit Icon"
+                className="w-[24px] h-[24px]"
+              />
+            </button>
+          )}
+        </div>
+        
         <p className="text-left text-gray-600">{description}</p>
         <p className="text-left text-gray-700 font-medium mt-2">
           {connections} connections
@@ -49,16 +63,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
         
         {/* Buttons */}
         <div className="mt-4 space-y-2">
-          {isOwner && (
-            <>
-              <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
-                Edit Profile
-              </button>
-            </>
-          )}
-          {!isOwner && isConnected && accessLevel !== "public" && (
+          {!isOwner && isConnected && !isPublic && (
             <div className='flex flex-row space-x-2'>
-              <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+              <button className="flex items-center bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                <img
+                  src={MessageIcon}
+                  alt="Message Icon"
+                  className="w-[16px] h-[16px] mr-2"
+                />
                 Message
               </button>
               <button className="bg-white text-black_primary font-semibold py-2 px-6 rounded-full border border-black_primary hover:bg-white_hover ">
@@ -66,7 +78,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </button>
             </div>
           )}
-          {!isOwner && !isConnected && accessLevel !== "public" && (
+          {!isOwner && !isConnected && !isPublic && (
             <>
               <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
                 Connect

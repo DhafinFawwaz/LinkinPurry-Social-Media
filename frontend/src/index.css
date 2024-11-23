@@ -4,6 +4,7 @@
 
 body {
   font-family: "Source Sans 3", sans-serif;
+  background-color: #f3f2ee;
 }
 
 a {
@@ -11,5 +12,5 @@ a {
 }
 
 button {
-  @apply bg-blue-500
+  @apply bg-blue-500;
 }

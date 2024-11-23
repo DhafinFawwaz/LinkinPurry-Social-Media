@@ -7,10 +7,10 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { Redis } from 'ioredis'
 import "./bigint-extension"
 import authRoute from './api/auth.js'
+import feedRoute from './api/feed.js'
+import profileRoute from './api/profile.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
-import { createMiddleware } from 'hono/factory'
-import type { socketParam } from './type.js'
 
 const app = new OpenAPIHono()
 const prisma = new PrismaClient()
@@ -18,31 +18,8 @@ const prisma = new PrismaClient()
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000'
 app.use('/*', cors({origin: [corsOrigin]}))
 
-app.get('/swagger', swaggerUI({ url: '/doc' }))
-app.doc('/doc', { info: { title: 'API', version: 'v1' }, openapi: '3.1.0'})
-app.openapi(
-  createRoute({
-    method: 'get',
-    path: '/hello',
-    responses: {
-      200: {
-        description: 'Respond a message',
-        content: {
-          'application/json': {
-            schema: z.object({
-              message: z.string()
-            })
-          }
-        }
-      }
-    }
-  }),
-  (c) => {
-    return c.json({
-      message: 'hello'
-    })
-  }
-)
+app.get('/doc', swaggerUI({ url: '/api/doc' }))
+app.doc('/api/doc', { info: { title: 'API Documentation', version: 'v1' }, openapi: '3.1.0'})
 
 const redis = new Redis({
   host: (process.env.REDIS_HOST || 'localhost') as string,
@@ -69,6 +46,8 @@ app.get('/', async (c) => {
 
 // Start here
 app.route('/api', authRoute)
+app.route('/api', feedRoute)
+app.route('/api', profileRoute)
 
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 4000;
 console.log(`Server is running on http://localhost:${port}`)

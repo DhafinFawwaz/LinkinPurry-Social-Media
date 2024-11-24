@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../components/form-input";
+import { fetchApi } from "../hooks/useFetchApi";
 
 export const RegisterSchema = z
   .object({
@@ -19,33 +20,30 @@ export const RegisterSchema = z
 
 export type RegisterSchema = z.infer<typeof RegisterSchema>;
 
-export default function Register() {
+export default function Register({ onRegister }: { onRegister?: () => void }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError} = useForm<RegisterSchema>({mode: "all", resolver: zodResolver(RegisterSchema)});
-  
+  const navigate = useNavigate();
+
   async function onSubmit(data: RegisterSchema) {
-      const response = await fetch("/api/register", {
+    const response = await fetchApi("/api/register", {
       method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-          "Content-Type": "application/json",
-      },
+      body: JSON.stringify(data)
     });
-    const responseData = await response.json();
-    if (!response.ok) {
-      alert("Submitting form failed!");
-      return;
-    }
-  
-    if (responseData.errors) {
-      const errors = responseData.errors;
-      switch (errors) {
-        case errors.username: setError("username", { type: "server", message: errors.username,}); break;
-        case errors.email: setError("email", { type: "server", message: errors.email,}); break;
-        case errors.name: setError("name", { type: "server", message: errors.name,}); break;
-        case errors.password: setError("password", { type: "server", message: errors.password,}); break;
-        case errors.confirmPassword: setError("confirmPassword", { type: "server", message: errors.confirmPassword,}); break;
-        default: alert("Something went wrong!"); break;
+    
+    try {
+      const responseData = await response.json();
+      if (responseData.errors) {
+        const errors = responseData.errors;
+        if(errors.username) setError("username", { type: "server", message: errors.username,});
+        if(errors.email) setError("email", { type: "server", message: errors.email,});
+        if(errors.name) setError("name", { type: "server", message: errors.name,});
+        if(errors.password) setError("password", { type: "server", message: errors.password,});
+        if(errors.confirmPassword) setError("confirmPassword", { type: "server", message: errors.confirmPassword,});
+      } else {
+        if (onRegister) onRegister();
       }
+    } catch (e) {
+      alert(e);
     }
   };
 

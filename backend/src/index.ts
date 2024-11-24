@@ -15,7 +15,7 @@ import db from './db/db.js'
 const app = new OpenAPIHono()
 
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000'
-app.use('/*', cors({origin: [corsOrigin]}))
+app.use('/*', cors({origin: [corsOrigin], credentials: true}))
 
 app.get('/doc', swaggerUI({ url: '/api/doc' }))
 app.doc('/api/doc', { info: { title: 'API Documentation', version: 'v1' }, openapi: '3.1.0'})

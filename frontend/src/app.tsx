@@ -7,14 +7,12 @@ import Chat from './routes/chat'
 import SplashScreen from './components/splash-screen'
 import useFetchApi from './hooks/useFetchApi'
 import { AuthResponse } from './type'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { deleteAllCookies } from './utils/cookies'
 
 const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
 
-// [currentPath, redirectPath]
-// const protectedRoutes = {
-//     "/": "/login",
-// };
+// [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
     ["/", "/login"],
 ]);
@@ -24,13 +22,15 @@ const notAuthenticatedRoutes = new Map<string, string>([
 ]);
 
 function AuthRouter() {
-    const { loading, error, value }: {loading: boolean, error: boolean|undefined, value: AuthResponse|undefined } = useFetchApi("/api/auth", 400);
+    const { loading, error, value, recall } = useFetchApi<AuthResponse>("/api/auth", 300);
     const navigate = useNavigate();
     const location = useLocation();
+    
+    const isAuthenticated = () => !loading && value && value.success;
 
     useEffect(() => {
         if(loading) return;
-        if (value && value.success) {
+        if (isAuthenticated()) {
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);
         } else {
@@ -39,24 +39,42 @@ function AuthRouter() {
         }
     }, [loading])
 
+    function logout() {
+        deleteAllCookies();
+        recall();
+    }
+
     return <>
 {loading ? <SplashScreen></SplashScreen> :
+isAuthenticated() ? <>
 
+<div className='fixed'>
+    <NavLink to={"/"} className={activeClass}>Root</NavLink>
+    <NavLink to={"/profile"} className={activeClass}>Profile</NavLink>
+    <NavLink to={"/chat"} className={activeClass}>Chat</NavLink>
+    <button onClick={logout}>Logout</button>
+</div>
+<Routes>
+    <Route path='/' element={<Root/>}></Route>
+    <Route path='/profile' element={<Profile/>}></Route>
+    <Route path='/chat' element={<Chat/>}></Route>
+</Routes>
+
+</>
+:
 <>
-    <div className='fixed'>
-        <NavLink to={"/"} className={activeClass}>Root</NavLink>
-        <NavLink to={"/profile"} className={activeClass}>Profile</NavLink>
-        <NavLink to={"/login"} className={activeClass}>Login</NavLink>
-        <NavLink to={"/register"} className={activeClass}>Register</NavLink>
-        <NavLink to={"/chat"} className={activeClass}>Chat</NavLink>
-    </div>
-    <Routes>
-        <Route path='/' element={<Root/>}></Route>
-        <Route path='/profile' element={<Profile/>}></Route>
-        <Route path='/login' element={<Login/>}></Route>
-        <Route path='/register' element={<Register/>}></Route>
-        <Route path='/chat' element={<Chat/>}></Route>
-    </Routes>
+
+<div className='fixed'>
+    <NavLink to={"/"} className={activeClass}>Root</NavLink>
+    <NavLink to={"/login"} className={activeClass}>Login</NavLink>
+    <NavLink to={"/register"} className={activeClass}>Register</NavLink>
+</div>
+<Routes>
+    <Route path='/' element={<Root/>}></Route>
+    <Route path='/login' element={<Login onLogin={recall}/>}></Route>
+    <Route path='/register' element={<Register onRegister={recall}/>}></Route>
+</Routes>
+
 </>
 }
 

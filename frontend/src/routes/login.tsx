@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { FieldValues, useForm } from "react-hook-form"
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../components/form-input";
+import { fetchApi } from "../hooks/useFetchApi";
 
 export const LoginSchema = z.object({
   identifier: z.string().min(1, "Email or Username is required"),
@@ -10,30 +11,26 @@ export const LoginSchema = z.object({
 });
 export type LoginSchema = z.infer<typeof LoginSchema>;
 
-export default function Login() {
+export default function Login({ onLogin: onLogin }: { onLogin?: () => void }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError} = useForm<LoginSchema>({mode: "all", resolver: zodResolver(LoginSchema)});
-  
+
   async function onSubmit(data: LoginSchema) {
-      const response = await fetch("/api/login", {
+    const response = await fetchApi("/api/login", {
       method: "POST",
       body: JSON.stringify(data),
-      headers: {
-          "Content-Type": "application/json",
-      },
     });
-    const responseData = await response.json();
-    if (!response.ok) {
-      alert("Submitting form failed!");
-      return;
-    }
-  
-    if (responseData.errors) {
-      const errors = responseData.errors;
-      switch (errors) {
-        case errors.identifier: setError("identifier", { type: "server", message: errors.identifier,}); break;
-        case errors.password: setError("password", { type: "server", message: errors.password,}); break;
-        default: alert("Something went wrong!"); break;
+    
+    try {
+      const responseData = await response.json();
+      if (responseData.errors) {
+        const errors = responseData.errors;
+        if(errors.identifier) setError("identifier", { type: "server", message: errors.identifier,});
+        if(errors.password) setError("password", { type: "server", message: errors.password,});
+      } else {
+        if (onLogin) onLogin();
       }
+    } catch (e) {
+      alert(e);
     }
   };
 
@@ -50,7 +47,7 @@ export default function Login() {
         <FormInput register={register} error={errors.identifier} field={"identifier"} type={"text"} title={"Enter Your Email or Username"}></FormInput>
         <FormInput register={register} error={errors.password} field={"password"} type={"password"} title={"Enter Your Password"}></FormInput>
 
-        <button disabled={isSubmitting} className="rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Login</button>
+        <button disabled={isSubmitting} className="disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-slate-200 rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Login</button>
       </form>
 
       <p className="text-slate-500 text-sm mt-3 text-center">Don't have an account ? <Link className="hover:underline hover:text-blue-700 focus:text-blue-800 focus:underline" to={"/register"}>Register</Link></p>

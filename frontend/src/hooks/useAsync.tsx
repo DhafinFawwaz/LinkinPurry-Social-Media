@@ -5,7 +5,7 @@ export default function useAsync<T>(callback: () => Promise<any>, dependencies =
   const [error, setError] = useState<boolean>()
   const [value, setValue] = useState<T>()
 
-  const callbackMemoized = useCallback(() => {
+  const recall = useCallback(() => {
     setLoading(true)
     setError(undefined)
     setValue(undefined)
@@ -16,8 +16,8 @@ export default function useAsync<T>(callback: () => Promise<any>, dependencies =
   }, dependencies)
 
   useEffect(() => {
-    callbackMemoized()
-  }, [callbackMemoized])
+    recall()
+  }, [recall])
 
-  return { loading, error, value }
+  return { loading, error, value, recall }
 }

@@ -10,6 +10,7 @@ services:
       - ./backend/prisma:/home/node/app/prisma
     ports:
       - 4000:4000
+      - 5555:5555 # prisma studio
     depends_on:
       db:
         condition: service_healthy

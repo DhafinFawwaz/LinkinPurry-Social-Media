@@ -10,14 +10,22 @@ import type { Context } from 'hono';
 const app = new OpenAPIHono()
 
 async function login(c: Context, username: string, email: string, name?: any) {
+  const iat = Math.floor(Date.now() / 1000)
+  const exp = Math.floor(Date.now() / 1000) + 60 * 60
   const token = await Jwt.sign({ 
     username: username, 
     email: email, 
     // name: name,
-    iat: Math.floor(Date.now() / 1000), // issued at time
-    exp: Math.floor(Date.now() / 1000) + 60 * 60
+    iat: iat, // issued at time
+    exp: exp
   }, process.env.JWT || "supersecretjwtsecret")
-  setCookie(c, 'token', token)
+
+  setCookie(c, 'token', token, {
+    httpOnly: false,
+    secure: true,
+    sameSite: "none",
+    expires: new Date(exp * 1000),
+  })
   return token;
 }
 
@@ -73,7 +81,8 @@ app.openapi(
           }
         })
       }
-      const token = login(c, user.username, user.email)
+      const token = await login(c, user.username, user.email)
+      
       return c.json({
         success: true,
         message: 'Login success',
@@ -181,6 +190,63 @@ app.openapi(
   }
 )
 
+
+app.openapi(
+  createRoute({
+    method: 'get',
+    path: '/auth',
+    description: 'Verify if user is authenticated',
+    tags: ['Auth'],
+    responses: {
+      200: DefaultJsonResponse("Getting list of posts successful", {
+        username: z.string(), 
+        email: z.string().email(), 
+        // name: z.string(),
+        iat: z.number(),
+        exp: z.number(),
+      }),
+      401: DefaultJsonResponse("Unauthorized")
+    }
+  }), async (c) => {
+
+    // case no token provided
+    if(!c.req.header("Authorization")) {
+      c.status(401)
+      return c.json({
+        success: false,
+        message: 'Unauthorized',
+      })
+    }
+
+    // case invalid token
+    try {
+      const auth = c.req.header("Authorization")?.split(" ");
+      if(!auth || auth[0] !== "Bearer") {
+        throw new Error("Invalid token")
+      }
+      const token = auth[1];
+      const payload = await Jwt.verify(token, process.env.JWT || "supersecretjwtsecret");
+      return c.json({
+        success: true,
+        message: 'Authenticated',
+        body: {
+          username: payload.username,
+          email: payload.email,
+          // name: payload.name,
+          iat: payload.iat,
+          exp: payload.exp,
+        }
+      })
+    } catch(e) {
+      c.status(401)
+      return c.json({
+        success: false,
+        message: e,
+      })
+    }
+
+}
+)
 
 export default app
 

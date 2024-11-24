@@ -35,7 +35,7 @@ export type UseFetchApiReturn<T> = {
   value: T | undefined,
   recall: () => void,
 }
-export default function useFetchApi<T>(path: string, minimumWaitDuration: number = 0, options: RequestInit = {}, dependencies = []): UseFetchApiReturn<T> {
+export default function useFetchApi<T>(path: string, minimumWaitDuration: number = 0, callOnMount: boolean = true, options: RequestInit = {}, dependencies: any[] = []): UseFetchApiReturn<T> {
   return useAsync<T>(async () => {
     const startTime = Date.now();
     const res = await fetchApi(path, options);
@@ -57,6 +57,6 @@ export default function useFetchApi<T>(path: string, minimumWaitDuration: number
     const remainingWaitTime = Math.max(minimumWaitDuration - elapsedTime, 0);
     await wait(remainingWaitTime);
     return Promise.reject(resJson);
-  }, dependencies);
+  }, callOnMount, dependencies);
 
 }

@@ -22,7 +22,7 @@ const notAuthenticatedRoutes = new Map<string, string>([
 ]);
 
 function AuthRouter() {
-    const { loading, error, value, recall } = useFetchApi<AuthResponse>("/api/auth", 300);
+    const { loading, value, recall } = useFetchApi<AuthResponse>("/api/auth", 300);
     const navigate = useNavigate();
     const location = useLocation();
     

@@ -6,16 +6,19 @@ import { Jwt } from 'hono/utils/jwt';
 import bcrypt from "bcrypt";
 import { setCookie } from 'hono/cookie';
 import type { Context } from 'hono';
+import { authenticated, type JwtContent } from "../middlewares/authenticated.js"
 
 const app = new OpenAPIHono()
 
-async function login(c: Context, username: string, email: string, name?: any) {
+
+async function login(c: Context, id: number, username: string, email: string, name: string) {
   const iat = Math.floor(Date.now() / 1000)
   const exp = Math.floor(Date.now() / 1000) + 60 * 60
-  const token = await Jwt.sign({ 
+  const token = await Jwt.sign({
+    id: id,
     username: username, 
     email: email, 
-    // name: name,
+    name: name,
     iat: iat, // issued at time
     exp: exp
   }, process.env.JWT || "supersecretjwtsecret")
@@ -81,7 +84,7 @@ app.openapi(
           }
         })
       }
-      const token = await login(c, user.username, user.email)
+      const token = await login(c, Number(user.id), user.username, user.email, user.username)
       
       return c.json({
         success: true,
@@ -159,7 +162,7 @@ app.openapi(
       // Create user
       const saltRound = process.env.SALT_ROUND ? Number.parseInt(process.env.SALT_ROUND) : 10;
       const hashedPassword: string = await bcrypt.hash(password, saltRound);
-      await db.user.create({
+      const newUser = await db.user.create({
         data: {
           username,
           email,
@@ -168,7 +171,7 @@ app.openapi(
       })
       
       
-      const token = login(c, username, email)
+      const token = login(c, Number(newUser.id), newUser.username, email, newUser.username)
       return c.json({
         success: true,
         message: 'Register success',
@@ -208,6 +211,7 @@ app.openapi(
       401: DefaultJsonResponse("Unauthorized")
     }
   }), async (c) => {
+    
 
     // case no token provided
     if(!c.req.header("Authorization")) {
@@ -247,6 +251,22 @@ app.openapi(
 
 }
 )
+
+export async function getUser(c: Context) {
+  if(!c.req.header("Authorization")) return undefined;
+
+  try {
+    const auth = c.req.header("Authorization")?.split(" ");
+    if(!auth || auth[0] !== "Bearer") {
+      throw new Error("Invalid token")
+    }
+    const token = auth[1];
+    const payload = await Jwt.verify(token, process.env.JWT || "supersecretjwtsecret") as JwtContent;
+    return payload;
+  } catch(e) {
+    return undefined;
+  }
+}
 
 export default app
 

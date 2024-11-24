@@ -35,7 +35,7 @@ model User {
 model Feed {
   id         BigInt   @id @default(autoincrement())
   created_at DateTime @default(now())
-  updated_at DateTime
+  updated_at DateTime @updatedAt
   content    String
   user_id    BigInt
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -46,7 +46,7 @@ model Feed {
 model Chat {
   id        BigInt   @id @default(autoincrement())
   timestamp DateTime @default(now())
-  from_id   BigInt
+  from_id   BigInt   
   to_id     BigInt
   message   String
   from      User     @relation("FromUser", fields: [from_id], references: [id], onDelete: Cascade)
@@ -58,7 +58,7 @@ model Chat {
 model ConnectionRequest {
   from_id   BigInt
   to_id     BigInt
-  createdAt DateTime
+  createdAt DateTime @default(now())
   from      User     @relation("FromConnectionRequest", fields: [from_id], references: [id], onDelete: Cascade)
   to        User     @relation("ToConnectionRequest", fields: [to_id], references: [id], onDelete: Cascade)
 
@@ -69,7 +69,7 @@ model ConnectionRequest {
 model Connection {
   from_id   BigInt
   to_id     BigInt
-  createdAt DateTime
+  createdAt DateTime @default(now())
   from      User     @relation("FromConnection", fields: [from_id], references: [id], onDelete: Cascade)
   to        User     @relation("ToConnection", fields: [to_id], references: [id], onDelete: Cascade)
 

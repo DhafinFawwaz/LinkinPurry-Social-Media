@@ -36,7 +36,7 @@ CREATE TABLE "chat" (
 CREATE TABLE "connection_request" (
     "from_id" BIGINT NOT NULL,
     "to_id" BIGINT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "connection_request_pkey" PRIMARY KEY ("from_id","to_id")
 );
@@ -45,7 +45,7 @@ CREATE TABLE "connection_request" (
 CREATE TABLE "connection" (
     "from_id" BIGINT NOT NULL,
     "to_id" BIGINT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "connection_pkey" PRIMARY KEY ("from_id","to_id")
 );

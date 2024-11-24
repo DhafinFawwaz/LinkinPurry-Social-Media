@@ -34,6 +34,7 @@ export function DefaultJsonRequest(description: string | undefined = undefined, 
 
 export function PostSchema() {
   return {
-    post_id: z.number()
+    post_id: z.number(),
+    content: z.string(),
   };
 }

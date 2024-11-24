@@ -1,5 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema } from '../schema.js'
+import db from '../db/db.js'
+import { authenticated } from '../middlewares/authenticated.js'
 
 const app = new OpenAPIHono()
 
@@ -17,20 +19,37 @@ app.openapi(
       },
       responses: {
         200: DefaultJsonResponse("Getting list of posts successful", {
-            posts: z.array(z.object(PostSchema()))
+            feeds: z.array(z.object(PostSchema()))
         }),
         401: DefaultJsonResponse("Unauthorized")
       }
-    }), (c) => {
+    }), async (c) => {
 
-    // c.req.valid()
-
-    return c.json({
-        success: true,
-        message: '',
-        body: {
+    try{
+      const { limit, cursor } = c.req.valid("query");
+      const feeds = await db.feed.findMany({
+        take: limit || 10,
+        skip: cursor || 0,
+        orderBy: {
+          created_at: 'desc'
         }
-    })
+      });
+
+      return c.json({
+          success: true,
+          message: 'Getting list of posts successful',
+          body: {
+            feeds
+          }
+      })
+    } catch(e) {
+      console.log(e)
+      c.status(422)
+      return c.json({
+          success: false,
+          message: 'Getting list of posts failed',
+      })
+    }
   }
 )
 
@@ -46,15 +65,41 @@ app.openapi(
       responses: {
         200: DefaultJsonResponse("Creating a post successful", PostSchema()),
         401: DefaultJsonResponse("Unauthorized")
-      }
-    }), (c) => {
+      },
+      middleware: authenticated
+    }), async (c) => {
+    const user = c.var.user;
 
-    return c.json({
-        success: true,
-        message: '',
-        body: {
+    try {
+      const { content } = c.req.valid("json");
+      if(!content) {
+        c.status(422);
+        return c.json({
+          success: false,
+          message: 'Content is required',
+        })
+      }
+
+      const post = await db.feed.create({
+        data: {
+          content,
+          user_id: user.id
         }
-    })
+      })
+
+      return c.json({
+          success: true,
+          message: 'Creating a post successful',
+          body: post
+      })
+    } catch(e) {
+      console.log(e)
+      c.status(422)
+      return c.json({
+          success: false,
+          message: 'Creating a post failed',
+      })
+    }
   }
 )
 
@@ -82,15 +127,69 @@ app.openapi(
       responses: {
         200: DefaultJsonResponse("Updating a post successful", PostSchema()),
         401: DefaultJsonResponse("Unauthorized")
-      }
-    }), (c) => {
-    
-    return c.json({
-        success: true,
-        message: '',
-        body: {
+      },
+      middleware: authenticated
+    }), async (c) => {
+
+    const user = c.var.user;
+
+    try {
+      const { post_id } = c.req.valid("param");
+
+      const post = await db.feed.findUnique({
+        where: {
+          id: post_id
         }
-    })
+      })
+
+      if(!post) {
+        c.status(404);
+        return c.json({
+          success: false,
+          message: 'Post not found',
+        })
+      }
+
+      if(Number(post.user_id) !== user.id) {
+        c.status(401);
+        return c.json({
+          success: false,
+          message: 'Unauthorized',
+        })
+      }
+
+      const { content } = c.req.valid("json");
+
+      if(!content) {
+        c.status(422);
+        return c.json({
+          success: false,
+          message: 'Content is required',
+        })
+      }
+
+      const updatedPost = await db.feed.update({
+        where: {
+          id: post_id
+        },
+        data: {
+          content
+        }
+      })
+
+      return c.json({
+          success: true,
+          message: 'Updating a post successful',
+          body: updatedPost
+      })
+    } catch(e) {
+      console.log(e)
+      c.status(422)
+      return c.json({
+          success: false,
+          message: 'Updating a post failed',
+      })
+    }
   }
 )
 
@@ -108,17 +207,56 @@ app.openapi(
       responses: {
         200: DefaultJsonResponse("Deleting a post successful", PostSchema()),
         401: DefaultJsonResponse("Unauthorized")
-      }
-    }), (c) => {
+      },
+      middleware: authenticated
+    }), async (c) => {
 
-    // c.req.valid()
+    const user = c.var.user;
 
-    return c.json({
-        success: true,
-        message: '',
-        body: {
+    try {
+      const { post_id } = c.req.valid("param");
+
+      const post = await db.feed.findUnique({
+        where: {
+          id: post_id
         }
-    })
+      })
+
+      if(!post) {
+        c.status(404);
+        return c.json({
+          success: false,
+          message: 'Post not found',
+        })
+      }
+
+      if(Number(post.user_id) !== user.id) {
+        c.status(401);
+        return c.json({
+          success: false,
+          message: 'Unauthorized',
+        })
+      }
+
+      await db.feed.delete({
+        where: {
+          id: post_id
+        }
+      })
+
+      return c.json({
+          success: true,
+          message: 'Deleting a post successful',
+          body: post
+      })
+    } catch(e) {
+      console.log(e)
+      c.status(422)
+      return c.json({
+          success: false,
+          message: 'Deleting a post failed',
+      })
+    }
   }
 )
 

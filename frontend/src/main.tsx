@@ -1,12 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './index.css'
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
 import Root from './routes/root'
 import Profile from './routes/profile'
 import Login from './routes/login'
 import Register from './routes/register'
 import Chat from './routes/chat'
-import './index.css'
+import SplashScreen from './components/splash-screen'
 
 const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
 
@@ -28,5 +29,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path='/chat' element={<Chat/>}></Route>
       </Routes>
     </BrowserRouter>
+    {/* <SplashScreen></SplashScreen> */}
   </StrictMode>,
 )

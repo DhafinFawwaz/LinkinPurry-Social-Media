@@ -5,6 +5,7 @@
     "dev": "nodemon src/index.ts"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.2.0",
     "@hono/node-server": "^1.13.7",
     "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.18.0",

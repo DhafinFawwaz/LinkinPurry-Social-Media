@@ -1,6 +1,7 @@
 import ListTile from "../components/list-tile";
 import useFetchApi, { fetchApi } from "../hooks/useFetchApi";
 import { UsersResponse } from "../type";
+import toImageSrc from "../utils/image";
 
 export default function Users() {
   const { loading, value, error, recall } = useFetchApi<UsersResponse>(
@@ -16,10 +17,11 @@ export default function Users() {
 <></>
 :
 <>
-{value?.body.map((req, i) => (<ListTile key={i}
-  title={req.from.full_name!} 
-  subtitle={new Date(req.created_at).toLocaleString()}
-  imageSrc={toImageSrc(req.from.profile_photo_path)}
+{value?.body.map((user, i) => (<ListTile key={i}
+  title={user.full_name!} 
+  subtitle={new Date(user.created_at).toLocaleString()}
+  imageSrc={toImageSrc(user.profile_photo_path)}
+  href={`/profile/${user.id}`}
   >
 </ListTile>))
 }

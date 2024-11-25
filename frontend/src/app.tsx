@@ -58,10 +58,11 @@ isAuthenticated() ? <>
 <Navbar
     activePage={location.pathname}
     isAuthenticated={isAuthenticated()}
+    user={value?.body}
 />
 <Routes>
     <Route path='/' element={<Feed user={value?.body}/>}></Route>
-    <Route path='/profile' element={<Profile/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile/>}></Route>
     <Route path='/chat' element={<Chat/>}></Route>
     <Route path='/networks' element={<Network/>}></Route>
     <Route path='/users' element={<Users/>}></Route>

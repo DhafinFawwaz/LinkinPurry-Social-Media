@@ -37,6 +37,7 @@ export default function Feed({user}: {user?: JWTContent}) {
   title={user.full_name} 
   subtitle={"Write a post!"}
   imageSrc={toImageSrc(user.profile_photo_path)}
+  href={`/profile/${user.id}`}
   >
 <div className="px-2 pb-2 text-sm">
   <textarea ref={textAreaRef} className="w-full min-h-20 h-20 p-2 border border-gray-300 rounded-md hover:border-blue-600 focus:border-blue-600 focus:bg-blue-50 focus:outline-none" placeholder="What's on your mind?"></textarea>
@@ -59,6 +60,7 @@ export default function Feed({user}: {user?: JWTContent}) {
   title={req.user.full_name!} 
   subtitle={new Date(req.updated_at).toLocaleString()}
   imageSrc={toImageSrc(req.user.profile_photo_path)}
+  href={`/profile/${req.user.id}`}
   >
 <div className="px-2 pb-2 text-sm">
   {req.content}

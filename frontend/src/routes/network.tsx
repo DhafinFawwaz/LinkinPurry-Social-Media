@@ -53,6 +53,7 @@ export default function Network() {
     <div className="w-4"></div>
     <button onClick={() => deny(req.from)} className="items-center bg-blue_primary text-white font-semibold h-[2rem] w-24 flex justify-center rounded-full hover:bg-blue_hover text-sm">Accept</button>
   </>}
+  href={`/profile/${req.from.id}`}
   >
 </ListTile>))
 }

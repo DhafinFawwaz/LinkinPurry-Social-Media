@@ -11,13 +11,15 @@ import MessagingHoverIcon from "../../assets/images/message-hover-icon.svg";
 import ProfileIcon from "../../assets/images/jobseeker_profile.svg";
 import JobsIcon from "../../assets/images/jobs-icon.svg";
 import JobsHoverIcon from "../../assets/images/jobs-hover-icon.svg";
+import { JWTContent, User } from "../../type";
 
 interface NavbarProps {
     activePage: string;
     isAuthenticated: boolean;
+    user: JWTContent
 }
 
-const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
+const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated, user }) => {
     const navigate = useNavigate();
 
     const tabs = [
@@ -67,7 +69,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
                 // },
                 {
                 name: "Me",
-                path: "/profile",
+                path: "/profile/" + user.id,
                 defaultIcon: ProfileIcon,
                 activeIcon: ProfileIcon,
                 },

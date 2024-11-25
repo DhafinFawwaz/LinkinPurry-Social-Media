@@ -8,6 +8,7 @@ import "./bigint-extension"
 import authRoute from './api/auth.js'
 import feedRoute from './api/feed.js'
 import profileRoute from './api/profile.js'
+import userRoute from './api/user.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
@@ -21,6 +22,7 @@ app.use('/uploads/img/*', serveStatic({ root: './src/' }))
 app.route('/api', authRoute)
 app.route('/api', feedRoute)
 app.route('/api', profileRoute)
+app.route('/api', userRoute)
 
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 4000;
 console.log(`Server is running on http://localhost:${port}`)

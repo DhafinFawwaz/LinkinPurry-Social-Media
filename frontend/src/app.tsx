@@ -9,8 +9,9 @@ import useFetchApi from './hooks/useFetchApi'
 import { AuthResponse } from './type'
 import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
+import Navbar from './components/navigation/Navbar'
 
-const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
+// const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -48,12 +49,16 @@ function AuthRouter() {
 {loading ? <SplashScreen></SplashScreen> :
 isAuthenticated() ? <>
 
-<div className='fixed'>
+{/* <div className='fixed'>
     <NavLink to={"/"} className={activeClass}>Root</NavLink>
     <NavLink to={"/profile"} className={activeClass}>Profile</NavLink>
     <NavLink to={"/chat"} className={activeClass}>Chat</NavLink>
     <button onClick={logout}>Logout</button>
-</div>
+</div> */}
+<Navbar
+    activePage={location.pathname}
+    isAuthenticated={isAuthenticated()}
+/>
 <Routes>
     <Route path='/' element={<Root/>}></Route>
     <Route path='/profile' element={<Profile/>}></Route>
@@ -64,11 +69,15 @@ isAuthenticated() ? <>
 :
 <>
 
-<div className='fixed'>
+{/* <div className='fixed'>
     <NavLink to={"/"} className={activeClass}>Root</NavLink>
     <NavLink to={"/login"} className={activeClass}>Login</NavLink>
     <NavLink to={"/register"} className={activeClass}>Register</NavLink>
-</div>
+</div> */}
+<Navbar
+    activePage={location.pathname}
+    isAuthenticated={isAuthenticated()}
+/>
 <Routes>
     <Route path='/' element={<Root/>}></Route>
     <Route path='/login' element={<Login onLogin={recall}/>}></Route>

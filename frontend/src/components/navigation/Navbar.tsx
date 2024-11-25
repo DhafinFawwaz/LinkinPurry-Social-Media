@@ -15,11 +15,10 @@ import { JWTContent, User } from "../../type";
 
 interface NavbarProps {
     activePage: string;
-    isAuthenticated: boolean;
-    user: JWTContent
+    user?: JWTContent
 }
 
-const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated, user }) => {
+const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
     const navigate = useNavigate();
 
     const tabs = [
@@ -47,7 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated, user }) =>
             defaultIcon: NetworkIcon,
             activeIcon: NetworkHoverIcon,
         },
-        ...(isAuthenticated
+        ...(user
             ? [
                 // {
                 //   name: "Jobs",
@@ -110,7 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated, user }) =>
                     ))}
                 </div>
             
-                {!isAuthenticated && (
+                {!user && (
                     <div className="flex items-center gap-4">
                     <div className="text-gray-400">|</div>
                     <button

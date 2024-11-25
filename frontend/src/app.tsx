@@ -57,7 +57,6 @@ isAuthenticated() ? <>
 </div> */}
 <Navbar
     activePage={location.pathname}
-    isAuthenticated={isAuthenticated()}
     user={value?.body}
 />
 <Routes>
@@ -79,7 +78,7 @@ isAuthenticated() ? <>
 </div> */}
 <Navbar
     activePage={location.pathname}
-    isAuthenticated={isAuthenticated()}
+    user={value?.body}
 />
 <Routes>
     <Route path='/' element={<Feed/>}></Route>

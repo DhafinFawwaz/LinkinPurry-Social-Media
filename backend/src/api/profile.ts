@@ -2,9 +2,27 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema } from '../schema.js'
 import { getUser } from './auth.js'
 import db from '../db/db.js'
-import { authenticated } from '../middlewares/authenticated.js'
+import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
+import { deleteCookie } from 'hono/cookie'
 
 const app = new OpenAPIHono()
+
+async function getConnectionCount(user_id: number) {
+  // TODO: Optimize this either with denormalization or redis
+
+  return await db.connection.count({
+    where: {
+      OR: [
+        {
+          from_id: user_id
+        },
+        {
+          to_id: user_id
+        }
+      ]
+    }
+  })
+}
 
 app.openapi(
     createRoute({
@@ -18,25 +36,174 @@ app.openapi(
         })
       },
       responses: {
-        200: DefaultJsonResponse("Getting profile by user_id successful", {
-            posts: z.array(z.object({
-                name: z.string(),
-                description: z.string(),
-                profile_photo: z.string(),
-                relevant_posts: z.array(z.object(PostSchema()))
-            }))
-        }),
-        401: DefaultJsonResponse("Unauthorized")
+        200: {
+          description: "Getting profile by user_id successful",
+          content: {
+            'application/json': {
+              schema: z.object({
+                success: z.boolean(),
+                message: z.string(),
+                body: z.object({ // Case public
+                  username: z.string(),
+                  name: z.string(),
+                  work_history: z.string(),
+                  skills: z.string(),
+                  connection_count: z.number(),
+                  profile_photo: z.string(),
+                }).or(z.object({ // Case logged in, connected, owner
+                  username: z.string(),
+                  name: z.string(),
+                  work_history: z.string(),
+                  skills: z.string(),
+                  connection_count: z.number(),
+                  profile_photo: z.string(),
+                  relevant_posts: z.array(z.object(PostSchema()))
+                })).or(z.object({}))
+              })
+            }
+          }
+        },
+        404: DefaultJsonResponse("User not found"),
       },
-      middleware: authenticated
-    }), (c) => {
-      const user = c.var.user;
+    }), async (c) => {
+      const user = await getUser(c) as JwtContent;
+      const { user_id } = c.req.valid("param");
 
-      return c.json({
+      // case logged in & owner (do it early to avoid unnecessary db queries)
+      if(user && user.id === user_id) {
+        const connection_count = await getConnectionCount(user_id);
+        const user = await db.user.findFirst({
+          where: {
+            id: user_id
+          },
+          include: {
+            feeds: true,
+          }
+        });
+        if(!user) { // happens when user is deleted but someone still has the token in their browser. Logout the user
+          c.status(404);
+          deleteCookie(c, "token");
+          return c.json({
+            success: false,
+            message: 'User not found. Account might have been deleted',
+            body: {}
+          })
+        }
+
+        return c.json({
           success: true,
           message: '',
-          body: user
-      })
+          body: {
+            username: user.username,
+            name: user.full_name,
+            work_history: user.work_history,
+            skills: user.skills,
+            connection_count: connection_count,
+            profile_photo: user.profile_photo_path,
+            relevant_posts: user.feeds
+          }
+        })
+      }
+
+      if(!user) { // case public
+        const targetUser = await db.user.findFirst({
+          where: {
+            id: user_id
+          }
+        })
+        if(!targetUser) { // case target user not found
+          c.status(404);
+          return c.json({
+            success: false,
+            message: 'User not found',
+            body: {}
+          })
+        }
+        return c.json({
+          success: true,
+          message: '',
+          body: {
+            username: targetUser.username,
+            name: targetUser.full_name,
+            work_history: targetUser.work_history,
+            skills: targetUser.skills,
+            connection_count: await getConnectionCount(user_id),
+            profile_photo: targetUser.profile_photo_path,
+          }
+        })
+      } else { // case logged in & (connected/not connected)
+        const connected = await db.connection.findFirst({
+          where: {
+            OR: [
+              {
+                from_id: user.id,
+                to_id: user_id
+              },
+              {
+                from_id: user_id,
+                to_id: user.id
+              }
+            ]
+          }
+        })
+        if(connected) {
+          const targetUser = await db.user.findFirst({
+            where: {
+              id: user_id
+            },
+            include: {
+              feeds: true,
+            }
+          })
+          if(!targetUser) { // case target user not found
+            c.status(404);
+            return c.json({
+              success: false,
+              message: 'User not found',
+              body: {}
+            })
+          }
+          return c.json({
+            success: true,
+            message: '',
+            body: {
+              username: targetUser.username,
+              name: targetUser.full_name,
+              work_history: targetUser.work_history,
+              skills: targetUser.skills,
+              connection_count: await getConnectionCount(user_id),
+              profile_photo: targetUser.profile_photo_path,
+              relevant_posts: targetUser.feeds
+            }
+          })
+        } else {
+          const targetUser = await db.user.findFirst({
+            where: {
+              id: user_id
+            }
+          })
+          if(!targetUser) { // case target user not found
+            c.status(404);
+            return c.json({
+              success: false,
+              message: 'User not found',
+              body: {}
+            })
+          }
+          return c.json({
+            success: true,
+            message: '',
+            body: {
+              username: targetUser.username,
+              name: targetUser.full_name,
+              work_history: targetUser.work_history,
+              skills: targetUser.skills,
+              connection_count: await getConnectionCount(user_id),
+              profile_photo: targetUser.profile_photo_path,
+            }
+          })
+        }
+      }
   }
 )
 
@@ -55,20 +222,24 @@ app.openapi(
           description: "Edit profile",
           content: {
             "multipart/form-data": {
-                schema: z.object({
-                  name: z.string(),
-                  description: z.string(),
-                  profile_photo: z.instanceof(Buffer).or(z.any())
-                }),
+              schema: z.object({
+                username: z.string(),
+                profile_photo: z.instanceof(Buffer).or(z.any()),
+                name: z.string(),
+                work_history: z.string(),
+                skills: z.string(),
+              }),
             },
           },
         }
       },
       responses: {
         200: DefaultJsonResponse("Editing profile successful", {
+          username: z.string(),
+          profile_photo: z.instanceof(Buffer).or(z.any()),
           name: z.string(),
-          description: z.string(),
-          profile_photo: z.string()
+          work_history: z.string(),
+          skills: z.string(),
         }),
         401: DefaultJsonResponse("Unauthorized")
       },
@@ -77,36 +248,41 @@ app.openapi(
       const user = c.var.user;
 
       try {
-        const { name, description, profile_photo } = c.req.valid("form");
-        if(!name || !description || !profile_photo) {
-          c.status(422);
-          return c.json({
-            success: false,
-            message: 'Name, description, and profile_photo are required',
-          })
-        }
+        const {  username, profile_photo, name, work_history, skills } = c.req.valid("form");
 
-        // await db.user.update({
-        //   where: {
-        //     id: user.id
-        //   },
-        //   data: {
-        //     // name: name,
-        //     // description: description,
-        //     // profile_photo: profile_photo
-        //   }
-        // })
+        const updatedUser = await db.user.update({
+          where: {
+            id: user.id
+          },
+          data: {
+            username: username,
+            profile_photo_path: profile_photo,
+            full_name: name,
+            work_history: work_history,
+            skills: skills
+          }
+        });
 
-      } catch(e) {
-      }
-
-
-      return c.json({
+        return c.json({
           success: true,
           message: '',
-          body: user
-      })
+          body: {
+            username: updatedUser.username,
+            profile_photo: updatedUser.profile_photo_path,
+            name: updatedUser.full_name,
+            work_history: updatedUser.work_history,
+            skills: updatedUser.skills,
+          }
+        })
 
+      } catch(e) {
+        console.log(e)
+        c.status(500);
+        return c.json({
+          success: false,
+          message: "Failed",
+        })
+      }
   }
 )
 

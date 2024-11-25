@@ -34,7 +34,10 @@ export function DefaultJsonRequest(description: string | undefined = undefined, 
 
 export function PostSchema() {
   return {
-    post_id: z.number(),
+    id: z.number().or(z.bigint()),
+    created_at: z.date(),
+    updated_at: z.date(),
     content: z.string(),
+    user_id: z.number().or(z.bigint()),
   };
 }

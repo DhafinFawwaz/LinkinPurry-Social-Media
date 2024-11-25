@@ -4,12 +4,15 @@ import db from '../db/db.js'
 // import bcrypt 
 import { Jwt } from 'hono/utils/jwt';
 import bcrypt from "bcrypt";
-import { setCookie } from 'hono/cookie';
+import { getCookie, setCookie } from 'hono/cookie';
 import type { Context } from 'hono';
 import { authenticated, type JwtContent } from "../middlewares/authenticated.js"
 
 const app = new OpenAPIHono()
 
+function getSecretKey() {
+  return process.env.JWT_SECRET || "supersecretjwtsecret";
+}
 
 async function login(c: Context, id: number, username: string, email: string, full_name: string|null, work_history: string|null, skills: string|null, profile_photo_path: string|null) {
   const iat = Math.floor(Date.now() / 1000)
@@ -24,7 +27,7 @@ async function login(c: Context, id: number, username: string, email: string, fu
     profile_photo_path: profile_photo_path || "",
     iat: iat, // issued at time
     exp: exp
-  }, process.env.JWT_SECRET || "supersecretjwtsecret")
+  }, getSecretKey())
 
   setCookie(c, 'token', token, {
     httpOnly: false,
@@ -98,7 +101,6 @@ app.openapi(
         }
       })
     } catch(e) {
-      console.log(e)
       c.status(401)
       return c.json({
         success: false,
@@ -107,6 +109,10 @@ app.openapi(
     }
   }
 )
+
+function getSaltRound() {
+  return process.env.SALT_ROUND ? Number.parseInt(process.env.SALT_ROUND) : 10;
+}
 
 app.openapi(
   createRoute({
@@ -164,7 +170,7 @@ app.openapi(
       }
 
       // Create user
-      const saltRound = process.env.SALT_ROUND ? Number.parseInt(process.env.SALT_ROUND) : 10;
+      const saltRound = getSaltRound();
       const hashedPassword: string = await bcrypt.hash(password, saltRound);
       const newUser = await db.user.create({
         data: {
@@ -177,7 +183,6 @@ app.openapi(
       
       
       const token = await login(c, Number(newUser.id), newUser.username, email, newUser.full_name, newUser.work_history, newUser.skills, newUser.profile_photo_path)
-      console.log(c.res.headers)
       return c.json({
         success: true,
         message: 'Register success',
@@ -222,7 +227,18 @@ app.openapi(
     }
   }), async (c) => {
     
+    // try token in cookies
+    const token = getCookie(c, 'token');
+    if(token) {
+      const payload = await Jwt.verify(token, getSecretKey());
+      return c.json({
+        success: true,
+        message: 'Authenticated',
+        body: payload
+      })
+    }
 
+    // else try token in header
     // case no token provided
     if(!c.req.header("Authorization")) {
       c.status(401)
@@ -239,7 +255,7 @@ app.openapi(
         throw new Error("Invalid token")
       }
       const token = auth[1];
-      const payload = await Jwt.verify(token, process.env.JWT || "supersecretjwtsecret");
+      const payload = await Jwt.verify(token, getSecretKey());
       return c.json({
         success: true,
         message: 'Authenticated',
@@ -257,6 +273,13 @@ app.openapi(
 )
 
 export async function getUser(c: Context) {
+  const token = getCookie(c, 'token');
+  if(token) {
+    const payload = await Jwt.verify(token, getSecretKey());
+    return payload;
+  }
+
+
   if(!c.req.header("Authorization")) return undefined;
 
   try {
@@ -265,7 +288,7 @@ export async function getUser(c: Context) {
       throw new Error("Invalid token")
     }
     const token = auth[1];
-    const payload = await Jwt.verify(token, process.env.JWT || "supersecretjwtsecret") as JwtContent;
+    const payload = await Jwt.verify(token, getSecretKey()) as JwtContent;
     return payload;
   } catch(e) {
     return undefined;

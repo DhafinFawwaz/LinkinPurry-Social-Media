@@ -25,7 +25,7 @@ app.openapi(
       }
     }), async (c) => {
 
-    try{
+    try {
       const { limit, cursor } = c.req.valid("query");
       const feeds = await db.feed.findMany({
         take: limit || 10,

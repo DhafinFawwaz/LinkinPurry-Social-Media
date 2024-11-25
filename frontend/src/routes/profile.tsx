@@ -20,7 +20,7 @@ const Profile: React.FC<ProfileProps> = ({ accessLevel = "connected" }) => {
 
   return (
     <div className="min-h-screen">
-      <div className="">
+      <div className="pt-5">
         <ProfileInfo
           banner={profileData.banner}
           photo={profileData.photo}

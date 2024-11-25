@@ -6,7 +6,6 @@ interface ProfileInfoProps {
   banner: string;
   name: string;
   photo: string;
-  description: string;
   connections: number;
   accessLevel: "public" | "owner" | "connected" | "notConnected";
 }
@@ -15,7 +14,6 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   banner,
   name,
   photo,
-  description,
   connections,
   accessLevel,
 }) => {
@@ -56,36 +54,38 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
           )}
         </div>
         
-        <p className="text-left text-gray-600">{description}</p>
+        {/* <p className="text-left text-gray-600">{description}</p> */}
         <p className="text-left text-gray-700 font-medium mt-2">
           {connections} connections
         </p>
         
         {/* Buttons */}
-        <div className="mt-4 space-y-2">
-          {!isOwner && isConnected && !isPublic && (
-            <div className='flex flex-row space-x-2'>
-              <button className="flex items-center bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
-                <img
-                  src={MessageIcon}
-                  alt="Message Icon"
-                  className="w-[16px] h-[16px] mr-2"
-                />
-                Message
-              </button>
-              <button className="bg-white text-black_primary font-semibold py-2 px-6 rounded-full border border-black_primary hover:bg-white_hover ">
-                Disconnect
-              </button>
-            </div>
-          )}
-          {!isOwner && !isConnected && !isPublic && (
-            <>
-              <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
-                Connect
-              </button>
-            </>
-          )}
-        </div>
+        {!isPublic && (
+          <div className="mt-4 space-y-2">
+            {!isOwner && isConnected && (
+              <div className='flex flex-row space-x-2'>
+                <button className="flex items-center bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                  <img
+                    src={MessageIcon}
+                    alt="Message Icon"
+                    className="w-[16px] h-[16px] mr-2"
+                  />
+                  Message
+                </button>
+                <button className="bg-white text-black_primary font-semibold py-2 px-6 rounded-full border border-black_primary hover:bg-white_hover ">
+                  Disconnect
+                </button>
+              </div>
+            )}
+            {!isOwner && !isConnected && (
+              <>
+                <button className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                  Connect
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

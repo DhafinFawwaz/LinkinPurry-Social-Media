@@ -14,18 +14,16 @@ const Profile: React.FC<ProfileProps> = ({ accessLevel = "connected" }) => {
     name: "Ucok Baba Manihot",
     banner: "",
     photo: "",
-    description: "Informatics Student at Bandung Institute of Technology",
     connections: 20,
   };
 
   return (
     <div className="min-h-screen">
-      <div className="pt-5">
+      <div className="pt-20">
         <ProfileInfo
           banner={profileData.banner}
           photo={profileData.photo}
           name={profileData.name}
-          description={profileData.description}
           connections={profileData.connections}
           accessLevel={accessLevel}
         />

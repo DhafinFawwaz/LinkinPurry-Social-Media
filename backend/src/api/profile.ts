@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
-import { getUser } from './auth.js'
+import { getUser, login } from './auth.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
 import { deleteCookie } from 'hono/cookie'
@@ -354,6 +354,7 @@ app.openapi(
             }
           });
 
+          await login(c, Number(user.id), updatedUser.username, updatedUser.email, updatedUser.full_name, updatedUser.work_history, updatedUser.skills, updatedUser.profile_photo_path)
           return c.json({
             success: true,
             message: '',
@@ -378,6 +379,7 @@ app.openapi(
             }
           });
 
+          await login(c, Number(user.id), updatedUser.username, updatedUser.email, updatedUser.full_name, updatedUser.work_history, updatedUser.skills, updatedUser.profile_photo_path)
           return c.json({
             success: true,
             message: '',
@@ -439,6 +441,55 @@ app.openapi(
   createRoute({
     method: 'post',
     path: '/profile/:user_id/accept',
+    description: 'Accept connection request from another user',
+    tags: ['Profile'],
+    request: {
+      params: z.object({
+        user_id: z.coerce.number()
+      })
+    },
+    responses: {
+      200: DefaultJsonResponse("Accept connection request from another user successful"),
+      401: DefaultJsonResponse("Unauthorized")
+    },
+    middleware: authenticated
+  }), async (c) => {
+    const user = c.var.user;
+
+    // check if connection request exists
+    const connectionRequest = await db.connectionRequest.findFirst({
+      where: {
+        from_id: Number.parseInt(c.req.param("user_id")),
+        to_id: user.id
+      }
+    });
+
+    if(!connectionRequest) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection request not found',
+      })
+    }
+
+    db.connection.create({
+      data: {
+        from_id: Number.parseInt(c.req.param("user_id")),
+        to_id: user.id,
+      }
+    });
+
+    return c.json({
+        success: true,
+        message: '',
+    })
+}
+)
+
+app.openapi(
+  createRoute({
+    method: 'post',
+    path: '/profile/:user_id/deny',
     description: 'Accept connection request from another user',
     tags: ['Profile'],
     request: {

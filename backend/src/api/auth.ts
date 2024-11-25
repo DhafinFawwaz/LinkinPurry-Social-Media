@@ -14,7 +14,7 @@ function getSecretKey() {
   return process.env.JWT_SECRET || "supersecretjwtsecret";
 }
 
-async function login(c: Context, id: number, username: string, email: string, full_name: string|null, work_history: string|null, skills: string|null, profile_photo_path: string|null) {
+export async function login(c: Context, id: number, username: string, email: string, full_name: string|null, work_history: string|null, skills: string|null, profile_photo_path: string|null) {
   const iat = Math.floor(Date.now() / 1000)
   const exp = Math.floor(Date.now() / 1000) + 60 * 60
   const token = await Jwt.sign({

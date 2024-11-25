@@ -17,6 +17,21 @@ export function DefaultJsonResponse(description: string, body?: z.ZodRawShape) {
     }
   }
 }
+export function DefaultJsonArrayResponse(description: string, body?: z.ZodRawShape) {
+  const schema: { success: z.ZodBoolean, message: z.ZodString, body?: any } = {
+    success: z.boolean(),
+    message: z.string(),
+  }
+  if (body) schema['body'] = z.array(z.object(body))
+  return {
+    description: description,
+    content: {
+      'application/json': {
+        schema: z.object(schema)
+      }
+    }
+  }
+}
 
 export function DefaultJsonRequest(description: string | undefined = undefined, body: z.ZodRawShape) {
   return {

@@ -10,10 +10,12 @@ import { AuthResponse } from './type'
 import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
 import Navbar from './components/navigation/Navbar'
+import Network from './routes/network'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
     ["/", "/login"],
+    ["/network", "/login"],
 ]);
 const notAuthenticatedRoutes = new Map<string, string>([
     ["/login", "/"],
@@ -29,8 +31,6 @@ function AuthRouter() {
 
     useEffect(() => {
         if(loading) return;
-        console.log(isAuthenticated());
-        console.log(value);
         if (isAuthenticated()) {
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);
@@ -63,6 +63,7 @@ isAuthenticated() ? <>
     <Route path='/' element={<Root/>}></Route>
     <Route path='/profile' element={<Profile/>}></Route>
     <Route path='/chat' element={<Chat/>}></Route>
+    <Route path='/networks' element={<Network/>}></Route>
 </Routes>
 
 </>

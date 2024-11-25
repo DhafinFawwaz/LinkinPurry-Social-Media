@@ -13,6 +13,9 @@ export default {
         black_primary: "#434343",
         white_hover: "#f3f2ee"
       },
+      transitionTimingFunction: {
+        'in-out-quart': 'cubic-bezier(0.76, 0, 0.24, 1)',
+      }
     },
   },
   plugins: [],

@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonResponse, DefaultJsonRequest, PostSchema } from '../schema.js'
+import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
 import { getUser } from './auth.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
@@ -8,6 +8,57 @@ import fs from 'fs'
 import { join } from 'path'
 
 const app = new OpenAPIHono()
+
+
+
+app.openapi(
+  createRoute({
+    method: 'get',
+    path: '/profile/requests',
+    description: 'Get all connection requests for current user',
+    tags: ['Profile'],
+    responses: {
+      200: DefaultJsonArrayResponse("Getting all connection requests for current user successful", {
+        from_id: z.number(),
+        to_id: z.number(),
+        created_at: z.string(),
+        from: z.object({
+          username: z.string(),
+          work_history: z.string().nullable(),
+          skills: z.string().nullable(),
+          id: z.number(),
+          created_at: z.string(),
+          updated_at: z.string(),
+          email: z.string(),
+          password_hash: z.string(),
+          full_name: z.string().nullable(),
+          profile_photo_path: z.string(),
+        })
+      }
+      ),
+      401: DefaultJsonResponse("Unauthorized")
+    },
+    middleware: authenticated
+  }), async (c) => {
+    const user = c.var.user;
+    // get all received_requests for user and the data of the user who sent the request
+    const requests = await db.connectionRequest.findMany({
+      where: {
+        to_id: user.id
+      },
+      include: {
+        from: true,
+      }
+    });
+
+    return c.json({
+        success: true,
+        message: '',
+        body: requests
+    })
+}
+)
+
 
 async function getConnectionCount(user_id: number) {
   // TODO: Optimize this either with denormalization or redis
@@ -25,7 +76,6 @@ async function getConnectionCount(user_id: number) {
     }
   })
 }
-
 app.openapi(
     createRoute({
       method: 'get',
@@ -430,54 +480,6 @@ app.openapi(
     return c.json({
         success: true,
         message: '',
-    })
-}
-)
-
-
-// app.post("/", authenticated, c => {
-//     return c.json({
-//         success: true,
-//         message: '',
-//         body: {
-//         }
-//     })
-// });
-app.openapi(
-  createRoute({
-    method: 'get',
-    path: '/profile/requests',
-    description: 'Get all connection requests for current user',
-    tags: ['Profile'],
-    request: {
-      params: z.object({
-        user_id: z.coerce.number()
-      })
-    },
-    responses: {
-      200: DefaultJsonResponse("Getting all connection requests for current user successful", {
-        requests: z.array(z.object({
-          from_id: z.number(),
-          to_id: z.number()
-        }))
-      }),
-      401: DefaultJsonResponse("Unauthorized")
-    },
-    middleware: authenticated
-  }), async (c) => {
-    const user = c.var.user;
-    const requests = await db.connectionRequest.findMany({
-      where: {
-        to_id: user.id
-      }
-    });
-
-    return c.json({
-        success: true,
-        message: '',
-        body: {
-          requests: requests
-        }
     })
 }
 )

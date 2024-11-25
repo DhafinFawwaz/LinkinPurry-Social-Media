@@ -11,3 +11,21 @@ export type AuthResponse = BaseResponse<{
     iat: number,
     exp: number,
 }>
+
+export type ConnectionRequestsResponse = BaseResponse<{
+    from: {
+        username: string;
+        work_history: string | null;
+        skills: string | null;
+        id: bigint;
+        created_at: string; // unfortunately, this is a string
+        updated_at: string; // unfortunately, this is a string
+        email: string;
+        password_hash: string;
+        full_name: string | null;
+        profile_photo_path: string;
+    },
+    created_at: string,
+    from_id: number,
+    to_id: number,
+}[]>

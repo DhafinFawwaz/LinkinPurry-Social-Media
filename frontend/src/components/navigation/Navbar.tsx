@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
         // },
         {
             name: "Networks",
-            path: "/network",
+            path: "/networks",
             defaultIcon: NetworkIcon,
             activeIcon: NetworkHoverIcon,
         },
@@ -62,17 +62,17 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
     ];
 
     return (
-        <nav className="flex items-center justify-between bg-white py-2 px-80 fixed top-0 w-full z-50 border-b border-gray-300">
+        <nav className="flex items-center justify-between bg-white px-80 fixed top-0 w-full z-50 border-b border-gray-300">
             <div className="flex items-center gap-8">
                 <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-0">
                     {tabs.map((tab) => (
                     <button
                         key={tab.path}
-                        className="flex flex-col items-center justify-center bg-transparent"
+                        className="flex flex-col pt-1.5 items-center justify-center bg-transparent w-full group hover:bg-gray-100 duration-150"
                         onClick={() => navigate(tab.path)}
                     >
                         <img
@@ -83,12 +83,13 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
                         }`}
                         />
                         <span
-                        className={`text-xs ${
+                        className={`text-xs group-hover:text-black ${
                             activePage === tab.path ? "text-black font-normal" : "text-gray-500"
                         }`}
                         >
                         {tab.name}
                         </span>
+                        <div className={`w-full h-[2px] px-12 mt-1 bg-slate-950 duration-150 ${activePage===tab.path ? "scale-x-100" : "scale-x-0"}`}></div>
                     </button>
                     ))}
                 </div>

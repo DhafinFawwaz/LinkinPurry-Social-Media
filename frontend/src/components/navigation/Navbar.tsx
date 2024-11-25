@@ -9,6 +9,8 @@ import MessagingHoverIcon from "../../assets/images/message-hover-icon.svg";
 // import NotificationsIcon from "../../assets/images/notification-icon.svg";
 // import NotificationsHoverIcon from "../../assets/images/notification-hover-icon.svg";
 import ProfileIcon from "../../assets/images/jobseeker_profile.svg";
+import JobsIcon from "../../assets/images/jobs-icon.svg";
+import JobsHoverIcon from "../../assets/images/jobs-hover-icon.svg";
 
 interface NavbarProps {
     activePage: string;
@@ -26,8 +28,20 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, isAuthenticated }) => {
         //   activeIcon: ,
         // },
         {
+            name: "Feed",
+            path: "/",
+            defaultIcon: JobsIcon,
+            activeIcon: JobsHoverIcon,
+        },
+        {
             name: "Networks",
             path: "/networks",
+            defaultIcon: NetworkIcon,
+            activeIcon: NetworkHoverIcon,
+        },
+        {
+            name: "Users",
+            path: "/users",
             defaultIcon: NetworkIcon,
             activeIcon: NetworkHoverIcon,
         },

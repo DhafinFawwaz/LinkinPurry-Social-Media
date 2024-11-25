@@ -3,7 +3,7 @@ type ListTileProps = {
   title: string;
   subtitle: string;
   imageSrc: string;
-  endChildren: React.ReactNode;
+  endChildren?: React.ReactNode;
   children?: React.ReactNode;
 }
 

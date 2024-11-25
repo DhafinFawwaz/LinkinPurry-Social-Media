@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonResponse, DefaultJsonRequest, PostSchema } from '../schema.js'
+import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
 import db from '../db/db.js'
 import { authenticated } from '../middlewares/authenticated.js'
 
@@ -18,9 +18,7 @@ app.openapi(
         })
       },
       responses: {
-        200: DefaultJsonResponse("Getting list of posts successful", {
-            feeds: z.array(z.object(PostSchema()))
-        }),
+        200: DefaultJsonArrayResponse("Getting list of posts successful", PostSchema()),
         401: DefaultJsonResponse("Unauthorized")
       }
     }), async (c) => {
@@ -32,15 +30,16 @@ app.openapi(
         skip: cursor || 0,
         orderBy: {
           created_at: 'desc'
+        },
+        include: {
+          user: true // TODO: omit password_hash
         }
       });
 
       return c.json({
           success: true,
           message: 'Getting list of posts successful',
-          body: {
-            feeds
-          }
+          body: feeds
       })
     } catch(e) {
       console.log(e)

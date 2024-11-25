@@ -62,7 +62,7 @@ model Chat {
 model ConnectionRequest {
   from_id   BigInt
   to_id     BigInt
-  createdAt DateTime @default(now())
+  created_at DateTime @default(now())
   from      User     @relation("FromConnectionRequest", fields: [from_id], references: [id], onDelete: Cascade)
   to        User     @relation("ToConnectionRequest", fields: [to_id], references: [id], onDelete: Cascade)
 
@@ -73,7 +73,7 @@ model ConnectionRequest {
 model Connection {
   from_id   BigInt
   to_id     BigInt
-  createdAt DateTime @default(now())
+  created_at DateTime @default(now())
   from      User     @relation("FromConnection", fields: [from_id], references: [id], onDelete: Cascade)
   to        User     @relation("ToConnection", fields: [to_id], references: [id], onDelete: Cascade)
 

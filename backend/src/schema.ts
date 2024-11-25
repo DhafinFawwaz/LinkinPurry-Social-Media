@@ -56,3 +56,29 @@ export function PostSchema() {
     user_id: z.number().or(z.bigint()),
   };
 }
+
+export function UserSchema() {
+  return {
+    id: z.number().or(z.bigint()),
+    created_at: z.date(),
+    updated_at: z.date(),
+    username: z.string(),
+    work_history: z.string().nullable(),
+    skills: z.string().nullable(),
+    email: z.string(),
+    // password_hash: z.string(),
+    full_name: z.string().nullable(),
+    profile_photo_path: z.string(),
+  }
+}
+
+export function PostSchemaWithUser() {
+  return {
+    id: z.number().or(z.bigint()),
+    created_at: z.date(),
+    updated_at: z.date(),
+    content: z.string(),
+    user_id: z.number().or(z.bigint()),
+    user: UserSchema()
+  };
+}

@@ -50,15 +50,10 @@ app.openapi(
                   skills: z.string(),
                   connection_count: z.number(),
                   profile_photo: z.string(),
-                }).or(z.object({ // Case logged in, connected, owner
-                  username: z.string(),
-                  name: z.string(),
-                  work_history: z.string(),
-                  skills: z.string(),
-                  connection_count: z.number(),
-                  profile_photo: z.string(),
-                  relevant_posts: z.array(z.object(PostSchema()))
-                })).or(z.object({}))
+                  relevant_posts: z.optional(z.array(z.object(PostSchema()))),
+                  connection: z.enum(["connected", "not_connected", "owner", "public"]),
+                  can_edit: z.boolean().optional()
+                }).or(z.object({}))
               })
             }
           }
@@ -100,7 +95,9 @@ app.openapi(
             skills: user.skills,
             connection_count: connection_count,
             profile_photo: user.profile_photo_path,
-            relevant_posts: user.feeds
+            relevant_posts: user.feeds,
+            connection: "owner",
+            can_edit: true
           }
         })
       }
@@ -129,6 +126,8 @@ app.openapi(
             skills: targetUser.skills,
             connection_count: await getConnectionCount(user_id),
             profile_photo: targetUser.profile_photo_path,
+            connection: "public",
+            can_edit: false
           }
         })
       } else { // case logged in & (connected/not connected)
@@ -173,7 +172,9 @@ app.openapi(
               skills: targetUser.skills,
               connection_count: await getConnectionCount(user_id),
               profile_photo: targetUser.profile_photo_path,
-              relevant_posts: targetUser.feeds
+              relevant_posts: targetUser.feeds,
+              connection: "connected",
+              can_edit: false
             }
           })
         } else {
@@ -200,6 +201,8 @@ app.openapi(
               skills: targetUser.skills,
               connection_count: await getConnectionCount(user_id),
               profile_photo: targetUser.profile_photo_path,
+              connection: "not_connected",
+              can_edit: false
             }
           })
         }

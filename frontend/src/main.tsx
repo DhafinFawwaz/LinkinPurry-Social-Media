@@ -3,8 +3,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './app'
 
-const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App></App>

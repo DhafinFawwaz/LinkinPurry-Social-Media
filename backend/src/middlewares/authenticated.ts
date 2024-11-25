@@ -6,7 +6,10 @@ export type JwtContent = {
     id: number,
     username: string,
     email: string,
-    name: string,
+    full_name: string,
+    work_history: string,
+    skills: string,
+    profile_photo_path: string,
     iat: number,
     exp: number
   }

@@ -4,6 +4,10 @@ CREATE TABLE "users" (
     "username" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "password_hash" VARCHAR(255) NOT NULL,
+    "full_name" VARCHAR(255),
+    "work_history" TEXT,
+    "skills" TEXT,
+    "profile_photo_path" VARCHAR(255) NOT NULL DEFAULT 'jobseeker_profile.svg',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

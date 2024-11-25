@@ -11,8 +11,6 @@ import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
 import Navbar from './components/navigation/Navbar'
 
-// const activeClass = ({isActive} : { isActive: boolean }) => isActive ? "bg-red-800" : "";
-
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
     ["/", "/login"],
@@ -27,10 +25,12 @@ function AuthRouter() {
     const navigate = useNavigate();
     const location = useLocation();
     
-    const isAuthenticated = () => !loading && value && value.success;
+    const isAuthenticated = () => (!loading && value && value.success) ? true : false;
 
     useEffect(() => {
         if(loading) return;
+        console.log(isAuthenticated());
+        console.log(value);
         if (isAuthenticated()) {
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);

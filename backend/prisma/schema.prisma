@@ -18,6 +18,10 @@ model User {
   username             String              @unique @db.VarChar(255)
   email                String              @unique @db.VarChar(255)
   password_hash        String              @db.VarChar(255)
+  full_name            String?             @db.VarChar(255)
+  work_history         String?             @db.Text
+  skills               String?             @db.Text
+  profile_photo_path   String              @db.VarChar(255) @default("jobseeker_profile.svg")
   created_at           DateTime            @default(now())
   updated_at           DateTime            @updatedAt
   feeds                Feed[]

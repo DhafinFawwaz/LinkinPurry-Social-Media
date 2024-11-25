@@ -11,17 +11,20 @@ import { authenticated, type JwtContent } from "../middlewares/authenticated.js"
 const app = new OpenAPIHono()
 
 
-async function login(c: Context, id: number, username: string, email: string, name: string) {
+async function login(c: Context, id: number, username: string, email: string, full_name: string|null, work_history: string|null, skills: string|null, profile_photo_path: string|null) {
   const iat = Math.floor(Date.now() / 1000)
   const exp = Math.floor(Date.now() / 1000) + 60 * 60
   const token = await Jwt.sign({
     id: id,
     username: username, 
     email: email, 
-    name: name,
+    full_name: full_name,
+    work_history: work_history || "",
+    skills: skills || "",
+    profile_photo_path: profile_photo_path || "",
     iat: iat, // issued at time
     exp: exp
-  }, process.env.JWT || "supersecretjwtsecret")
+  }, process.env.JWT_SECRET || "supersecretjwtsecret")
 
   setCookie(c, 'token', token, {
     httpOnly: false,
@@ -29,6 +32,7 @@ async function login(c: Context, id: number, username: string, email: string, na
     sameSite: "none",
     expires: new Date(exp * 1000),
   })
+
   return token;
 }
 
@@ -84,7 +88,7 @@ app.openapi(
           }
         })
       }
-      const token = await login(c, Number(user.id), user.username, user.email, user.username)
+      const token = await login(c, Number(user.id), user.username, user.email, user.full_name, user.work_history, user.skills, user.profile_photo_path)
       
       return c.json({
         success: true,
@@ -167,11 +171,13 @@ app.openapi(
           username,
           email,
           password_hash: hashedPassword,
+          full_name: name,
         }
       })
       
       
-      const token = login(c, Number(newUser.id), newUser.username, email, newUser.username)
+      const token = await login(c, Number(newUser.id), newUser.username, email, newUser.full_name, newUser.work_history, newUser.skills, newUser.profile_photo_path)
+      console.log(c.res.headers)
       return c.json({
         success: true,
         message: 'Register success',
@@ -202,9 +208,13 @@ app.openapi(
     tags: ['Auth'],
     responses: {
       200: DefaultJsonResponse("Getting list of posts successful", {
+        id: z.number(),
         username: z.string(), 
-        email: z.string().email(), 
-        // name: z.string(),
+        email: z.string().email(),
+        full_name: z.string(),
+        work_history: z.string(),
+        skills: z.string(),
+        profile_photo_path: z.string(),
         iat: z.number(),
         exp: z.number(),
       }),
@@ -233,13 +243,7 @@ app.openapi(
       return c.json({
         success: true,
         message: 'Authenticated',
-        body: {
-          username: payload.username,
-          email: payload.email,
-          // name: payload.name,
-          iat: payload.iat,
-          exp: payload.exp,
-        }
+        body: payload
       })
     } catch(e) {
       c.status(401)

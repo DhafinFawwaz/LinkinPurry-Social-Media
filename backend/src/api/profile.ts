@@ -4,6 +4,8 @@ import { getUser } from './auth.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
 import { deleteCookie } from 'hono/cookie'
+import fs from 'fs'
+import { join } from 'path'
 
 const app = new OpenAPIHono()
 
@@ -210,6 +212,13 @@ app.openapi(
   }
 )
 
+function getProfilePhotoPathPrefixId(user_id: number, image_name: string) {
+  return `/uploads/img/${user_id}_${image_name}`
+}
+function getProfilePhotoPath(image_name: string) {
+  return `/uploads/img/${image_name}`
+}
+
 app.openapi(
     createRoute({
       method: 'put',
@@ -244,39 +253,93 @@ app.openapi(
           work_history: z.string(),
           skills: z.string(),
         }),
-        401: DefaultJsonResponse("Unauthorized")
+        401: DefaultJsonResponse("Unauthorized"),
+        400: DefaultJsonResponse("Invalid profile photo"),
+        500: DefaultJsonResponse("Failed to edit profile")
       },
       middleware: authenticated
     }), async (c) => {
       const user = c.var.user;
+      const targetId = c.req.valid("param").user_id;
+      
+      if(user.id !== targetId) {
+        c.status(401);
+        return c.json({
+          success: false,
+          message: 'Unauthorized',
+        })
+      }
 
       try {
-        const {  username, profile_photo, name, work_history, skills } = c.req.valid("form");
-
-        const updatedUser = await db.user.update({
-          where: {
-            id: user.id
-          },
-          data: {
-            username: username,
-            profile_photo_path: profile_photo,
-            full_name: name,
-            work_history: work_history,
-            skills: skills
+        const {  username, name, work_history, skills } = c.req.valid("form");
+        
+        const { profile_photo } = await c.req.parseBody()
+        if(profile_photo) {
+          
+          
+          if(user.profile_photo_path !== "jobseeker_profile.svg") { // delete old profile photo
+            const old_profile_photo_path = getProfilePhotoPath(user.profile_photo_path);
+            fs.unlink(join(process.cwd(), old_profile_photo_path), (err) => {
+              if (err) throw err
+            })
           }
-        });
+          
+          const image = profile_photo as File;
+          const buffer = await image.arrayBuffer()
+          const profile_photo_path = getProfilePhotoPathPrefixId(user.id, image.name);
+          fs.writeFile(profile_photo_path, Buffer.from(buffer), (err) => {
+            if (err) throw err
+          })
 
-        return c.json({
-          success: true,
-          message: '',
-          body: {
-            username: updatedUser.username,
-            profile_photo: updatedUser.profile_photo_path,
-            name: updatedUser.full_name,
-            work_history: updatedUser.work_history,
-            skills: updatedUser.skills,
-          }
-        })
+          const updatedUser = await db.user.update({
+            where: {
+              id: user.id
+            },
+            data: {
+              username: username,
+              profile_photo_path: profile_photo_path,
+              full_name: name,
+              work_history: work_history,
+              skills: skills
+            }
+          });
+
+          return c.json({
+            success: true,
+            message: '',
+            body: {
+              username: updatedUser.username,
+              profile_photo: updatedUser.profile_photo_path,
+              name: updatedUser.full_name || "",
+              work_history: updatedUser.work_history || "",
+              skills: updatedUser.skills || "",
+            }
+          })
+        } else {
+          const updatedUser = await db.user.update({
+            where: {
+              id: user.id
+            },
+            data: {
+              username: username,
+              full_name: name,
+              work_history: work_history,
+              skills: skills
+            }
+          });
+
+          return c.json({
+            success: true,
+            message: '',
+            body: {
+              username: updatedUser.username,
+              profile_photo: updatedUser.profile_photo_path,
+              name: updatedUser.full_name || "",
+              work_history: updatedUser.work_history || "",
+              skills: updatedUser.skills || "",
+            }
+          })
+        }
 
       } catch(e) {
         console.log(e)

@@ -44,11 +44,10 @@ export type UsersResponse = BaseResponse<User[]>
 
 export type ProfileResponse = BaseResponse<Profile>
 
-export type AccessLevel = "public" | "owner" | "not_connected" | "connection_requested" | "connected";
+export type AccessLevel = "public" | "owner" | "not_connected" | "connection_requested" | "connection_received" | "connected";
 
 export type Profile = User & {
     name: string,
     connection: AccessLevel,
-    can_edit: boolean,
     relevant_posts: Post[],
 }

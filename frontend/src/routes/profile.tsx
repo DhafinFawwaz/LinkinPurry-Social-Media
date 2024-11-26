@@ -26,7 +26,7 @@ export type EditProfileSchema = z.infer<typeof EditProfileSchema>;
 
 
 
-export default function Profile() {
+export default function Profile({ logout }: { logout: () => void }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset} = useForm<EditProfileSchema>({mode: "all", resolver: zodResolver(EditProfileSchema)});
 
@@ -68,11 +68,8 @@ export default function Profile() {
   function getAccessLevel(): AccessLevel {
     if(loading) return "public";
     if(!value) return "public";
-    if(value.body.connection === "connected") return "connected";
-    if(value.body.connection === "not_connected") return "not_connected";
-    if(value.body.connection === "connection_requested") return "connection_requested";
-    if(value.body.can_edit) return "owner";
-    return "public";
+    if(!value.body) return "public";
+    return value.body.connection;
   }
 
   async function onConnect() {
@@ -90,6 +87,30 @@ export default function Profile() {
     if(!res.ok) {
       alert("Failed to disconnect to user");
       return
+    }
+
+    recall();
+  }
+
+  async function accept(user_id: number) {
+    const res = await fetchApi(`/api/profile/${user_id}/accept`, {
+      method: "POST",
+    })
+    if(!res.ok) {
+      alert("Accepting failed");
+      return;
+    }
+
+    recall();
+  }
+
+  async function deny(user_id: number) {
+    const res = await fetchApi(`/api/profile/${user_id}/deny`, {
+      method: "POST",
+    })
+    if(!res.ok) {
+      alert("Accepting failed");
+      return;
     }
 
     recall();
@@ -143,9 +164,13 @@ export default function Profile() {
         onEditButtonClick={onEditButtonClick}
         onConnectButtonClick={onConnect}
         onDisconnectButtonClick={onDisconnect}
+        onLogoutButtonClick={logout}
+        onAcceptButtonClick={accept}
+        onDenyButtonClick={deny}
       />
       <ProfileTile title='Work History'>{value?.body.work_history}</ProfileTile>
       <ProfileTile title='Skills'>{value?.body.skills}</ProfileTile>
+{value?.body.connection === "public" ? <></> : 
       <ProfileTile title='Post'>
         <div className='flex flex-col gap-4'>
           {value?.body.relevant_posts.map(post =>
@@ -162,6 +187,8 @@ export default function Profile() {
           )}
         </div>
       </ProfileTile>
+}
+
     </div>
   </div>
 </section>

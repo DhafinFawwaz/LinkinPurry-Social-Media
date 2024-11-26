@@ -53,6 +53,10 @@ async function main() {
       Array.from({ length: feedsPerUser }).map(() => ({
         content: faker.lorem.sentences(),
         user_id: user.id,
+        created_at: faker.date.recent({
+          days: 30,
+        }).toISOString(),
+
       }))
     );
     const feeds = await prisma.feed.createMany({ data: feedsData });

@@ -11,9 +11,12 @@ interface ProfileInfoProps {
   connections: number;
   accessLevel: AccessLevel;
   user_id: number;
-  onEditButtonClick?: () => void;
-  onConnectButtonClick?: () => void;
-  onDisconnectButtonClick?: () => void;
+  onEditButtonClick: () => void;
+  onConnectButtonClick: () => void;
+  onDisconnectButtonClick: () => void;
+  onLogoutButtonClick: () => void;
+  onAcceptButtonClick: (id: number) => void;
+  onDenyButtonClick: (id: number) => void;
 }
 
 const ProfileInfo: React.FC<ProfileInfoProps> = ({
@@ -26,12 +29,17 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   onEditButtonClick,
   onConnectButtonClick,
   onDisconnectButtonClick,
+  onLogoutButtonClick,
+  onAcceptButtonClick,
+  onDenyButtonClick,
 }) => {
   const isPublic = accessLevel === "public";
   const isOwner = accessLevel === "owner";
   const isNotConnected = accessLevel === "not_connected";
   const isConnectionRequested = accessLevel === "connection_requested";
+  const isConnectionReceived = accessLevel === "connection_received";
   const isConnected = accessLevel === "connected";
+  console.log(isConnectionReceived);
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg relative">
@@ -76,6 +84,13 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         {/* Buttons */}
         {!isPublic && (
           <div className="mt-4 space-y-2">
+            {isOwner && (
+              <>
+                <button onClick={onLogoutButtonClick} className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                  Logout
+                </button>
+              </>
+            )}
             {isNotConnected && (
               <>
                 <button onClick={onConnectButtonClick} className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
@@ -90,8 +105,20 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                 </button>
               </>
             )}
+            {isConnectionReceived && (
+              <>
+                <div className='flex flex-row gap-2'>
+                  <button onClick={() => onAcceptButtonClick(user_id)} className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                    Accept
+                  </button>
+                  <button onClick={() => onDenyButtonClick(user_id)} className="bg-white text-black_primary font-semibold py-2 px-6 rounded-full border border-black_primary hover:bg-white_hover ">
+                    Deny
+                  </button>
+                </div>
+              </>
+            )}
             {isConnected && (
-              <div className='flex flex-row space-x-2'>
+              <div className='flex flex-row gap-2'>
                 <Link to={`/chat/${user_id}`} className="flex items-center bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
                   <img
                     src={MessageIcon}

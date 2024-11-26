@@ -9,9 +9,10 @@ import { AuthResponse } from './type'
 import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
 import Navbar from './components/navigation/Navbar'
-import Network from './routes/network'
+import Invitation from './routes/invitation'
 import Feed from './routes/feed'
 import Users from './routes/users'
+import Network from './routes/network'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -61,9 +62,10 @@ isAuthenticated() ? <>
 />
 <Routes>
     <Route path='/' element={<Feed user={value?.body}/>}></Route>
-    <Route path='/profile/:user_id' element={<Profile/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile logout={logout}/>}></Route>
     <Route path='/chat' element={<Chat/>}></Route>
-    <Route path='/networks' element={<Network/>}></Route>
+    <Route path='/invitation' element={<Invitation/>}></Route>
+    <Route path='/network' element={<Network/>}></Route>
     <Route path='/users' element={<Users/>}></Route>
 </Routes>
 
@@ -82,6 +84,7 @@ isAuthenticated() ? <>
 />
 <Routes>
     <Route path='/' element={<Feed/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile logout={logout}/>}></Route>
     <Route path='/login' element={<Login onLogin={recall}/>}></Route>
     <Route path='/register' element={<Register onRegister={recall}/>}></Route>
     <Route path='/users' element={<Users/>}></Route>

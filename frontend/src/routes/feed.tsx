@@ -14,11 +14,19 @@ export default function Feed({user}: {user?: User}) {
   async function post() {
     const content = textAreaRef.current?.value;
     if (!content) return;
+    const body = { content: content };
+    console.log(JSON.stringify(body));
     const res = await fetchApi("/api/feed", {
       method: "POST",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json" // For some reason, this is required. Login doesn't require this
+      }
     });
+    console.log(body);
     if(!res.ok) {
+      const data = await res.json();
+      console.log(data);
       alert("Failed to post");
       return;
     }

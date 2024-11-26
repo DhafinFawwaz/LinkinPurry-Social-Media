@@ -67,9 +67,11 @@ app.openapi(
       },
       middleware: authenticated
     }), async (c) => {
-    const user = c.var.user;
-
+      const user = c.var.user;
+      
     try {
+      const body = await c.req.json()
+      console.log(body)
       const { content } = c.req.valid("json");
       if(!content) {
         c.status(422);

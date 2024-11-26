@@ -35,12 +35,6 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
             activeIcon: JobsHoverIcon,
         },
         {
-            name: "Networks",
-            path: "/networks",
-            defaultIcon: NetworkIcon,
-            activeIcon: NetworkHoverIcon,
-        },
-        {
             name: "Users",
             path: "/users",
             defaultIcon: NetworkIcon,
@@ -48,6 +42,19 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
         },
         ...(user
             ? [
+                
+                {
+                    name: "Invitation",
+                    path: "/invitation",
+                    defaultIcon: NetworkIcon,
+                    activeIcon: NetworkHoverIcon,
+                },
+                {
+                    name: "Network",
+                    path: "/network",
+                    defaultIcon: NetworkIcon,
+                    activeIcon: NetworkHoverIcon,
+                },
                 // {
                 //   name: "Jobs",
                 //   path: "/jobs",

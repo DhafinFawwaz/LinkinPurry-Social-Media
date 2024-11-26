@@ -15,7 +15,6 @@ app.openapi(
       200: DefaultJsonArrayResponse("Getting all users successful", PostSchema()),
       401: DefaultJsonResponse("Unauthorized")
     },
-    middleware: authenticated
   }), async (c) => {
     const users = await db.user.findMany();
     return c.json({

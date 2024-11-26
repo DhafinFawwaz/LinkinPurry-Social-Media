@@ -60,6 +60,64 @@ app.openapi(
 )
 
 
+app.openapi(
+  createRoute({
+    method: 'get',
+    path: '/profile/network',
+    description: 'Get all connection for current user',
+    tags: ['Profile'],
+    responses: {
+      200: DefaultJsonArrayResponse("Getting all connection requests for current user successful", {
+        from_id: z.number(),
+        to_id: z.number(),
+        created_at: z.string(),
+        from: z.object({
+          username: z.string(),
+          work_history: z.string().nullable(),
+          skills: z.string().nullable(),
+          id: z.number(),
+          created_at: z.string(),
+          updated_at: z.string(),
+          email: z.string(),
+          password_hash: z.string(),
+          full_name: z.string().nullable(),
+          profile_photo_path: z.string(),
+        })
+      }
+      ),
+      401: DefaultJsonResponse("Unauthorized")
+    },
+    middleware: authenticated
+  }), async (c) => {
+    const user = c.var.user;
+    const requests = await db.connection.findMany({
+      where: {
+        OR: [
+          {
+            from_id: user.id
+          },
+          {
+            to_id: user.id
+          }
+        ]
+      },
+      include: {
+        from: true,
+      }
+    });
+
+    // exclude the current user from the list
+    // const filteredRequests = requests.filter((req) => Number(req.) !== user.id)
+
+    return c.json({
+        success: true,
+        message: '',
+        body: requests
+    })
+}
+)
+
+
 async function getConnectionCount(user_id: number) {
   // TODO: Optimize this either with denormalization or redis
 
@@ -103,13 +161,14 @@ app.openapi(
                   connection_count: z.number(),
                   profile_photo_path: z.string(),
                   relevant_posts: z.optional(z.array(z.object(PostSchema()))),
-                  connection: z.enum(["public", "owner", "not_connected", "connection_requested", "connected"]),
-                  can_edit: z.boolean().optional()
+                  connection: z.enum(["public", "owner", "not_connected", "connection_requested", "connection_received", "connected"]),
                 }).or(z.object({}))
               })
             }
           }
         },
+        401: DefaultJsonResponse("Unauthorized"),
+        400: DefaultJsonResponse("Bad request"),
         404: DefaultJsonResponse("User not found"),
       },
     }), async (c) => {
@@ -128,7 +187,7 @@ app.openapi(
           }
         });
         if(!user) { // happens when user is deleted but someone still has the token in their browser. Logout the user
-          c.status(404);
+          c.status(400);
           deleteCookie(c, "token");
           return c.json({
             success: false,
@@ -149,7 +208,6 @@ app.openapi(
             profile_photo_path: user.profile_photo_path,
             relevant_posts: user.feeds,
             connection: "owner",
-            can_edit: true
           }
         })
       }
@@ -179,10 +237,9 @@ app.openapi(
             connection_count: await getConnectionCount(user_id),
             profile_photo_path: targetUser.profile_photo_path,
             connection: "public",
-            can_edit: false
           }
         })
-      } else { // case logged in & (not_connected/connection_requested/connected)
+      } else { // case logged in & (not_connected/connection_requested/connection_received/connected)
         const connected = await db.connection.findFirst({
           where: {
             OR: [
@@ -226,20 +283,28 @@ app.openapi(
               profile_photo_path: targetUser.profile_photo_path,
               relevant_posts: targetUser.feeds,
               connection: "connected",
-              can_edit: false
             }
           })
         } else { // case not_connected/connection_requested
-
-          const connectionRequest = await db.connectionRequest.findFirst({
+          let connection = "not_connected"
+          const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
             where: {
               from_id: user.id,
               to_id: user_id
             }
           })
-          let connection = "not_connected"
-          if(connectionRequest) {
+          if(connectionRequestMeToTarget) {
             connection = "connection_requested"
+          } else {
+            const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+              where: {
+                from_id: user_id,
+                to_id: user.id
+              }
+            })
+            if(connectionRequestTargetToMe) {
+              connection = "connection_received"
+            }
           }
 
           const targetUser = await db.user.findFirst({
@@ -270,7 +335,6 @@ app.openapi(
               profile_photo_path: targetUser.profile_photo_path,
               relevant_posts: targetUser.feeds,
               connection: connection,
-              can_edit: false
             }
           })
         }
@@ -333,7 +397,7 @@ app.openapi(
         c.status(401);
         return c.json({
           success: false,
-          message: 'Unauthorized',
+          message: 'Cannot edit other user\'s profile',
         })
       }
 
@@ -434,6 +498,7 @@ app.openapi(
     },
     responses: {
       200: DefaultJsonResponse("Connection request to another user successful"),
+      400: DefaultJsonResponse("Bad request"),
       401: DefaultJsonResponse("Unauthorized")
     },
     middleware: authenticated
@@ -441,7 +506,7 @@ app.openapi(
     const user = c.var.user;
     const target_id = Number.parseInt(c.req.param("user_id"));
     if(user.id === target_id) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Cannot connect to yourself',
@@ -464,7 +529,7 @@ app.openapi(
       }
     });
     if(connection2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection already exists',
@@ -487,7 +552,7 @@ app.openapi(
       }
     });
     if(connectionRequest2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection request already exists',
@@ -529,7 +594,7 @@ app.openapi(
     const user = c.var.user;
     const target_id = Number.parseInt(c.req.param("user_id"));
     if(user.id === target_id) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Cannot accept yourself',
@@ -552,7 +617,7 @@ app.openapi(
       }
     });
     if(connection2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection already exists',
@@ -567,7 +632,7 @@ app.openapi(
       }
     });
     if(connectionRequestMeToTarget) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Current user is accepting but the current user is the one who sent the request',
@@ -583,7 +648,7 @@ app.openapi(
     });
 
     if(!connectionRequestTargetToMe) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection request not found',
@@ -636,7 +701,7 @@ app.openapi(
     const user = c.var.user;
     const target_id = Number.parseInt(c.req.param("user_id"));
     if(user.id === target_id) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Cannot deny yourself',
@@ -659,7 +724,7 @@ app.openapi(
       }
     })
     if(connection2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection already exists',
@@ -674,7 +739,7 @@ app.openapi(
       }
     });
     if(connectionRequestMeToTarget) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Current user is denying but the current user is the one who sent the request',
@@ -689,7 +754,7 @@ app.openapi(
       }
     });
     if(!connectionRequestTargetToMe) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection request not found',
@@ -733,7 +798,7 @@ app.openapi(
     const user = c.var.user;
     const target_id = Number.parseInt(c.req.param("user_id"));
     if(user.id === target_id) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Cannot disconnect yourself',
@@ -756,7 +821,7 @@ app.openapi(
       }
     })
     if(connectionRequest2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection request exists somehow',
@@ -779,7 +844,7 @@ app.openapi(
       }
     })
     if(!connection2Way) {
-      c.status(401);
+      c.status(400);
       return c.json({
         success: false,
         message: 'Connection not found',
@@ -801,6 +866,8 @@ app.openapi(
     })
 }
 )
+
+
 
 export default app
 

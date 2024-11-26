@@ -39,7 +39,6 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   const isConnectionRequested = accessLevel === "connection_requested";
   const isConnectionReceived = accessLevel === "connection_received";
   const isConnected = accessLevel === "connected";
-  console.log(isConnectionReceived);
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg relative">

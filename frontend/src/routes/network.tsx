@@ -18,11 +18,12 @@ export default function Network() {
 <></>
 :
 <>
+
 {value?.body.map((req, i) => (<ListTile key={i}
-  title={req.from.full_name!} 
+  title={req.full_name!} 
   subtitle={new Date(req.created_at).toLocaleString()}
-  imageSrc={toImageSrc(req.from.profile_photo_path)}
-  href={`/profile/${req.from.id}`}
+  imageSrc={toImageSrc(req.profile_photo_path)}
+  href={`/profile/${req.id}`}
   >
 </ListTile>))
 }

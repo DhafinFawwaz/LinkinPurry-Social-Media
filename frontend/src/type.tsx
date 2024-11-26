@@ -21,12 +21,7 @@ export type User = {
     // exp: number;
 }
 
-export type ConnectionRequestsResponse = BaseResponse<{
-    from: User,
-    created_at: string,
-    from_id: number,
-    to_id: number,
-}[]>
+export type ConnectionRequestsResponse = BaseResponse<User[]>
 
 export type Post = {
     id: number,

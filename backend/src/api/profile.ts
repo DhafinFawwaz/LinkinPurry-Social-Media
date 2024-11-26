@@ -90,29 +90,36 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
-    const requests = await db.connection.findMany({
+    const connectionFromUser = await db.connection.findMany({
       where: {
-        OR: [
-          {
-            from_id: user.id
-          },
-          {
-            to_id: user.id
-          }
-        ]
+        from_id: user.id
+      },
+      include: {
+        to: true,
+      }
+    });
+    const connectionToUser = await db.connection.findMany({
+      where: {
+        to_id: user.id
       },
       include: {
         from: true,
       }
-    });
+    })
 
-    // exclude the current user from the list
-    // const filteredRequests = requests.filter((req) => Number(req.) !== user.id)
+    const connections = []
+    for(let i = 0; i < connectionFromUser.length; i++) {
+      connections.push(connectionFromUser[i].to);
+    }
+    for(let i = 0; i < connectionToUser.length; i++) {
+      connections.push(connectionToUser[i].from);
+    }
+    console.log(connections)
 
     return c.json({
         success: true,
         message: '',
-        body: requests
+        body: connections
     })
 }
 )
@@ -851,13 +858,23 @@ app.openapi(
       })
     }
 
-    await db.connection.delete({
-      where: {
-        from_id_to_id: {
-          from_id: user.id,
-          to_id: target_id
+    await db.$transaction(async (db) => {
+      await db.connection.delete({
+        where: {
+          from_id_to_id: {
+            from_id: user.id,
+            to_id: target_id
+          }
         }
-      }
+      })
+      await db.connection.delete({
+        where: {
+          from_id_to_id: {
+            from_id: target_id,
+            to_id: user.id
+          }
+        }
+      })
     })
 
     return c.json({

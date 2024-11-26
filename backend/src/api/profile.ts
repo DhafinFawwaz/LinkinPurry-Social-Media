@@ -114,8 +114,7 @@ app.openapi(
     for(let i = 0; i < connectionToUser.length; i++) {
       connections.push(connectionToUser[i].from);
     }
-    console.log(connections)
-
+ 
     return c.json({
         success: true,
         message: '',
@@ -859,22 +858,26 @@ app.openapi(
     }
 
     await db.$transaction(async (db) => {
-      await db.connection.delete({
-        where: {
-          from_id_to_id: {
-            from_id: user.id,
-            to_id: target_id
+      try {
+        await db.connection.delete({
+          where: {
+            from_id_to_id: {
+              from_id: user.id,
+              to_id: target_id
+            }
           }
-        }
-      })
-      await db.connection.delete({
-        where: {
-          from_id_to_id: {
-            from_id: target_id,
-            to_id: user.id
+        })
+      } catch(e) {}
+      try {
+        await db.connection.delete({
+          where: {
+            from_id_to_id: {
+              from_id: target_id,
+              to_id: user.id
+            }
           }
-        }
-      })
+        })
+      } catch(e) {}
     })
 
     return c.json({

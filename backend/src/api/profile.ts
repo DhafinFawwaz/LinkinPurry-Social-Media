@@ -233,6 +233,9 @@ app.openapi(
           const targetUser = await db.user.findFirst({
             where: {
               id: user_id
+            },
+            include: {
+              feeds: true,
             }
           })
           if(!targetUser) { // case target user not found
@@ -253,6 +256,7 @@ app.openapi(
               skills: targetUser.skills,
               connection_count: await getConnectionCount(user_id),
               profile_photo_path: targetUser.profile_photo_path,
+              relevant_posts: targetUser.feeds,
               connection: "not_connected",
               can_edit: false
             }
@@ -423,10 +427,66 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
-    db.connectionRequest.create({
+    const target_id = Number.parseInt(c.req.param("user_id"));
+    if(user.id === target_id) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Cannot connect to yourself',
+      })
+    }
+
+    // check if connection already exists
+    const connection2Way = await db.connection.findFirst({
+      where: {
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    });
+    if(connection2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection already exists',
+      })
+    }
+
+    // Check if connection request already exists
+    const connectionRequest2Way = await db.connectionRequest.findFirst({
+      where: {
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    });
+    if(connectionRequest2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection request already exists',
+      })
+    }
+
+    // create connection request
+    await db.connectionRequest.create({
       data: {
         from_id: user.id,
-        to_id: Number.parseInt(c.req.param("user_id"))
+        to_id: target_id
       }
     });
 
@@ -455,16 +515,62 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
+    const target_id = Number.parseInt(c.req.param("user_id"));
+    if(user.id === target_id) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Cannot accept yourself',
+      })
+    }
 
-    // check if connection request exists
-    const connectionRequest = await db.connectionRequest.findFirst({
+    // check if connection exists
+    const connection2Way = await db.connection.findFirst({
       where: {
-        from_id: Number.parseInt(c.req.param("user_id")),
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    });
+    if(connection2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection already exists',
+      })
+    }
+
+    // check if connection request me to target exists
+    const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
+      where: {
+        from_id: user.id,
+        to_id: target_id
+      }
+    });
+    if(connectionRequestMeToTarget) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Current user is accepting but the current user is the one who sent the request',
+      })
+    }
+
+    // check if connection request target to me exists
+    const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+      where: {
+        from_id: target_id,
         to_id: user.id
       }
     });
 
-    if(!connectionRequest) {
+    if(!connectionRequestTargetToMe) {
       c.status(401);
       return c.json({
         success: false,
@@ -472,12 +578,24 @@ app.openapi(
       })
     }
 
-    db.connection.create({
-      data: {
-        from_id: Number.parseInt(c.req.param("user_id")),
-        to_id: user.id,
-      }
-    });
+
+    await db.$transaction(async (db) => {
+      await db.connectionRequest.delete({
+        where: {
+          from_id_to_id: {
+            from_id: target_id,
+            to_id: user.id
+          }
+        }
+      });
+  
+      await db.connection.create({
+        data: {
+          from_id: target_id,
+          to_id: user.id,
+        }
+      });
+    })
 
     return c.json({
         success: true,
@@ -486,7 +604,7 @@ app.openapi(
 }
 )
 
-app.openapi(
+ app.openapi(
   createRoute({
     method: 'post',
     path: '/profile/:user_id/deny',
@@ -504,16 +622,61 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
+    const target_id = Number.parseInt(c.req.param("user_id"));
+    if(user.id === target_id) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Cannot deny yourself',
+      })
+    }
 
-    // check if connection request exists
-    const connectionRequest = await db.connectionRequest.findFirst({
+    // check if connection exists
+    const connection2Way = await db.connection.findFirst({
       where: {
-        from_id: Number.parseInt(c.req.param("user_id")),
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    })
+    if(connection2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection already exists',
+      })
+    }
+
+    // check if connection request me to target exists
+    const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
+      where: {
+        from_id: user.id,
+        to_id: target_id
+      }
+    });
+    if(connectionRequestMeToTarget) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Current user is denying but the current user is the one who sent the request',
+      })
+    }
+
+    // check if connection request target to me exists
+    const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+      where: {
+        from_id: target_id,
         to_id: user.id
       }
     });
-
-    if(!connectionRequest) {
+    if(!connectionRequestTargetToMe) {
       c.status(401);
       return c.json({
         success: false,
@@ -521,12 +684,104 @@ app.openapi(
       })
     }
 
-    db.connection.create({
-      data: {
-        from_id: Number.parseInt(c.req.param("user_id")),
-        to_id: user.id,
+    await db.connectionRequest.delete({
+      where: {
+        from_id_to_id: {
+          from_id: target_id,
+          to_id: user.id
+        }
       }
-    });
+    })
+
+    return c.json({
+        success: true,
+        message: '',
+    })
+}
+)
+
+
+app.openapi(
+  createRoute({
+    method: 'post',
+    path: '/profile/:user_id/disconnect',
+    description: 'Disconnect another user',
+    tags: ['Profile'],
+    request: {
+      params: z.object({
+        user_id: z.coerce.number()
+      })
+    },
+    responses: {
+      200: DefaultJsonResponse("Disconnecting another user successful"),
+      401: DefaultJsonResponse("Unauthorized")
+    },
+    middleware: authenticated
+  }), async (c) => {
+    const user = c.var.user;
+    const target_id = Number.parseInt(c.req.param("user_id"));
+    if(user.id === target_id) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Cannot disconnect yourself',
+      })
+    }
+
+    // check if connection request exists
+    const connectionRequest2Way = await db.connectionRequest.findFirst({
+      where: {
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    })
+    if(connectionRequest2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection request exists somehow',
+      })
+    }
+
+    // check if connection exists
+    const connection2Way = await db.connection.findFirst({
+      where: {
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    })
+    if(!connection2Way) {
+      c.status(401);
+      return c.json({
+        success: false,
+        message: 'Connection not found',
+      })
+    }
+
+    await db.connection.delete({
+      where: {
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
+      }
+    })
 
     return c.json({
         success: true,

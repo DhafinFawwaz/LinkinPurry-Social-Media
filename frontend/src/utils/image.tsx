@@ -6,5 +6,7 @@ function getApiUrl() {
 }
 
 export default function toImageSrc(img: string) {
-    return getApiUrl() +"/uploads/img/"+ img;
+    // return getApiUrl() +"/uploads/img/"+ img;
+    return getApiUrl() + img;
+    // return getApiUrl() + "/" + img;
 }

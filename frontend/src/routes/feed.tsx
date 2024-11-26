@@ -3,9 +3,8 @@ import useFetchApi, { fetchApi } from "../hooks/useFetchApi";
 import { ConnectionRequestsResponse, PostResponse, User } from "../type";
 import toImageSrc from "../utils/image";
 import ListTile from "../components/list-tile";
-import { JWTContent } from "../type";
 
-export default function Feed({user}: {user?: JWTContent}) {
+export default function Feed({user}: {user?: User}) {
   const { loading, value, error, recall } = useFetchApi<PostResponse>(
     "/api/feed?limit=10&cursor=0", 0, true, {
     method: "GET",
@@ -34,13 +33,13 @@ export default function Feed({user}: {user?: JWTContent}) {
 
 {user ? <>
 <ListTile
-  title={user.full_name} 
+  title={user.full_name || ""} 
   subtitle={"Write a post!"}
   imageSrc={toImageSrc(user.profile_photo_path)}
   href={`/profile/${user.id}`}
   >
 <div className="px-2 pb-2 text-sm">
-  <textarea ref={textAreaRef} className="w-full min-h-20 h-20 p-2 border border-gray-300 rounded-md hover:border-blue-600 focus:border-blue-600 focus:bg-blue-50 focus:outline-none" placeholder="What's on your mind?"></textarea>
+  <textarea ref={textAreaRef} className="w-full rounded-xl min-h-20 h-20 p-2 border border-gray-300 rounded-md hover:border-blue-600 focus:border-blue-600 focus:bg-blue-50 focus:outline-none" placeholder="What's on your mind?"></textarea>
   <div className="flex justify-end gap-2">
     <button onClick={post} className="items-center bg-blue_primary text-white font-semibold h-[2rem] w-20 flex justify-center rounded-full hover:bg-blue_hover text-sm">
       Post

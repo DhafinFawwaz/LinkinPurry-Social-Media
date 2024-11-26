@@ -4,19 +4,7 @@ export type BaseResponse<T> = {
     body: T
 }
 
-export type JWTContent = {
-    id: number,
-    username: string, 
-    email: string, 
-    full_name: string,
-    work_history: string,
-    skills: string,
-    profile_photo_path: string,
-    iat: number,
-    exp: number
-}
-
-export type AuthResponse = BaseResponse<JWTContent>
+export type AuthResponse = BaseResponse<User>
 
 export type User = {
     username: string;
@@ -26,9 +14,11 @@ export type User = {
     created_at: string; // unfortunately, this is a string
     updated_at: string; // unfortunately, this is a string
     email: string;
-    password_hash: string;
+    // password_hash: string; 
     full_name: string | null;
     profile_photo_path: string;
+    iat: number;
+    exp: number;
 }
 
 export type ConnectionRequestsResponse = BaseResponse<{

@@ -262,12 +262,13 @@ app.openapi(
   }
 )
 
+
+const baseImgPath = "/uploads/img/"
 function getProfilePhotoPathPrefixId(user_id: number, image_name: string) {
-  return `/uploads/img/${user_id}_${image_name}`
+  return `${baseImgPath}${user_id}_${image_name}`
 }
-function getProfilePhotoPath(image_name: string) {
-  return `/uploads/img/${image_name}`
-}
+
+const defaultPhotoPath = baseImgPath + "jobseeker_profile.svg"
 
 app.openapi(
     createRoute({
@@ -298,7 +299,7 @@ app.openapi(
       responses: {
         200: DefaultJsonResponse("Editing profile successful", {
           username: z.string(),
-          profile_photo: z.instanceof(Buffer).or(z.any()),
+          profile_photo_path: z.string(),
           name: z.string(),
           work_history: z.string(),
           skills: z.string(),
@@ -324,20 +325,19 @@ app.openapi(
         const {  username, name, work_history, skills } = c.req.valid("form");
         
         const { profile_photo } = await c.req.parseBody()
+        
         if(profile_photo) {
           
-          
-          if(user.profile_photo_path !== "jobseeker_profile.svg") { // delete old profile photo
-            const old_profile_photo_path = getProfilePhotoPath(user.profile_photo_path);
-            fs.unlink(join(process.cwd(), old_profile_photo_path), (err) => {
-              if (err) throw err
+          if(user.profile_photo_path !== defaultPhotoPath) { // delete old profile photo
+            fs.unlink(join(process.cwd(), user.profile_photo_path), (err) => {
+              if (err) console.log(err)
             })
           }
           
-          const image = profile_photo as File;
+          const image = profile_photo as File
           const buffer = await image.arrayBuffer()
           const profile_photo_path = getProfilePhotoPathPrefixId(user.id, image.name);
-          fs.writeFile(profile_photo_path, Buffer.from(buffer), (err) => {
+          fs.writeFile(join(process.cwd(), profile_photo_path), Buffer.from(buffer), (err) => {
             if (err) throw err
           })
 
@@ -360,7 +360,7 @@ app.openapi(
             message: '',
             body: {
               username: updatedUser.username,
-              profile_photo: updatedUser.profile_photo_path,
+              profile_photo_path: updatedUser.profile_photo_path,
               name: updatedUser.full_name || "",
               work_history: updatedUser.work_history || "",
               skills: updatedUser.skills || "",
@@ -385,7 +385,7 @@ app.openapi(
             message: '',
             body: {
               username: updatedUser.username,
-              profile_photo: updatedUser.profile_photo_path,
+              profile_photo_path: updatedUser.profile_photo_path,
               name: updatedUser.full_name || "",
               work_history: updatedUser.work_history || "",
               skills: updatedUser.skills || "",

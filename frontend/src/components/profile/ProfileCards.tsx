@@ -13,7 +13,7 @@ const ProfileCards: React.FC<ProfileCardsProps> = ({
   const isConnected = accessLevel === "connected";
 
   return (
-    <div className="mb-6 mx-80">
+    <div className="mb-6">
       <>
         {/* Postingan relevan? */}
         {(isOwner || isConnected) && !isPublic && (

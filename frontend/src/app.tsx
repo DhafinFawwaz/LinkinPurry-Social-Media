@@ -23,7 +23,7 @@ const notAuthenticatedRoutes = new Map<string, string>([
 ]);
 
 function AuthRouter() {
-    const { loading, value, recall } = useFetchApi<AuthResponse>("/api/auth", 300);
+    const { loading, value, recall, setValue } = useFetchApi<AuthResponse>("/api/auth", 300);
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -61,7 +61,7 @@ isAuthenticated() ? <>
 />
 <Routes>
     <Route path='/' element={<Feed user={value?.body}/>}></Route>
-    <Route path='/profile/:user_id' element={<Profile/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile user={value?.body!} setAuthResponse={setValue}/>}></Route>
     <Route path='/chat' element={<Chat/>}></Route>
     <Route path='/networks' element={<Network/>}></Route>
     <Route path='/users' element={<Users/>}></Route>

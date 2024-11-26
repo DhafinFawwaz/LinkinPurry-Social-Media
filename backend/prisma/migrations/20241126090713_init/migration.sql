@@ -7,7 +7,7 @@ CREATE TABLE "users" (
     "full_name" VARCHAR(255),
     "work_history" TEXT,
     "skills" TEXT,
-    "profile_photo_path" VARCHAR(255) NOT NULL DEFAULT 'jobseeker_profile.svg',
+    "profile_photo_path" VARCHAR(255) NOT NULL DEFAULT '/uploads/img/jobseeker_profile.svg',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

@@ -5,6 +5,7 @@ services:
       dockerfile: backend/Dockerfile
     volumes:
       - ./backend/src:/home/node/app/src
+      - ./backend/uploads:/home/node/app/uploads
       - ./backend/tsconfig.json:/home/node/app/tsconfig.json
       - ./backend/nodemon.json:/home/node/app/nodemon.json
       - ./backend/prisma:/home/node/app/prisma

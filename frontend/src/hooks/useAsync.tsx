@@ -19,5 +19,5 @@ export default function useAsync<T>(callback: () => Promise<any>, callOnMount: b
     if(callOnMount) recall()
   }, [recall, callOnMount])
 
-  return { loading, error, value, recall }
+  return { loading, error, value, recall, setValue }
 }

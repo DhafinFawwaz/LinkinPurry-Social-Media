@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient()
 
+const defaultPhotoPath = '/uploads/img/jobseeker_profile.svg';
+
 async function main() {
     await prisma.user.deleteMany();
     await prisma.feed.deleteMany();
@@ -38,7 +40,7 @@ async function main() {
                 full_name: fullName,
                 work_history: faker.lorem.paragraph(),
                 skills: faker.lorem.words(5),
-                profile_photo_path: 'jobseeker_profile.svg',
+                profile_photo_path: defaultPhotoPath,
             };
         })
     );

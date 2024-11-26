@@ -11,11 +11,11 @@ import MessagingHoverIcon from "../../assets/images/message-hover-icon.svg";
 import ProfileIcon from "../../assets/images/jobseeker_profile.svg";
 import JobsIcon from "../../assets/images/jobs-icon.svg";
 import JobsHoverIcon from "../../assets/images/jobs-hover-icon.svg";
-import { JWTContent, User } from "../../type";
+import { User } from "../../type";
 
 interface NavbarProps {
     activePage: string;
-    user?: JWTContent
+    user?: User
 }
 
 const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
@@ -77,7 +77,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
     ];
 
     return (
-        <nav className="flex items-center justify-between bg-white px-80 fixed top-0 w-full z-50 border-b border-gray-300">
+        <nav className="flex items-center justify-between bg-white px-80 fixed top-0 w-full z-20 border-b border-gray-300">
             <div className="flex items-center gap-8">
                 <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
             </div>

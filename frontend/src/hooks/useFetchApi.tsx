@@ -34,6 +34,7 @@ export type UseFetchApiReturn<T> = {
   error: boolean | undefined,
   value: T | undefined,
   recall: () => void,
+  setValue: React.Dispatch<React.SetStateAction<T | undefined>>
 }
 export default function useFetchApi<T>(path: string, minimumWaitDuration: number = 0, callOnMount: boolean = true, options: RequestInit = {}, dependencies: any[] = []): UseFetchApiReturn<T> {
   return useAsync<T>(async () => {

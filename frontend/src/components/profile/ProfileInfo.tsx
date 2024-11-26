@@ -8,6 +8,7 @@ interface ProfileInfoProps {
   photo: string;
   connections: number;
   accessLevel: "public" | "owner" | "connected" | "notConnected";
+  onEditButtonClick?: () => void;
 }
 
 const ProfileInfo: React.FC<ProfileInfoProps> = ({
@@ -16,13 +17,14 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   photo,
   connections,
   accessLevel,
+  onEditButtonClick,
 }) => {
   const isPublic = accessLevel === "public";
   const isOwner = accessLevel === "owner";
   const isConnected = accessLevel === "connected";
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg relative mx-80">
+    <div className="bg-white border border-gray-300 rounded-lg relative">
       {/* Banner */}
       <div className="h-48 relative">
         <img
@@ -44,7 +46,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         <div className="flex justify-between items-center mt-20">
           <h2 className="text-2xl font-semibold text-left">{name}</h2>
           {isOwner && (
-            <button className="p-2 bg-white hover:bg-gray-200 rounded-full">
+            <button onClick={onEditButtonClick} className="p-2 bg-white hover:bg-gray-200 rounded-full">
               <img
                 src={EditIcon}
                 alt="Edit Icon"

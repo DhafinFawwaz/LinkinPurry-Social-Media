@@ -3,7 +3,6 @@ import { Hono, type Context } from 'hono'
 import { cors } from 'hono/cors'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { Redis } from 'ioredis'
 import "./bigint-extension"
 import authRoute from './api/auth.js'
 import feedRoute from './api/feed.js'
@@ -12,6 +11,8 @@ import userRoute from './api/user.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
+import { getConnInfo } from 'hono/cloudflare-workers'
+import os from 'os'
 
 const app = new OpenAPIHono()
 
@@ -33,28 +34,17 @@ const server = serve({
 })
 
 
-var corsOrigin;
 function getCorsOrigin(c: Context) {
   const origins = process.env.CORS_ORIGIN || 'http://localhost:3000'
   let host = c.req.header("Host")
   if(!host) host = "localhost"
   if(host?.includes(":")) {
     const [hostname, port] = host.split(":")
-    corsOrigin = [hostname+":"+port, hostname, host, origins]
-    return corsOrigin;
+    return [hostname+":"+port, hostname, host, origins];
   }
-  corsOrigin = [host, origins]
-  return corsOrigin;
+  return [host, origins];
 }
 
-const io = new Server(server, {cors: {origin: corsOrigin}});
+const io = new Server(server, {cors: {origin: ['http://localhost:3000', process.env.CORS_ORIGIN || ""]}});
 handleSocket(io)
 
-
-const redis = new Redis({
-  host: (process.env.REDIS_HOST || 'localhost') as string,
-  port: (process.env.REDIS_PORT || 6379) as number
-});
-redis.on('error', (err) => {
-  console.error(err)
-});

@@ -103,7 +103,7 @@ app.openapi(
                   connection_count: z.number(),
                   profile_photo_path: z.string(),
                   relevant_posts: z.optional(z.array(z.object(PostSchema()))),
-                  connection: z.enum(["connected", "not_connected", "owner", "public"]),
+                  connection: z.enum(["public", "owner", "not_connected", "connection_requested", "connected"]),
                   can_edit: z.boolean().optional()
                 }).or(z.object({}))
               })
@@ -182,7 +182,7 @@ app.openapi(
             can_edit: false
           }
         })
-      } else { // case logged in & (connected/not connected)
+      } else { // case logged in & (not_connected/connection_requested/connected)
         const connected = await db.connection.findFirst({
           where: {
             OR: [
@@ -229,7 +229,19 @@ app.openapi(
               can_edit: false
             }
           })
-        } else {
+        } else { // case not_connected/connection_requested
+
+          const connectionRequest = await db.connectionRequest.findFirst({
+            where: {
+              from_id: user.id,
+              to_id: user_id
+            }
+          })
+          let connection = "not_connected"
+          if(connectionRequest) {
+            connection = "connection_requested"
+          }
+
           const targetUser = await db.user.findFirst({
             where: {
               id: user_id
@@ -257,7 +269,7 @@ app.openapi(
               connection_count: await getConnectionCount(user_id),
               profile_photo_path: targetUser.profile_photo_path,
               relevant_posts: targetUser.feeds,
-              connection: "not_connected",
+              connection: connection,
               can_edit: false
             }
           })

@@ -14,8 +14,7 @@ import useFetchApi, { fetchApi } from '../hooks/useFetchApi';
 import ProfileTile from '../components/profile/profile-tile';
 import ListTile from '../components/list-tile';
 import { useParams } from 'react-router-dom';
-
-type AccessLevel = "public" | "owner" | "connected" | "notConnected";
+import { AccessLevel } from '../type';
 
 export const EditProfileSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -70,7 +69,8 @@ export default function Profile() {
     if(loading) return "public";
     if(!value) return "public";
     if(value.body.connection === "connected") return "connected";
-    if(value.body.connection === "not_connected") return "notConnected";
+    if(value.body.connection === "not_connected") return "not_connected";
+    if(value.body.connection === "connection_requested") return "connection_requested";
     if(value.body.can_edit) return "owner";
     return "public";
   }

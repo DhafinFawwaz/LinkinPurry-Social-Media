@@ -2,13 +2,14 @@ import React from 'react';
 import EditIcon from '../../assets/images/edit-icon.svg';
 import MessageIcon from '../../assets/images/message.svg';
 import { Link } from 'react-router-dom';
+import { AccessLevel } from '../../type';
 
 interface ProfileInfoProps {
   banner: string;
   name: string;
   photo: string;
   connections: number;
-  accessLevel: "public" | "owner" | "connected" | "notConnected";
+  accessLevel: AccessLevel;
   user_id: number;
   onEditButtonClick?: () => void;
   onConnectButtonClick?: () => void;
@@ -28,6 +29,8 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
 }) => {
   const isPublic = accessLevel === "public";
   const isOwner = accessLevel === "owner";
+  const isNotConnected = accessLevel === "not_connected";
+  const isConnectionRequested = accessLevel === "connection_requested";
   const isConnected = accessLevel === "connected";
 
   return (
@@ -73,7 +76,21 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         {/* Buttons */}
         {!isPublic && (
           <div className="mt-4 space-y-2">
-            {!isOwner && isConnected && (
+            {isNotConnected && (
+              <>
+                <button onClick={onConnectButtonClick} className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
+                  Connect
+                </button>
+              </>
+            )}
+            {isConnectionRequested && (
+              <>
+                <button disabled className="bg-background_grey text-gray-400 font-semibold py-2 px-6 rounded-full border-gray-300 border">
+                  Connection Requested
+                </button>
+              </>
+            )}
+            {isConnected && (
               <div className='flex flex-row space-x-2'>
                 <Link to={`/chat/${user_id}`} className="flex items-center bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
                   <img
@@ -87,13 +104,6 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                   Disconnect
                 </button>
               </div>
-            )}
-            {!isOwner && !isConnected && (
-              <>
-                <button onClick={onConnectButtonClick} className="bg-blue_primary text-white font-semibold py-2 px-6 rounded-full hover:bg-blue_hover">
-                  Connect
-                </button>
-              </>
             )}
           </div>
         )}

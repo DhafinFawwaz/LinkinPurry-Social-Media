@@ -5,8 +5,8 @@ export default function ProfileTile({ title, children }: { title: string, childr
   <div className="flex justify-between items-center">
     <h3 className="text-xl font-semibold">{title}</h3>
   </div>
-  <p className="text-gray-600 mt-2">
+  <div className="text-gray-600 mt-2">
     {children}
-  </p>
+  </div>
 </div>
 }

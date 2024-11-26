@@ -101,7 +101,7 @@ app.openapi(
                   work_history: z.string(),
                   skills: z.string(),
                   connection_count: z.number(),
-                  profile_photo: z.string(),
+                  profile_photo_path: z.string(),
                   relevant_posts: z.optional(z.array(z.object(PostSchema()))),
                   connection: z.enum(["connected", "not_connected", "owner", "public"]),
                   can_edit: z.boolean().optional()
@@ -146,7 +146,7 @@ app.openapi(
             work_history: user.work_history,
             skills: user.skills,
             connection_count: connection_count,
-            profile_photo: user.profile_photo_path,
+            profile_photo_path: user.profile_photo_path,
             relevant_posts: user.feeds,
             connection: "owner",
             can_edit: true
@@ -177,7 +177,7 @@ app.openapi(
             work_history: targetUser.work_history,
             skills: targetUser.skills,
             connection_count: await getConnectionCount(user_id),
-            profile_photo: targetUser.profile_photo_path,
+            profile_photo_path: targetUser.profile_photo_path,
             connection: "public",
             can_edit: false
           }
@@ -223,7 +223,7 @@ app.openapi(
               work_history: targetUser.work_history,
               skills: targetUser.skills,
               connection_count: await getConnectionCount(user_id),
-              profile_photo: targetUser.profile_photo_path,
+              profile_photo_path: targetUser.profile_photo_path,
               relevant_posts: targetUser.feeds,
               connection: "connected",
               can_edit: false
@@ -252,7 +252,7 @@ app.openapi(
               work_history: targetUser.work_history,
               skills: targetUser.skills,
               connection_count: await getConnectionCount(user_id),
-              profile_photo: targetUser.profile_photo_path,
+              profile_photo_path: targetUser.profile_photo_path,
               connection: "not_connected",
               can_edit: false
             }

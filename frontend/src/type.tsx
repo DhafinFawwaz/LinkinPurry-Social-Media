@@ -17,8 +17,8 @@ export type User = {
     // password_hash: string; 
     full_name: string | null;
     profile_photo_path: string;
-    iat: number;
-    exp: number;
+    // iat: number;
+    // exp: number;
 }
 
 export type ConnectionRequestsResponse = BaseResponse<{
@@ -28,13 +28,25 @@ export type ConnectionRequestsResponse = BaseResponse<{
     to_id: number,
 }[]>
 
-export type PostResponse = BaseResponse<{
+export type Post = {
     id: number,
     created_at: string,
     updated_at: string,
     content: string,
     user_id: number,
     user: User,
-}[]>
+}
+
+export type PostResponse = BaseResponse<Post[]>
 
 export type UsersResponse = BaseResponse<User[]>
+
+
+export type ProfileResponse = BaseResponse<Profile>
+
+export type Profile = User & {
+    name: string,
+    connection: "connected" | "not_connected" | "owner" | "public",
+    can_edit: boolean,
+    relevant_posts: Post[],
+}

@@ -9,14 +9,27 @@ app.openapi(
   createRoute({
     method: 'get',
     path: '/users',
-    description: 'Get all users',
+    description: 'Get users',
     tags: ['Profile'],
+    request: {
+      query: z.object({
+          search: z.string().optional()
+      })
+    },
     responses: {
-      200: DefaultJsonArrayResponse("Getting all users successful", PostSchema()),
+      200: DefaultJsonArrayResponse("Getting users successful", PostSchema()),
       401: DefaultJsonResponse("Unauthorized")
     },
   }), async (c) => {
-    const users = await db.user.findMany();
+    const {search} = c.req.valid("query");
+    const users = await db.user.findMany({
+      where: {
+        full_name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    });
     return c.json({
       success: true,
       message: '',

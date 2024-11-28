@@ -1,46 +1,54 @@
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-const socket = io(URL, {
-	autoConnect: false,
-	auth: {
-		token: ""
-	}
-});
+import { useEffect, useRef, useState } from 'react';
+import socket from '../socket/socket';
+import { useParams } from 'react-router-dom';
+import { ChatErrorResponse, ChatMessage, ChatResponse, LatestChat, LatestChatResponse } from '../type';
+import chatController from '../socket/chat-controller';
+import useFetchApi from '../hooks/useFetchApi';
 
 export default function Chat() {
 	const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
+	const param = useParams<{ user_id: string }>();
+	const inputRef = useRef<HTMLInputElement>(null);
+	const [chats, setChats] = useState<ChatMessage[]>([]);
+
+	const { loading, value, error, recall } = useFetchApi<LatestChatResponse>("/api/chats");
 
 	useEffect(() => {
-		function onConnect() {
-			setIsConnected(true);
-		}
-		function onDisconnect() {
-			setIsConnected(false);
-		}
-		socket.on('connect', onConnect);
-		socket.on('disconnect', onDisconnect);
-
-		socket.on("message", (arg) => {
-			console.log(arg);
+		chatController.reinitialize({
+			onConnect: () => setIsConnected(true),
+			onDisconnect: () => setIsConnected(false),
+			onChatJoinSuccess: res => {
+				setChats(res.body.chats);
+			},
+			onChatJoinError: e => {},
+			onChatSendSuccess: r => {
+				setChats(r.body.chats);
+			},
+			onChatSendError: e => {},
+			onChatLeaveSuccess: r => {},
+			onChatLeaveError: e => {},
+			onMessageReceived: res => {
+				setChats(res.body.chats);
+			},
 		});
+		chatController.connect();
+		chatController.joinChat(parseInt(param.user_id!));
+
 
 		// for debugging
-		socket.onAny((event, ...args) => {
-			console.log(event, args);
-		});
+		// socket.onAny((event, ...args) => {
+		// 	console.log(event, args);
+		// });
 
 		return () => {
-			socket.off('connect', onConnect);
-			socket.off('disconnect', onDisconnect);
+			chatController.unsubscribe();
+			console.log('unsubscribed');
 		}
 	}, []);
 
 	function onSubmit(e: any) {
 		e.preventDefault();
-		socket.emit("message", "Helloooooo");
+		chatController.sendMessage(parseInt(param.user_id!), inputRef.current!.value);
 	}
 
 	return (
@@ -49,15 +57,21 @@ export default function Chat() {
 			<br />
 			<br />
 			<h1>Chat</h1>
-			<button onClick={() => socket.connect()}>Connect</button>
 			<button onClick={() => socket.disconnect()}>Disconnect</button>
 			<form onSubmit={ onSubmit }>
+				<input type="text" name="" id="" ref={inputRef} />
 				<button type="submit">Submit</button>
 			</form>
 			<div>
 				<h2>Connection Status</h2>
 				<p>{isConnected ? 'Connected' : 'Disconnected'}</p>
 			</div>
+			<div>
+				{chats.map((chat, i) => (<div key={i}>
+					{JSON.stringify(chat)}
+				</div>))}
+			</div>
+			{JSON.stringify(value?.body)}
 		</div>
 	);
 }

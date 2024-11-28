@@ -30,7 +30,7 @@ export default function Profile({ logout }: { logout: () => void }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset} = useForm<EditProfileSchema>({mode: "all", resolver: zodResolver(EditProfileSchema)});
 
-  const { user_id } = useParams();
+  const { user_id } = useParams<{ user_id: string }>();
   const { loading, value, recall } = useFetchApi<ProfileResponse>(`/api/profile/${user_id}`);
   
   const [file, setFile] = useState<File>();

@@ -8,11 +8,10 @@ import authRoute from './api/auth.js'
 import feedRoute from './api/feed.js'
 import profileRoute from './api/profile.js'
 import userRoute from './api/user.js'
+import chatRoute from './api/chat.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { getConnInfo } from 'hono/cloudflare-workers'
-import os from 'os'
 
 const app = new OpenAPIHono()
 
@@ -24,7 +23,7 @@ app.route('/api', authRoute)
 app.route('/api', feedRoute)
 app.route('/api', profileRoute)
 app.route('/api', userRoute)
-
+app.route('/api', chatRoute)
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 4000;
 console.log(`Server is running on http://localhost:${port}`)
 
@@ -45,6 +44,11 @@ function getCorsOrigin(c: Context) {
   return [host, origins];
 }
 
-const io = new Server(server, {cors: {origin: ['http://localhost:3000', process.env.CORS_ORIGIN || ""]}});
+function getCorsOriginSoket() {
+  const origins = ['http://localhost:3000', process.env.CORS_ORIGIN || ""]
+  return origins;
+  // return "http://localhost:3000";
+}
+const io = new Server(server, {cors: {origin: getCorsOriginSoket(), credentials: true}});
 handleSocket(io)
 

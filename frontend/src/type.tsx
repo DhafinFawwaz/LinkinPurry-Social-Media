@@ -46,3 +46,29 @@ export type Profile = User & {
     connection: AccessLevel,
     relevant_posts: Post[],
 }
+
+export type ChatMessage = {
+    id: number,
+    timestamp: string,
+    from_id: number,
+    to_id: number,
+    message: string,
+}
+
+export type ChatResponse = BaseResponse<{
+    chats: ChatMessage[],
+    room: string,
+}>
+export type ChatErrorResponse = BaseResponse<null>
+
+
+
+export type LatestChat = {
+    id: number,
+    timestamp: string,
+    message: string,
+    other_user_id: number,
+    user_id: number,
+    full_name: string,
+}
+export type LatestChatResponse = BaseResponse<LatestChat[]>

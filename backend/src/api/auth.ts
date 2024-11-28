@@ -272,10 +272,14 @@ app.openapi(
 }
 )
 
+export async function decodeToken(token: string) {
+  return await Jwt.verify(token, getSecretKey()) as JwtContent;
+}
+
 export async function getUser(c: Context) {
   const token = getCookie(c, 'token');
   if(token) {
-    const payload = await Jwt.verify(token, getSecretKey()) as JwtContent;
+    const payload = await decodeToken(token);
     return payload;
   }
 

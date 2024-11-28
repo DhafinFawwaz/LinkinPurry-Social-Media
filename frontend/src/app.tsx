@@ -4,7 +4,7 @@ import Login from './routes/login'
 import Register from './routes/register'
 import Chat from './routes/chat'
 import SplashScreen from './components/splash-screen'
-import useFetchApi from './hooks/useFetchApi'
+import useFetchApi, { getApiUrl } from './hooks/useFetchApi'
 import { AuthResponse } from './type'
 import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
@@ -13,6 +13,7 @@ import Invitation from './routes/invitation'
 import Feed from './routes/feed'
 import Users from './routes/users'
 import Network from './routes/network'
+import { tryRegisterServiceWorker } from './notification/notification'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -29,12 +30,14 @@ function AuthRouter() {
     const location = useLocation();
     
     const isAuthenticated = () => (!loading && value && value.success) ? true : false;
+    
 
     useEffect(() => {
         if(loading) return;
         if (isAuthenticated()) {
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);
+            tryRegisterServiceWorker();
         } else {
             const redirectProtectedPath = protectedRoutes.get(location.pathname);
             if (redirectProtectedPath) navigate(redirectProtectedPath);

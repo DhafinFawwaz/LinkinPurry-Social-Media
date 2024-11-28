@@ -5,6 +5,7 @@ import type { JwtContent } from '../middlewares/authenticated.js';
 import { decodeToken } from '../api/auth.js';
 import { parse } from 'cookie';
 import db from '../db/db.js';
+import { sendChatNotification } from '../notification/notification.js';
 
 function sortIds(id1: number, id2: number): [number, number]{
 	id1 = Number(id1);
@@ -125,6 +126,7 @@ export function handleSocket(io: Server) {
 					const chats = await findAllChats(user.id, targetUserId);
 					io.to(roomKey).emit(MESSAGE_RECEIVED, successResponse("Sent chat", {room: roomKey, chats: chats}));
 					socket.emit(MESSAGE_SEND_SUCCESS, successResponse("Sent chat", {room: roomKey, chats: chats}));
+					sendChatNotification(targetUserId, message); // no need to await
 				} catch (e) {
 					socket.emit(MESSAGE_SEND_ERROR, errorResponse("Failed to send chat"));
 				}

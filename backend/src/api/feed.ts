@@ -2,6 +2,7 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
 import db from '../db/db.js'
 import { authenticated } from '../middlewares/authenticated.js'
+import { sendFeedNotification } from '../notification/notification.js'
 
 const app = new OpenAPIHono()
 
@@ -70,8 +71,6 @@ app.openapi(
       const user = c.var.user;
       
     try {
-      const body = await c.req.json()
-      console.log(body)
       const { content } = c.req.valid("json");
       if(!content) {
         c.status(422);
@@ -87,6 +86,9 @@ app.openapi(
           user_id: user.id
         }
       })
+
+
+      sendFeedNotification(user.id) // no need to await
 
       return c.json({
           success: true,

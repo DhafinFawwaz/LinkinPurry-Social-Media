@@ -4,7 +4,7 @@ const DEFAULT_OPTIONS = {
   headers: { "Content-Type": "application/json" },
 }
 
-function getApiUrl() {
+export function getApiUrl() {
     if(!window.location.port) return import.meta.env.VITE_API_URL;
     const hostName = window.location.hostname;
     const protocol = window.location.protocol;

@@ -1,5 +1,6 @@
 import db from "../db/db.js";
 import webpush from "./webpush.js";
+import type { PushSubscription } from 'web-push';
 
 async function getAllConnectedUsers(userId: number) {
 	return await db.connection.findMany({
@@ -31,7 +32,11 @@ export async function sendFeedNotification(userId: number) {
 		};
 
 		for(const s of c.from.push_subscriptions) {
-			targets.push(webpush.sendNotification(s.endpoint as any, JSON.stringify(notificationPayload)))
+			const subscription: PushSubscription = {
+				endpoint: s.endpoint,
+				keys: JSON.parse(s.keys as string)
+			}
+			targets.push(webpush.sendNotification(subscription, JSON.stringify(notificationPayload)))
 		}
 	}
 	const res = await Promise.all(targets)
@@ -60,7 +65,11 @@ export async function sendChatNotification(userId: number, message: string) {
 		};
 
 		for(const s of c.from.push_subscriptions) {
-			targets.push(webpush.sendNotification(s.endpoint as any, JSON.stringify(notificationPayload)))
+			const subscription: PushSubscription = {
+				endpoint: s.endpoint,
+				keys: JSON.parse(s.keys as string)
+			}
+			targets.push(webpush.sendNotification(subscription, JSON.stringify(notificationPayload)))
 		}
 	}
 	const res = await Promise.all(targets)

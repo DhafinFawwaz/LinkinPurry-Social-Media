@@ -24,11 +24,12 @@ app.openapi(
     const user = c.var.user;
     try {
         const { subscription } = c.req.valid("json");
+        console.log(subscription)
         await db.pushSubscription.create({
             data: {
                 user_id: user.id,
-                endpoint: subscription,
-                keys: {}
+                endpoint: subscription.endpoint,
+                keys: subscription.keys
             }
         })
         return c.json({

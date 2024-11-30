@@ -14,6 +14,7 @@ import Feed from './routes/feed'
 import Users from './routes/users'
 import Network from './routes/network'
 import { tryRegisterServiceWorker } from './notification/notification'
+import ChatUI from './routes/chat_ui'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -91,6 +92,7 @@ isAuthenticated() ? <>
     <Route path='/login' element={<Login onLogin={recall}/>}></Route>
     <Route path='/register' element={<Register onRegister={recall}/>}></Route>
     <Route path='/users' element={<Users/>}></Route>
+    <Route path='/chat' element={<ChatUI/>}></Route> {/* test chat ui only */}
 </Routes>
 
 </>

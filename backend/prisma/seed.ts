@@ -14,11 +14,12 @@ async function main() {
     await prisma.connection.deleteMany();
     await prisma.pushSubscription.deleteMany();
 
+    // hawk tuah
     const userCount = 100; // users
     const feedsPerUser = 20; // feeds per user
     const chatsPerUser = 20; // chats per user
-    const requestsPerUser = 10; // connection requests per user
-    const connectionsPerUser = 30; // connections per user
+    const connectionsPerUser = 30; // connections per user (approximately)
+    const requestsPerUser = 10; // connection requests per user (setelah filter akan jauh lebih sedikit)
   
     const uniqueFirstNames = faker.helpers.uniqueArray(faker.person.firstName, userCount*2);
     const usersData = await Promise.all(
@@ -76,7 +77,23 @@ async function main() {
     );
     const chats = await prisma.chat.createMany({ data: chatsData });
     console.log(`Created ${chats.count} chats`);
-  
+
+    const connectionsData = createdUsers.flatMap((user) =>
+      Array.from({ length: Math.ceil(connectionsPerUser / 2) }).flatMap(() => {
+        const connection = faker.helpers.arrayElement(
+          createdUsers.filter((u) => u.id !== user.id)
+        );
+        return [
+          // Jika A ada connection ke B, maka B juga ada connection ke A
+          {from_id: user.id, to_id: connection.id,},
+          {from_id: connection.id, to_id: user.id,},
+        ];
+      })
+    );
+    const connectionsDataUnique = connectionsData.filter((connection, index, self) => index === self.findIndex((t) => t.from_id === connection.from_id && t.to_id === connection.to_id)) // remove duplicate
+    const connections = await prisma.connection.createMany({ data: connectionsDataUnique });
+    console.log(`Created ${connections.count} connections`);
+
     const requestsData = createdUsers.flatMap((user) =>
       Array.from({ length: requestsPerUser }).map(() => {
         const recipient = faker.helpers.arrayElement(
@@ -88,24 +105,13 @@ async function main() {
         };
       })
     );
-    const requestsDataUnique = requestsData.filter((request, index, self) => index === self.findIndex((t) => t.from_id === request.from_id && t.to_id === request.to_id))
+    const requestsDataUnique = requestsData.filter((request, index, self) => {
+      if (self.some((t, i) => i < index && t.from_id === request.to_id && t.to_id === request.from_id)) return false; // Jika A ada request ke B, maka B tidak ada request ke A
+      if (connectionsDataUnique.some((t) => t.from_id === request.from_id && t.to_id === request.to_id)) return false; // Jika A ada connection ke B, maka A tidak ada request ke B
+      return index === self.findIndex((t) => t.from_id === request.from_id && t.to_id === request.to_id); // remove duplicate
+    });
     const connectionRequests = await prisma.connectionRequest.createMany({ data: requestsDataUnique });
     console.log(`Created ${connectionRequests.count} connection requests`);
-  
-    const connectionsData = createdUsers.flatMap((user) =>
-      Array.from({ length: connectionsPerUser }).map(() => {
-        const connection = faker.helpers.arrayElement(
-          createdUsers.filter((u) => u.id !== user.id)
-        );
-        return {
-          from_id: user.id,
-          to_id: connection.id,
-        };
-      })
-    );
-    const connectionsDataUnique = connectionsData.filter((connection, index, self) => index === self.findIndex((t) => t.from_id === connection.from_id && t.to_id === connection.to_id))
-    const connections = await prisma.connection.createMany({ data: connectionsDataUnique });
-    console.log(`Created ${connections.count} connections`);
   
     console.log('Seeding completed.');
 }

@@ -123,6 +123,7 @@ export default class ChatSocket {
     }
 
     connect() {
-        this.socket.connect();
+        if(!this.socket.connected)
+            this.socket.connect();
     }
 }

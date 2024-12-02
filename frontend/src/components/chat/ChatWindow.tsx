@@ -8,7 +8,6 @@ export default function ChatWindow({ chatDetails, messages, user, children }: { 
   const scrollViewRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if(scrollViewRef.current) scrollViewRef.current.scrollTop = scrollViewRef.current.scrollHeight;
-    console.log('scrolling');
   }, [messages]);
 
   const isMessageFromSelf = (msg: ChatMessage) => msg.from_id === Number(user.id);

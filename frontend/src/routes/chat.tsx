@@ -16,9 +16,9 @@ export default function Chat({ user }: { user?: User}) {
 		details: LatestChat;
 	}>(null);
 
-	const [value, setValue] = useState<LatestChatResponse | null>(null);
+	const [chats, setChats] = useState<LatestChatResponse | null>(null);
 	function setMessagesFromResponse(res: ChatResponse) {
-		setValue((prev) => {
+		setChats((prev) => {
 			if (!prev) return prev; // Ensure prevValue exists
 			const details = prev.body.find(c => (c.other_user_id) === parseInt(param.user_id!))!;
 			setMessages({
@@ -30,10 +30,20 @@ export default function Chat({ user }: { user?: User}) {
 	}
 
 	useEffect(() => {
+		console.log('chat component mounted');
 		chatController.connect();
 		chatController.unsubscribe();
 
 		(async () => {
+			const res = await fetchApi('/api/chats', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			const json = await res.json();
+			setChats(json);
+			
 			chatController.reinitialize({
 				onConnect: () => setIsConnected(true),
 				onDisconnect: () => setIsConnected(false),
@@ -46,14 +56,6 @@ export default function Chat({ user }: { user?: User}) {
 				onMessageReceived: r => setMessagesFromResponse,
 			});
 			chatController.joinChat(parseInt(param.user_id!));
-			const res = await fetchApi('/api/chats', {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
-			const json = await res.json();
-			setValue(json);
 		})()
 
 		// for debugging
@@ -84,7 +86,7 @@ export default function Chat({ user }: { user?: User}) {
 
 
 	return (<>
-{!value ? <>
+{!chats ? <>
 
 </> 
 : 
@@ -99,7 +101,7 @@ export default function Chat({ user }: { user?: User}) {
 		<div className='absolute z-20 bottom-0 w-[37%] hidden md:flex justify-end px-8 pb-4'>
 			<button type="submit" className='bg-blue_primary text-white font-semibold rounded-full hover:bg-blue_hover w-12 h-12 text-3xl'>+</button>
 		</div>
-		<ChatList chatList={value?.body!} selectedChatId={parseInt(param.user_id!)}>
+		<ChatList chatList={chats?.body!} selectedChatId={parseInt(param.user_id!)}>
 		</ChatList>
 
 

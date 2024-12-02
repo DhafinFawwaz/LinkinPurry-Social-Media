@@ -13,7 +13,7 @@ import Invitation from './routes/invitation'
 import Feed from './routes/feed'
 import Users from './routes/users'
 import Network from './routes/network'
-import { tryRegisterServiceWorker } from './notification/notification'
+import { tryRegisterServiceWorker, tryRemoveServiceWorker } from './notification/notification'
 import ChatUI from './routes/chat_ui'
 
 // [currentPath, redirectPath]]
@@ -36,16 +36,17 @@ function AuthRouter() {
     useEffect(() => {
         if(loading) return;
         if (isAuthenticated()) {
+            tryRegisterServiceWorker();
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);
-            tryRegisterServiceWorker();
         } else {
             const redirectProtectedPath = protectedRoutes.get(location.pathname);
             if (redirectProtectedPath) navigate(redirectProtectedPath);
         }
     }, [loading])
 
-    function logout() {
+    async function logout() {
+        await tryRemoveServiceWorker();
         deleteAllCookies();
         recall();
     }

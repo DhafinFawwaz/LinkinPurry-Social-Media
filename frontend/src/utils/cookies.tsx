@@ -1,5 +1,4 @@
 export function deleteAllCookies() {
-    console.log("Deleting all cookies");
     document.cookie.split(';').forEach(cookie => {
         const eqPos = cookie.indexOf('=');
         const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;

@@ -2,18 +2,23 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
-import webpush from '../notification/webpush.js'
 
 const app = new OpenAPIHono()
 
 app.openapi(
     createRoute({
       method: 'post',
-      path: '/notification',
+      path: '/notification/subscribe',
       description: 'Subscribe to notifications',
-      tags: ['Profile'],
+      tags: ['Notification'],
       request: DefaultJsonRequest("The user id to subscribe to", {
-        subscription: z.string()
+        subscription: z.object({
+          endpoint: z.string(),
+          keys: z.object({
+            p256dh: z.string(),
+            auth: z.string()
+          })
+        })
       }),
       responses: {
         200: DefaultJsonResponse("Subscribing to notificattion successful"),
@@ -24,13 +29,20 @@ app.openapi(
     const user = c.var.user;
     try {
         const { subscription } = c.req.valid("json");
-        console.log(subscription)
-        await db.pushSubscription.create({
-            data: {
-                user_id: user.id,
-                endpoint: subscription.endpoint,
-                keys: subscription.keys
-            }
+        // create a new subscription or update the existing one
+        await db.pushSubscription.upsert({
+          where: {
+            user_id: user.id,
+            endpoint: subscription.endpoint
+          },
+          create: {
+            user_id: user.id,
+            endpoint: subscription.endpoint,
+            keys: subscription.keys
+          },
+          update: {
+            keys: subscription.keys
+          }
         })
         return c.json({
             success: true,
@@ -48,10 +60,13 @@ app.openapi(
 
 app.openapi(
   createRoute({
-    method: 'delete',
-    path: '/notification',
+    method: 'post',
+    path: '/notification/unsubscribe',
     description: 'Unsubscribe to notifications',
-    tags: ['Profile'],
+    tags: ['Notification'],
+    request: DefaultJsonRequest("Endpoint to unsubscribe to", {
+      endpoint: z.string()
+    }),
     responses: {
       200: DefaultJsonResponse("Unsubscribing to notificattion successful"),
       401: DefaultJsonResponse("Unauthorized")
@@ -60,9 +75,11 @@ app.openapi(
   }), async (c) => {
   const user = c.var.user;
   try {
-      await db.pushSubscription.deleteMany({
+      const { endpoint } = c.req.valid("json");
+      await db.pushSubscription.delete({
         where: {
-          user_id: user.id
+          user_id: user.id,
+          endpoint: endpoint
         }
       })
       return c.json({

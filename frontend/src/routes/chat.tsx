@@ -98,11 +98,15 @@ export default function Chat({ user }: { user?: User}) {
 		</div>
 		<div className="flex h-full">
 
+	
 		<div className='absolute z-20 bottom-0 w-[37%] hidden md:flex justify-end px-8 pb-4'>
 			<button type="submit" className='bg-blue_primary text-white font-semibold rounded-full hover:bg-blue_hover w-12 h-12 text-3xl'>+</button>
 		</div>
-		<ChatList chatList={chats?.body!} selectedChatId={parseInt(param.user_id!)}>
-		</ChatList>
+
+		<ul className="w-full md:w-[37%] border-r overflow-y-scroll relative hidden md:block">
+			{chats.body.map((chat, idx) => <ChatList to={`/chat/${chat.other_user_id}`} key={idx} chat={chat} selectedChatId={parseInt(param.user_id!)}/>)}
+		</ul>
+
 
 
 {!messages?.message ? <>

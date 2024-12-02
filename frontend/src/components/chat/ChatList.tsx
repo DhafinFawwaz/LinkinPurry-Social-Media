@@ -1,19 +1,17 @@
 import { format } from 'date-fns';
 import { ChatMessage, LatestChat } from '../../type';
+import { Link } from 'react-router-dom';
 
-export default function ChatList({ chatList, selectedChatId, children } : { chatList: LatestChat[], selectedChatId: number, children?: React.ReactNode }) {
+export default function ChatList({ chat, selectedChatId, to } : { chat: LatestChat, selectedChatId: number, to: string}) {
 
   const truncateText = (text: string, maxLength: number) => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
   return (
-    <ul className="w-full md:w-[37%] border-r overflow-y-scroll relative">
-      {children}
-      {chatList.map((chat, idx) => (
-        <li
-          key={idx}
-          className={`p-4 border-b cursor-pointer flex items-center ${
+    
+        <Link to={to}
+          className={`p-4 border-b cursor-pointer flex items-center text-black ${
             chat.other_user_id === selectedChatId ? 'bg-blue-50' : 'hover:bg-gray-100'
           }`}
         >
@@ -31,9 +29,7 @@ export default function ChatList({ chatList, selectedChatId, children } : { chat
             </div>
             <p className="text-sm text-gray-500 truncate">{truncateText(chat.message, 20)}</p>
           </div>
-        </li>
-      ))}
-    </ul>
+        </Link>
   );
 };
 

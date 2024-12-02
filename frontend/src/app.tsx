@@ -61,7 +61,6 @@ isAuthenticated() ? <>
     <button onClick={logout}>Logout</button>
 </div> */}
 <Navbar
-    activePage={location.pathname}
     user={value?.body}
 />
 <Routes>
@@ -83,7 +82,6 @@ isAuthenticated() ? <>
     <NavLink to={"/register"} className={activeClass}>Register</NavLink>
 </div> */}
 <Navbar
-    activePage={location.pathname}
     user={value?.body}
 />
 <Routes>

@@ -1,33 +1,22 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 import LinkinPurry from "../../assets/images/linkinpurry-logo.svg";
 import NetworkIcon from "../../assets/images/network-icon.svg";
 import NetworkHoverIcon from "../../assets/images/network-hover-icon.svg";
 import MessagingIcon from "../../assets/images/message-icon.svg";
 import MessagingHoverIcon from "../../assets/images/message-hover-icon.svg";
-// import NotificationsIcon from "../../assets/images/notification-icon.svg";
-// import NotificationsHoverIcon from "../../assets/images/notification-hover-icon.svg";
 import ProfileIcon from "../../assets/images/jobseeker_profile.svg";
 import JobsIcon from "../../assets/images/jobs-icon.svg";
 import JobsHoverIcon from "../../assets/images/jobs-hover-icon.svg";
 import { User } from "../../type";
 
 interface NavbarProps {
-    activePage: string;
-    user?: User
+    user?: User;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
-    const navigate = useNavigate();
-
+const Navbar: React.FC<NavbarProps> = ({ user }) => {
     const tabs = [
-        // {
-        //   name: "Home",
-        //   path: "/",
-        //   defaultIcon: ,
-        //   activeIcon: ,
-        // },
         {
             name: "Feed",
             path: "/",
@@ -42,7 +31,6 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
         },
         ...(user
             ? [
-                
                 {
                     name: "Invitation",
                     path: "/invitation",
@@ -55,87 +43,147 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, user }) => {
                     defaultIcon: NetworkIcon,
                     activeIcon: NetworkHoverIcon,
                 },
-                // {
-                //   name: "Jobs",
-                //   path: "/jobs",
-                //   defaultIcon: ,
-                //   activeIcon: ,
-                // },
                 {
-                name: "Messaging",
-                path: "/chat",
-                defaultIcon: MessagingIcon,
-                activeIcon: MessagingHoverIcon,
+                    name: "Messaging",
+                    path: "/chat",
+                    defaultIcon: MessagingIcon,
+                    activeIcon: MessagingHoverIcon,
                 },
-                // {
-                //   name: "Notifications",
-                //   path: "/notifications",
-                //   defaultIcon: NotificationsIcon,
-                //   activeIcon: NotificationsHoverIcon,
-                // },
                 {
-                name: "Me",
-                path: "/profile/" + user.id,
-                defaultIcon: ProfileIcon,
-                activeIcon: ProfileIcon,
+                    name: "Me",
+                    path: `/profile/${user.id}`,
+                    defaultIcon: ProfileIcon,
+                    activeIcon: ProfileIcon,
                 },
             ]
-        : []),
+            : []),
     ];
 
-    return (
-        <nav className="flex items-center justify-between bg-white px-80 fixed top-0 w-full z-20 border-b border-gray-300">
-            <div className="flex items-center gap-8">
-                <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
-            </div>
+    // For mobile separation purpose
+    const profileTab = tabs.find((tab) => tab.name === "Me");
+    const otherTabs = tabs.filter((tab) => tab.name !== "Me");
 
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-0">
-                    {tabs.map((tab) => (
-                    <button
-                        key={tab.path}
-                        className="flex flex-col pt-1.5 items-center justify-center bg-transparent w-full group hover:bg-gray-100 duration-150"
-                        onClick={() => navigate(tab.path)}
+    return (
+        <>
+            {/* For mobile, move profile tab to top of the screen */}
+            {profileTab && (
+                <nav className="flex justify-between bg-white fixed top-0 left-0 py-3 px-4 border-b border-gray-300 z-30 w-full sm:hidden">
+                    <NavLink
+                        to={profileTab.path}
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center bg-transparent group hover:bg-gray-100 duration-150 ${
+                                isActive ? "text-black font-medium" : "text-gray-500"
+                            }`
+                        }
                     >
-                        <img
-                        src={activePage === tab.path ? tab.activeIcon : tab.defaultIcon}
-                        alt={tab.name}
-                        className={`h-6 w-6 ${
-                            tab.name === "Me" ? "rounded-full border-2 border-gray-300" : ""
-                        }`}
-                        />
-                        <span
-                        className={`text-xs group-hover:text-black ${
-                            activePage === tab.path ? "text-black font-normal" : "text-gray-500"
-                        }`}
+                        {({ isActive }) => (
+                            <>
+                                <img
+                                    src={isActive ? profileTab.activeIcon : profileTab.defaultIcon}
+                                    alt={profileTab.name}
+                                    className="h-8 w-8 rounded-full border-2 border-gray-300"
+                                />
+                                <span
+                                    className={`text-xs group-hover:text-black ${
+                                        isActive ? "text-black font-normal" : "text-gray-500"
+                                    }`}
+                                >
+                                </span>
+                            </>
+                        )}
+                    </NavLink>
+                    <div className="flex items-center gap-8">
+                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
+                    </div>
+                </nav>
+            )}
+
+            {/* For mobile, move other Navbar to bottom of the screen */}
+            <nav className="flex bg-white fixed bottom-0 w-full border-t border-gray-300 z-20 py-2 sm:hidden">
+                <div className="flex justify-around items-center w-full">
+                    {otherTabs.map((tab) => (
+                        <NavLink
+                            key={tab.path}
+                            to={tab.path}
+                            className={({ isActive }) =>
+                                `flex flex-col items-center justify-center bg-transparent group hover:bg-gray-100 duration-150 ${
+                                    isActive ? "text-black font-medium" : "text-gray-500"
+                                }`
+                            }
                         >
-                        {tab.name}
-                        </span>
-                        <div className={`w-full h-[2px] px-12 mt-1 bg-slate-950 duration-150 ${activePage===tab.path ? "scale-x-100" : "scale-x-0"}`}></div>
-                    </button>
+                            {({ isActive }) => (
+                                <>
+                                    <img
+                                        src={isActive ? tab.activeIcon : tab.defaultIcon}
+                                        alt={tab.name}
+                                        className="h-6 w-6"
+                                    />
+                                    <span
+                                        className={`text-xs group-hover:text-black ${
+                                            isActive ? "text-black font-normal" : "text-gray-500"
+                                        }`}
+                                    >
+                                        {tab.name}
+                                    </span>
+                                </>
+                            )}
+                        </NavLink>
                     ))}
                 </div>
-            
-                {!user && (
-                    <div className="flex items-center gap-4">
-                    <div className="text-gray-400">|</div>
-                    <button
-                        onClick={() => navigate("/register")}
-                        className="text-gray-700 hover:text-black font-medium bg-transparent"
-                    >
-                        Register
-                    </button>
-                    <button
-                        onClick={() => navigate("/login")}
-                        className="text-blue_primary border border-blue_primary rounded-full px-4 py-1 hover:bg-blue-100 font-medium bg-transparent"
-                    >
-                        Login
-                    </button>
+            </nav>
+
+            {/* Default Full Navbar for larger size */}
+            <nav className="hidden sm:flex justify-center w-full bg-white fixed top-0 border-b border-gray-300 z-20">
+                <div className="flex items-center justify-between bg-white top-0 w-full px-4 sm:px-8 sm:max-w-4xl">
+                    <div className="flex items-center gap-8">
+                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
                     </div>
-                )}
-            </div>
-        </nav>
-        );
-    };
-    
-    export default Navbar;
+
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-0">
+                            {tabs.map((tab) => (
+                                <NavLink
+                                    key={tab.path}
+                                    to={tab.path}
+                                    className={({ isActive }) =>
+                                        `flex flex-col pt-1.5 items-center justify-center bg-transparent w-full group hover:bg-gray-100 duration-150 ${
+                                            isActive ? "text-black font-medium" : "text-gray-500"
+                                        }`
+                                    }
+                                >
+                                    {({ isActive }) => (
+                                        <>
+                                            <img
+                                                src={isActive ? tab.activeIcon : tab.defaultIcon}
+                                                alt={tab.name}
+                                                className={`h-6 w-6 ${
+                                                    tab.name === "Me"
+                                                        ? "rounded-full border-2 border-gray-300"
+                                                        : ""
+                                                }`}
+                                            />
+                                            <span
+                                                className={`text-xs group-hover:text-black ${
+                                                    isActive ? "text-black font-normal" : "text-gray-500"
+                                                }`}
+                                            >
+                                                {tab.name}
+                                            </span>
+                                            <div
+                                                className={`w-full h-[2px] px-12 mt-1 bg-slate-950 duration-150 ${
+                                                    isActive ? "scale-x-100" : "scale-x-0"
+                                                }`}
+                                            ></div>
+                                        </>
+                                    )}
+                                </NavLink>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </>
+    );
+};
+
+export default Navbar;

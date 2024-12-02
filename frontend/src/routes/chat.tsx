@@ -6,6 +6,8 @@ import chatController from '../socket/chat-controller';
 import useFetchApi, { fetchApi } from '../hooks/useFetchApi';
 import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
+import PopUp from '../components/popup';
+import NewChat from '../components/chat/new-chat';
 
 export default function Chat({ user }: { user?: User}) {
 	const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
@@ -20,7 +22,8 @@ export default function Chat({ user }: { user?: User}) {
 	function setMessagesFromResponse(res: ChatResponse) {
 		setChats((prev) => {
 			if (!prev) return prev; // Ensure prevValue exists
-			const details = prev.body.find(c => (c.other_user_id) === parseInt(param.user_id!))!;
+			const userId = parseInt(param.user_id!);
+			const details = prev.body.find(c => (c.other_user_id) === userId)!;
 			setMessages({
 				message: res.body.chats,
 				details: details,
@@ -35,12 +38,15 @@ export default function Chat({ user }: { user?: User}) {
 		chatController.unsubscribe();
 
 		(async () => {
-			const res = await fetchApi('/api/chats', {
+			const res = await fetchApi(`/api/chats/${parseInt(param.user_id!)}`, {
 				method: 'GET',
 				headers: {
-					'Content-Type': 'application/json',
+					'content-type': 'application/json',
 				},
 			});
+			if(!res.ok) {
+				return;
+			}
 			const json = await res.json();
 			setChats(json);
 			
@@ -71,19 +77,9 @@ export default function Chat({ user }: { user?: User}) {
 	function onSubmit(e: any) {
 		e.preventDefault();
 		chatController.sendMessage(parseInt(param.user_id!), inputRef.current!.value);
-		// scroll to bottom
 	}	
 
-
-
-	const [showNewMessage, setShowNewMessage] = useState(false); 
-	const [users, setUsers] = useState([
-		{ id: 1, name: 'Denise Felicia Tiowanni', avatar: null },
-		{ id: 2, name: 'Bagas Sambega Rosyadi', avatar: '/bagas_avatar.png' },
-		{ id: 3, name: 'Franklin Tavarez', avatar: null },
-		{ id: 4, name: 'New User', avatar: '/default_avatar.png' }, // Contoh user baru ((belom work demn))
-	]);
-
+	const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
 	return (<>
 {!chats ? <>
@@ -91,6 +87,11 @@ export default function Chat({ user }: { user?: User}) {
 </> 
 : 
 <>
+
+	
+<PopUp title='New Message' open={isPopUpOpen} onClose={() => {setIsPopUpOpen(false)}}>
+	<NewChat></NewChat>
+</PopUp>
 <div className="h-dvh h-screen flex justify-center items-center pt-20 pb-6">
 	<div className="bg-white border border-gray-300 rounded-lg overflow-hidden w-full h-full max-w-4xl relative">
 		<div className="py-1 px-4 border-b flex justify-between items-center">
@@ -100,11 +101,11 @@ export default function Chat({ user }: { user?: User}) {
 
 	
 		<div className='absolute z-20 bottom-0 w-[37%] hidden md:flex justify-end px-8 pb-4'>
-			<button type="submit" className='bg-blue_primary text-white font-semibold rounded-full hover:bg-blue_hover w-12 h-12 text-3xl'>+</button>
+			<button onClick={() => setIsPopUpOpen(true)} type="submit" className='bg-blue_primary text-white font-semibold rounded-full hover:bg-blue_hover w-12 h-12 text-3xl'>+</button>
 		</div>
 
 		<ul className="w-full md:w-[37%] border-r overflow-y-scroll relative hidden md:block">
-			{chats.body.map((chat, idx) => <ChatList to={`/chat/${chat.other_user_id}`} key={idx} chat={chat} selectedChatId={parseInt(param.user_id!)}/>)}
+			{chats && chats.body.map((chat, idx) => <ChatList to={`/chat/${chat.other_user_id}`} key={idx} chat={chat} selectedChatId={parseInt(param.user_id!)}/>)}
 		</ul>
 
 
@@ -121,30 +122,6 @@ export default function Chat({ user }: { user?: User}) {
 </>}
 
 		</div>
-
-		{/* New message dropdown */}
-		{showNewMessage && (
-			<div className="absolute bg-white border rounded-lg shadow-lg w-1/3 max-w-md right-80 top-32 z-10">
-			<div className="p-4 border-b">
-				<h2 className="text-lg font-semibold">New message</h2>
-			</div>
-			<ul>
-				{users.map((user) => (
-				<li
-					key={user.id}
-					className="p-4 flex items-center cursor-pointer hover:bg-gray-100"
-				>
-					<img
-					src={user.avatar || '/jobseeker_profile.svg'}
-					alt={user.name}
-					className="w-8 h-8 rounded-full mr-4"
-					/>
-					<span className="font-medium">{user.name}</span>
-				</li>
-				))}
-			</ul>
-			</div>
-		)}
 	</div>
 </div>
 </>}

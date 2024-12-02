@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { format, isToday } from 'date-fns';
 import { ChatMessage, LatestChat, User } from '../../type';
+import toImageSrc from '../../utils/image';
 
 export default function ChatWindow({ chatDetails, messages, user, children }: { chatDetails: LatestChat; messages: ChatMessage[]; user: User; children: React.ReactNode })
   {
@@ -53,7 +54,7 @@ export default function ChatWindow({ chatDetails, messages, user, children }: { 
                     <div className="text-base text-gray-900 ml-11">{msg.message}</div>
                   </div>
                   <img
-                    src={user.profile_photo_path}
+                    src={toImageSrc(user.profile_photo_path)}
                     alt={`My avatar`}
                     className="w-8 h-8 rounded-full"
                   />
@@ -62,7 +63,7 @@ export default function ChatWindow({ chatDetails, messages, user, children }: { 
                 :
                 <div className="flex items-start space-x-3">
                   <img
-                    src={chatDetails.profile_photo_path}
+                    src={toImageSrc(user.profile_photo_path)}
                     alt={`${chatDetails.full_name}'s avatar`}
                     className="w-8 h-8 rounded-full"
                   />

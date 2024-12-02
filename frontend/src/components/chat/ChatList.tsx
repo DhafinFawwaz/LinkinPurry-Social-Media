@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { ChatMessage, LatestChat } from '../../type';
 import { Link } from 'react-router-dom';
+import toImageSrc from '../../utils/image';
 
 export default function ChatList({ chat, selectedChatId, to } : { chat: LatestChat, selectedChatId: number, to: string}) {
 
@@ -16,7 +17,7 @@ export default function ChatList({ chat, selectedChatId, to } : { chat: LatestCh
           }`}
         >
           <img
-            src={chat.profile_photo_path || '/jobseeker_profile.svg'}
+            src={toImageSrc(chat.profile_photo_path) || '/jobseeker_profile.svg'}
             alt={`${chat.full_name}'s avatar`}
             className="w-10 h-10 rounded-full mr-4"
           />

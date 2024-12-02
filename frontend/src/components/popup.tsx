@@ -4,7 +4,7 @@ type PopUpProps = {
     children: React.ReactNode;
     open: boolean;
     title: string;
-    onClose: (e: React.MouseEvent<HTMLElement>) => void;
+    onClose?: (e: React.MouseEvent<HTMLElement>) => void;
     className?: string;
   };
   

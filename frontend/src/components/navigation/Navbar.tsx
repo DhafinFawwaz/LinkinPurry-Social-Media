@@ -64,10 +64,36 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     const otherTabs = tabs.filter((tab) => tab.name !== "Me");
 
     return (
-        <>
+        <>  
+            {/* For mobile, move login-register tab to top of the screen */}
+            {!user && (
+                <nav className="flex justify-between bg-white fixed top-0 left-0 py-2 px-4 border-b border-gray-300 z-30 w-full sm:hidden">
+                    <div className="flex items-center gap-8">
+                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <NavLink
+                            to="/register"
+                            className="text-gray-700 hover:text-black font-medium bg-transparent"
+                        >
+                            Register
+                        </NavLink>
+                        <NavLink
+                            to="/login"
+                            className="text-blue_primary border border-blue_primary rounded-full px-4 py-1 hover:bg-blue-100 font-medium bg-transparent"
+                        >
+                            Login
+                        </NavLink>
+                    </div>
+                </nav>
+                )}
+
             {/* For mobile, move profile tab to top of the screen */}
             {profileTab && (
                 <nav className="flex justify-between bg-white fixed top-0 left-0 py-3 px-4 border-b border-gray-300 z-30 w-full sm:hidden">
+                    <div className="flex items-center gap-8">
+                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
+                    </div>
                     <NavLink
                         to={profileTab.path}
                         className={({ isActive }) =>
@@ -92,9 +118,6 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                             </>
                         )}
                     </NavLink>
-                    <div className="flex items-center gap-8">
-                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
-                    </div>
                 </nav>
             )}
 
@@ -179,6 +202,24 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                                 </NavLink>
                             ))}
                         </div>
+
+                        {!user && (
+                            <div className="flex items-center gap-4">
+                                <div className="text-gray-400">|</div>
+                                <NavLink
+                                    to="/register"
+                                    className="text-gray-700 hover:text-black font-medium bg-transparent"
+                                >
+                                    Register
+                                </NavLink>
+                                <NavLink
+                                    to="/login"
+                                    className="text-blue_primary border border-blue_primary rounded-full px-4 py-1 hover:bg-blue-100 font-medium bg-transparent"
+                                >
+                                    Login
+                                </NavLink>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>

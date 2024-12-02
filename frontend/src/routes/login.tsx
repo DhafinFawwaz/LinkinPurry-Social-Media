@@ -36,9 +36,9 @@ export default function Login({ onLogin: onLogin }: { onLogin?: () => void }) {
 
   return (
 <>
-<section className="sm:bg-slate-200 bg-slate-100"> {/* Fallback */}
+<section className="sm:bg-background_grey bg-white"> {/* Fallback */}
   <div className="flex min-h-dvh min-h-screen items-center justify-center px-5 mx-auto">
-    <div className="w-full rounded-2xl md:mt-0 sm:max-w-md bg-slate-100 border-none p-0 sm:p-8">
+    <div className="w-full rounded-2xl md:mt-0 sm:max-w-md bg-white sm:border border-gray-300 p-0 sm:p-8">
       <h1 className="text-3xl font-bold text-slate-700">Login</h1>
       <p className="text-slate-400 mb-4 mt-1">Make the most of your professional life</p>
 
@@ -47,10 +47,10 @@ export default function Login({ onLogin: onLogin }: { onLogin?: () => void }) {
         <FormInput register={register} error={errors.identifier} field={"identifier"} type={"text"} title={"Enter Your Email or Username"}></FormInput>
         <FormInput register={register} error={errors.password} field={"password"} type={"password"} title={"Enter Your Password"}></FormInput>
 
-        <button disabled={isSubmitting} className="disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-slate-200 rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Login</button>
+        <button disabled={isSubmitting} className="disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-slate-200 rounded-lg bg-blue_primary hover:bg-blue_hover focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Login</button>
       </form>
 
-      <p className="text-slate-500 text-sm mt-3 text-center">Don't have an account ? <Link className="hover:underline hover:text-blue-700 focus:text-blue-800 focus:underline" to={"/register"}>Register</Link></p>
+      <p className="text-slate-500 text-sm mt-3 text-center">Don't have an account ? <Link className="hover:underline hover:text-blue_primary focus:text-blue_hover focus:underline" to={"/register"}>Register</Link></p>
     </div>
   </div>
   

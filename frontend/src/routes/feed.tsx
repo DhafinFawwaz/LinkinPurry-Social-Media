@@ -50,11 +50,10 @@ export default function Feed({user}: {user?: User}) {
   async function loadMore() {
     setLoadingMore(true);
     const nextCursor = cursor + 10;
-    const res = await fetchApi<PostResponse>(
-      `/api/feed?limit=10&cursor=${nextCursor}`,
-      { method: "GET" }
-    );
-
+    const res = await fetchApi(`/api/feed?limit=10&cursor=${nextCursor}`, {
+      method: "GET",
+    });
+    
     if (res.ok) {
       const data = await res.json();
       setPosts((prev) => [...prev, ...data.body]);

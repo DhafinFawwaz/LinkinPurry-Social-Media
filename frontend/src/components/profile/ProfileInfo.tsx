@@ -43,7 +43,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
   return (
     <div className="bg-white border border-gray-300 rounded-lg relative">
       {/* Banner */}
-      <div className="h-48 relative">
+      <div className="h-24 sm:h-48 relative">
         <img
           className="object-cover w-full h-full rounded-t-lg"
           style={{
@@ -76,7 +76,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         </div>
         
         {/* <p className="text-left text-gray-600">{description}</p> */}
-        <p className="text-left text-gray-700 font-medium mt-2">
+        <p className="text-left text-gray-700 font-medium">
           {connections} connections
         </p>
         

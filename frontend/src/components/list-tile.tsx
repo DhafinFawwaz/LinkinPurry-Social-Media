@@ -11,7 +11,7 @@ type ListTileProps = {
 
 export default function ListTile({ title, subtitle, imageSrc, href, endChildren, children }: ListTileProps) {
     return (
-<div className="w-full max-w-md bg-white border border-gray-300 rounded-3xl relative">
+<div className="w-full max-w-md bg-white border border-gray-300 rounded-lg relative">
     <div className="px-2 py-[0.25rem] flex items-center">
       <Link to={href} className="w-full flex gap-2 items-center text-black group hover:cursor-pointer">
         <img className="h-8 w-8 rounded-full overflow-hidden object-cover" src={imageSrc} alt="" />

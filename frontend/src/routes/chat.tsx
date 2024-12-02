@@ -42,7 +42,6 @@ export default function Chat() {
 
 		return () => {
 			chatController.unsubscribe();
-			console.log('unsubscribed');
 		}
 	}, []);
 

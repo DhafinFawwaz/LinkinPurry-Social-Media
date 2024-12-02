@@ -13,8 +13,10 @@ import notificationRoute from './api/notification.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
+import { logger } from 'hono/logger'
 
 const app = new OpenAPIHono()
+// app.use(logger())
 
 app.use('/*', async (c, next) => cors({origin: getCorsOrigin(c), credentials: true})(c, next))
 app.get('/doc', swaggerUI({ url: '/api/doc' }))

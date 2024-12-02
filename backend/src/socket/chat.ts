@@ -126,7 +126,7 @@ export function handleSocket(io: Server) {
 					const chats = await findAllChats(user.id, targetUserId);
 					io.to(roomKey).emit(MESSAGE_RECEIVED, successResponse("Sent chat", {room: roomKey, chats: chats}));
 					socket.emit(MESSAGE_SEND_SUCCESS, successResponse("Sent chat", {room: roomKey, chats: chats}));
-					sendChatNotification(targetUserId, message); // no need to await
+					sendChatNotification(user, targetUserId, message); // no need to await
 				} catch (e) {
 					socket.emit(MESSAGE_SEND_ERROR, errorResponse("Failed to send chat"));
 				}

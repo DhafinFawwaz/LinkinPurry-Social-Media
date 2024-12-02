@@ -7,9 +7,6 @@ export default function ChatList({ chatList, selectedChatId, children } : { chat
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
-  console.log(chatList[0].other_user_id)
-  console.log(selectedChatId)
-
   return (
     <ul className="w-full md:w-[37%] border-r overflow-y-scroll relative">
       {children}

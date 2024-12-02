@@ -25,7 +25,7 @@ export default function Users() {
   return (<>
 <section className="mt-16 mb-2">
   <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2">
-    <input type="text" placeholder="Search users..." value={search} onChange={(q) => setSearch(q.target.value)} className="w-full max-w-md p-2 mt-4 sm:mt-0 pr-3 border border-gray-300 rounded-lg text-md font-normal leading-open text-color-text bg-cool-gray-20 dark:bg-color-surface-accent-4"/>
+    <input type="text" placeholder="Search users..." value={search} onChange={(q) => setSearch(q.target.value)} className="w-full max-w-md p-2 mt-4 sm:mt-0 pr-3 border border-gray-300 rounded-lg text-md font-normal leading-open text-color-text dark:bg-color-surface-accent-4 border-1 appearance-none px-2.5 pb-2.5 pt-3 text-sm text-gray-900 focus:outline-none focus:ring-0 focus:border-blue-600 focus:bg-[#e8f0fe] hover:border-blue-600"/>
     {loading ? 
     <></>
     :

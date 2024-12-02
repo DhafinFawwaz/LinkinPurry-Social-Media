@@ -9,8 +9,12 @@ export default function Users() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
 
+  function clean(text: string) {
+    return text.replace(/[^a-zA-Z0-9]/g, '');
+  }
+
   const { loading, value, error, recall } = useFetchApi<UsersResponse>(
-    `/api/users?search=${debounced}`, 0, true, {
+    `/api/users?search=${clean(debounced)}`, 0, true, {
     method: "GET",
   }, [debounced]);
 

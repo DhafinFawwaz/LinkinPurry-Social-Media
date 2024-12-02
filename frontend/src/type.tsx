@@ -70,5 +70,6 @@ export type LatestChat = {
     other_user_id: number,
     user_id: number,
     full_name: string,
+    profile_photo_path: string,
 }
 export type LatestChatResponse = BaseResponse<LatestChat[]>

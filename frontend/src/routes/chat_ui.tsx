@@ -72,7 +72,7 @@ const Chat: React.FC = () => {
           {selectedChat && (
             <ChatWindow
               chatDetails={chatDetails[selectedChat]}
-              messages={messages[selectedChat]}
+              initialMessages={messages[selectedChat]}
             />
           )}
         </div>

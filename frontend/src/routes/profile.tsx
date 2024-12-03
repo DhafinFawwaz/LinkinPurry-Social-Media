@@ -151,7 +151,7 @@ export default function Profile({ logout }: { logout: () => void }) {
     <FormTextarea register={register} error={errors.work_history} field={"work_history"} title={"Work History"} defaultValue={value?.body.work_history || ""}></FormTextarea>
     <FormTextarea register={register} error={errors.skills} field={"skills"} title={"Enter your work Skills"} defaultValue={value?.body.skills || ""}></FormTextarea>
 
-    <button disabled={isSubmitting} className="disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-slate-200 rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Submit</button>
+    <button disabled={isSubmitting} className="disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-slate-200 rounded-lg bg-blue_primary hover:bg-blue_hover focus:ring-4 ring-blue-500 py-2 font-bold text-white w-full">Submit</button>
   </form>
 </>
 }

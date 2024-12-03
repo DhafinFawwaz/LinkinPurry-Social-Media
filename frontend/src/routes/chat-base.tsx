@@ -21,14 +21,14 @@ export default function ChatBase() {
 </> 
 : 
 <>
-<div className="h-dvh h-screen flex justify-center items-center pt-20 pb-6">
-	<div className="bg-white border border-gray-300 rounded-lg overflow-hidden w-full h-full max-w-4xl relative">
+<div className="h-dvh h-screen flex justify-center items-center pt-16 pb-6">
+	<div className="bg-white border border-gray-300 rounded-lg overflow-hidden w-full h-full max-w-3xl relative mx-2 mt-8 sm:mt-0">
 		<div className="py-1 px-4 border-b flex justify-between items-center">
 			<h1 className="text-xl font-semibold my-2">Messaging</h1>  
 		</div>
 		<div className="flex h-full">
 
-		<div className='absolute z-20 bottom-0 w-full flex justify-end px-8 pb-4'>
+		<div className='absolute z-20 bottom-12 sm:bottom-0 w-full flex justify-end px-8 pb-4'>
 			<button onClick={() => setIsPopUpOpen(true)} type="submit" className='bg-blue_primary text-white font-semibold rounded-full hover:bg-blue_hover w-12 h-12 text-3xl'>+</button>
 		</div>
 		<ul className="w-full border-r overflow-y-scroll relative">

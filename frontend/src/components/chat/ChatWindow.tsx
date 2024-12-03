@@ -83,7 +83,7 @@ export default function ChatWindow({ chatDetails, messages, user, children }: { 
         })}
       </div>
 
-      <div className="p-4 border-t flex bottom-0 w-full mb-12 z-20 bg-white">
+      <div className="p-4 border-t flex bottom-0 w-full mb-24 sm:mb-12 z-20 bg-white">
         { children }
       </div>
     </div>

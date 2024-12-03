@@ -121,8 +121,10 @@ app.openapi(
             required: true,
             description: "Update a post by post_id",
             content: {
-              'multipart/form-data': {
-                schema: z.object(PostSchema())
+              'application/json': {
+                schema: z.object({
+                  content: z.string()
+                })
               }
             },
         }
@@ -161,7 +163,7 @@ app.openapi(
         })
       }
 
-      const { content } = c.req.valid("form");
+      const { content } = c.req.valid("json");
 
       if(!content) {
         c.status(422);

@@ -90,6 +90,7 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
+
     const connectionFromUser = await db.connection.findMany({
       where: {
         from_id: user.id
@@ -98,21 +99,10 @@ app.openapi(
         to: true,
       }
     });
-    const connectionToUser = await db.connection.findMany({
-      where: {
-        to_id: user.id
-      },
-      include: {
-        from: true,
-      }
-    })
 
     const connections = []
     for(let i = 0; i < connectionFromUser.length; i++) {
       connections.push(connectionFromUser[i].to);
-    }
-    for(let i = 0; i < connectionToUser.length; i++) {
-      connections.push(connectionToUser[i].from);
     }
  
     return c.json({
@@ -129,14 +119,7 @@ async function getConnectionCount(user_id: number) {
 
   return await db.connection.count({
     where: {
-      OR: [
-        {
-          from_id: user_id
-        },
-        {
-          to_id: user_id
-        }
-      ]
+      from_id: user_id
     }
   })
 }
@@ -248,16 +231,8 @@ app.openapi(
       } else { // case logged in & (not_connected/connection_requested/connection_received/connected)
         const connected = await db.connection.findFirst({
           where: {
-            OR: [
-              {
-                from_id: user.id,
-                to_id: user_id
-              },
-              {
-                from_id: user_id,
-                to_id: user.id
-              }
-            ]
+            from_id: user.id,
+            to_id: user_id
           }
         })
         if(connected) {
@@ -522,16 +497,8 @@ app.openapi(
     // check if connection already exists
     const connection2Way = await db.connection.findFirst({
       where: {
-        OR: [
-          {
-            from_id: user.id,
-            to_id: target_id
-          },
-          {
-            from_id: target_id,
-            to_id: user.id
-          }
-        ]
+        from_id: user.id,
+        to_id: target_id
       }
     });
     if(connection2Way) {
@@ -610,16 +577,8 @@ app.openapi(
     // check if connection exists
     const connection2Way = await db.connection.findFirst({
       where: {
-        OR: [
-          {
-            from_id: user.id,
-            to_id: target_id
-          },
-          {
-            from_id: target_id,
-            to_id: user.id
-          }
-        ]
+        from_id: user.id,
+        to_id: target_id
       }
     });
     if(connection2Way) {
@@ -678,6 +637,13 @@ app.openapi(
           to_id: user.id,
         }
       });
+
+      await db.connection.create({
+        data: {
+          from_id: user.id,
+          to_id: target_id,
+        }
+      });
     })
 
     return c.json({
@@ -717,16 +683,8 @@ app.openapi(
     // check if connection exists
     const connection2Way = await db.connection.findFirst({
       where: {
-        OR: [
-          {
-            from_id: user.id,
-            to_id: target_id
-          },
-          {
-            from_id: target_id,
-            to_id: user.id
-          }
-        ]
+        from_id: user.id,
+        to_id: target_id
       }
     })
     if(connection2Way) {

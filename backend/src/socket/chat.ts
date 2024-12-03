@@ -16,12 +16,12 @@ function sortIds(id1: number, id2: number): [number, number]{
 
 async function isBothUserConnected(user1Id: number, user2Id: number) {
 	const [smallId, bigId] = sortIds(user1Id, user2Id);
-	const connection = await db.connection.findFirst({
+	const connection = await db.connection.findUnique({
 		where: {
-			// from_id: smallId,
-			// to_id: bigId
-			from_id: bigId,
-			to_id: smallId
+			from_id_to_id: {
+				from_id: smallId,
+				to_id: bigId
+			}
 		}
 	})
 	if(!connection) return false;
@@ -110,6 +110,7 @@ export function handleSocket(io: Server) {
 						socket.emit(MESSAGE_SEND_ERROR, errorResponse("User is not connected"));
 						return;
 					}
+					// console.log(user.id)
 					const roomKey = getRoomKey(user.id, targetUserId);
 					await socket.join(roomKey);
 					const chats = await findAllChats(user.id, targetUserId);
@@ -120,6 +121,7 @@ export function handleSocket(io: Server) {
 			})
 
 			socket.on(MESSAGE_SEND, async (targetUserId: number, message: string) => {
+				if(!message) return;
 				const roomKey = getRoomKey(user.id, targetUserId);
 				try {
 					await sendChat(user.id, targetUserId, message);

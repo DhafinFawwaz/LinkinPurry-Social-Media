@@ -27,7 +27,6 @@ export default function Feed({user}: {user?: User}) {
     const content = textAreaRef.current?.value;
     if (!content) return;
     const body = { content: content };
-    console.log(JSON.stringify(body));
     const res = await fetchApi("/api/feed", {
       method: "POST",
       body: JSON.stringify(body),
@@ -35,7 +34,6 @@ export default function Feed({user}: {user?: User}) {
         "content-type": "application/json" // For some reason, this is required. Login doesn't require this
       },
     });
-    console.log(body);
     if (!res.ok) {
       const data = await res.json();
       console.log(data);

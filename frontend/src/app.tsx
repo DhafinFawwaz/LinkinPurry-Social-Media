@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, NavLink, useNavigation, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, NavLink, useNavigation, useNavigate, useLocation, useParams } from 'react-router-dom'
 import Profile from './routes/profile'
 import Login from './routes/login'
 import Register from './routes/register'
@@ -20,6 +20,8 @@ import ChatBase from './routes/chat-base'
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
     ["/network", "/login"],
+    ["/chat", "/login"],
+    ["/invitation", "/login"],
 ]);
 const notAuthenticatedRoutes = new Map<string, string>([
     ["/login", "/"],
@@ -50,6 +52,7 @@ function AuthRouter() {
         await tryRemoveServiceWorker();
         deleteAllCookies();
         recall();
+        navigate('/login');
     }
 
     return <>

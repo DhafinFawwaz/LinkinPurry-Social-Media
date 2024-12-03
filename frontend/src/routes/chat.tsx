@@ -20,6 +20,7 @@ export default function Chat({ user }: { user?: User}) {
 
 	const [chats, setChats] = useState<LatestChatResponse | null>(null);
 	function setMessagesFromResponse(res: ChatResponse) {
+		console.log("chat joined ", res);
 		setChats((prev) => {
 			if (!prev) return prev; // Ensure prevValue exists
 			const userId = parseInt(param.user_id!);
@@ -31,6 +32,10 @@ export default function Chat({ user }: { user?: User}) {
 			return prev;
 		});
 	}
+	function onErrorResponse(res: ChatErrorResponse) {
+		console.log(res);
+	}
+
 
 	useEffect(() => {
 		console.log('chat component mounted');
@@ -54,12 +59,12 @@ export default function Chat({ user }: { user?: User}) {
 				onConnect: () => setIsConnected(true),
 				onDisconnect: () => setIsConnected(false),
 				onChatJoinSuccess: setMessagesFromResponse,
-				onChatJoinError: e => {},
+				onChatJoinError: onErrorResponse,
 				onChatSendSuccess: setMessagesFromResponse,
-				onChatSendError: e => {},
+				onChatSendError: onErrorResponse,
 				onChatLeaveSuccess: r => {},
-				onChatLeaveError: e => {},
-				onMessageReceived: r => setMessagesFromResponse,
+				onChatLeaveError: onErrorResponse,
+				onMessageReceived: setMessagesFromResponse,
 			});
 			chatController.joinChat(parseInt(param.user_id!));
 		})()
@@ -72,11 +77,14 @@ export default function Chat({ user }: { user?: User}) {
 		return () => {
 			chatController.unsubscribe();
 		}
-	}, []);
+	}, [param.user_id]); // needed because we may change page to same chat component, only the url changes
 
 	function onSubmit(e: any) {
 		e.preventDefault();
+		if(!inputRef.current) return;
+		if(!inputRef.current.value) return;
 		chatController.sendMessage(parseInt(param.user_id!), inputRef.current!.value);
+		inputRef.current.value = '';
 	}	
 
 	const [isPopUpOpen, setIsPopUpOpen] = useState(false);

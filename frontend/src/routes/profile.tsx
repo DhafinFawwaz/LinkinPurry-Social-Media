@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import FormInput from '../components/form-input';
 import { AuthResponse, ProfileResponse, User } from '../type';
 import FormTextarea from '../components/form-textarea';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toImageSrc from '../utils/image';
 import EditIcon from '../assets/images/edit-icon.svg';
 import useFetchApi, { fetchApi } from '../hooks/useFetchApi';
@@ -31,9 +31,10 @@ export default function Profile({ logout }: { logout: () => void }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset} = useForm<EditProfileSchema>({mode: "all", resolver: zodResolver(EditProfileSchema)});
 
   const { user_id } = useParams<{ user_id: string }>();
-  const { loading, value, recall } = useFetchApi<ProfileResponse>(`/api/profile/${user_id}`);
+  const { loading, value, recall } = useFetchApi<ProfileResponse>(`/api/profile/${user_id}`, 0, true, {}, [user_id]);
   // console.log("Profile", value);
   // console.log("Profile", value?.body.connection_count);
+
   
   const [file, setFile] = useState<File>();
   function handleImageChange(e: any) {

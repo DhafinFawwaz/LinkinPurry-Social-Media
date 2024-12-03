@@ -3,12 +3,18 @@ import useFetchApi, { fetchApi } from "../hooks/useFetchApi";
 import { ConnectionRequestsResponse, PostResponse, User } from "../type";
 import toImageSrc from "../utils/image";
 import ListTile from "../components/list-tile";
+import Dialog from '../components/popup';
+import Dropdown from '../components/Dropdown';
 
 export default function Feed({user}: {user?: User}) {
   const [posts, setPosts] = useState<PostResponse["body"]>([]); 
   const [cursor, setCursor] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false); 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<{ id: number; content: string } | null>(null);
 
   const initialFetch = useFetchApi<PostResponse>(
     `/api/feed?limit=10&cursor=${cursor}`,
@@ -22,6 +28,42 @@ export default function Feed({user}: {user?: User}) {
       setPosts(initialFetch.value.body);
     }
   }, [initialFetch.value]);
+
+  function openEditDialog(post: { id: number; content: string }) {
+    setSelectedPost(post);
+    setEditDialogOpen(true);
+  }
+
+  function openDeleteDialog(post: { id: number; content: string }) {
+    setSelectedPost(post);
+    setDeleteDialogOpen(true);
+  }
+
+  async function handleSaveEdit() {
+    // not yet implemented
+  }
+
+  async function handleDeletePost() {
+    if (!selectedPost) return;
+  
+    try {
+      const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Failed to delete the post");
+        return;
+      }
+  
+      setDeleteDialogOpen(false);
+      initialFetch.recall();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("An error occurred while deleting the post.");
+    }
+  }
 
   async function post() {
     const content = textAreaRef.current?.value;
@@ -62,6 +104,46 @@ export default function Feed({user}: {user?: User}) {
   }
 
   return (<>
+<Dialog
+  title="Edit Post"
+  open={editDialogOpen}
+  onClose={() => setEditDialogOpen(false)}
+>
+  {selectedPost && (
+    <div className="flex flex-col gap-4">
+      <textarea
+        className="w-full p-2 border border-gray-300 rounded-lg"
+        value={selectedPost.content}
+        onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
+      />
+      <button
+        onClick={handleSaveEdit}
+        className="bg-blue_primary hover:bg-blue_hover font-semibold text-white px-4 py-2 rounded-lg"
+      >
+        Save
+      </button>
+    </div>
+  )}
+</Dialog>
+
+<Dialog
+  title="Delete Post"
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  {selectedPost && (
+    <div className="flex flex-col gap-4">
+      <p className="text-center">Are you sure you want to delete this post?</p>
+      <button
+        onClick={handleDeletePost}
+        className="bg-red-500 hover:bg-red-600 font-semibold text-white px-4 py-2 rounded-lg"
+      >
+        Delete
+      </button>
+    </div>
+  )}
+</Dialog>
+
 <section className="mt-20 sm:mt-16 mb-2">
   <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2">
 
@@ -87,19 +169,34 @@ export default function Feed({user}: {user?: User}) {
 
     {initialFetch.loading ? (
       <p>Loading...</p>
-    ) : (
-      posts.map((post, i) => (
-        <ListTile
-          key={i}
-          title={post.user.full_name!}
-          subtitle={new Date(post.updated_at).toLocaleString()}
-          imageSrc={toImageSrc(post.user.profile_photo_path)}
-          href={`/profile/${post.user.id}`}
-        >
-          <div className="px-2 pb-2 text-sm">{post.content}</div>
-        </ListTile>
-      ))
-    )}
+    ) : (posts.map((post, i) => (
+      <ListTile
+        key={i}
+        title={post.user.full_name!}
+        subtitle={new Date(post.updated_at).toLocaleString()}
+        imageSrc={toImageSrc(post.user.profile_photo_path)}
+        href={`/profile/${post.user.id}`}
+        endChildren={
+          user?.id === post.user.id && (
+            <Dropdown
+              options={[
+                {
+                  label: "Edit",
+                  onClick: () => openEditDialog({ id: post.id, content: post.content }),
+                },
+                {
+                  label: "Delete",
+                  onClick: () => openDeleteDialog({ id: post.id, content: post.content }),
+                },
+              ]}
+            />
+          )
+        }
+      >
+        <div className="px-2 pb-2 text-sm">{post.content}</div>
+      </ListTile>
+    )))
+    }
     
     {!initialFetch.loading && posts.length > 0 && (
       // <div className="flex justify-center w-full">

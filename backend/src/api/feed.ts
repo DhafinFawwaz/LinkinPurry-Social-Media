@@ -88,7 +88,7 @@ app.openapi(
       })
 
 
-      sendFeedNotification(user.id) // no need to await
+      sendFeedNotification(user) // no need to await
 
       return c.json({
           success: true,

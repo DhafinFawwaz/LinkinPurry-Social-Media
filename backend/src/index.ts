@@ -47,11 +47,11 @@ function getCorsOrigin(c: Context) {
   return [host, origins];
 }
 
-function getCorsOriginSoket() {
+function getCorsOriginSocket() {
   const origins = ['http://localhost:3000', process.env.CORS_ORIGIN || ""]
   return origins;
   // return "http://localhost:3000";
 }
-const io = new Server(server, {cors: {origin: getCorsOriginSoket(), credentials: true}});
+const io = new Server(server, {cors: {origin: getCorsOriginSocket(), credentials: true}});
 handleSocket(io)
 

@@ -32,6 +32,8 @@ export default function Profile({ logout }: { logout: () => void }) {
 
   const { user_id } = useParams<{ user_id: string }>();
   const { loading, value, recall } = useFetchApi<ProfileResponse>(`/api/profile/${user_id}`);
+  // console.log("Profile", value);
+  // console.log("Profile", value?.body.connection_count);
   
   const [file, setFile] = useState<File>();
   function handleImageChange(e: any) {
@@ -63,6 +65,11 @@ export default function Profile({ logout }: { logout: () => void }) {
   }
   function onEditButtonClick() {
     setIsDialogOpen(true);
+  }
+
+  function getConnectionCount() {
+    if (!value) return 0;
+    return value.body.connection_count;
   }
 
   function getAccessLevel(): AccessLevel {
@@ -153,12 +160,12 @@ export default function Profile({ logout }: { logout: () => void }) {
 {loading ? <></> : <>
 <section className="mt-16 mb-4">
   <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2">
-    <div className='w-full max-w-md'>
+    <div className='w-full max-w-3xl mt-4 sm:mt-0'>
       <ProfileInfo
         banner={""}
         photo={toImageSrc(value?.body.profile_photo_path!)}
         name={value?.body.name || ""}
-        connections={20}
+        connections={getConnectionCount()}
         accessLevel={getAccessLevel()}
         user_id={Number(user_id)}
         onEditButtonClick={onEditButtonClick}

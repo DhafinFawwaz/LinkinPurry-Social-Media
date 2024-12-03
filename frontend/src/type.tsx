@@ -45,6 +45,7 @@ export type Profile = User & {
     name: string,
     connection: AccessLevel,
     relevant_posts: Post[],
+    connection_count: number,
 }
 
 export type ChatMessage = {

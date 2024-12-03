@@ -298,6 +298,7 @@ export default function Profile({ logout }: { logout: () => void }) {
           imageSrc={toImageSrc(value.body.profile_photo_path)}
           href={`/profile/${user_id}`}
           endChildren={
+            getAccessLevel() !== "owner" ? <></> :
             <Dropdown
               options={[
                 {

@@ -32,7 +32,7 @@ export default function Feed({user}: {user?: User}) {
       method: "POST",
       body: JSON.stringify(body),
       headers: { 
-        "Content-Type": "application/json" // For some reason, this is required. Login doesn't require this
+        "content-type": "application/json" // For some reason, this is required. Login doesn't require this
       },
     });
     console.log(body);

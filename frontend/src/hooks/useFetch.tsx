@@ -1,7 +1,7 @@
 import useAsync from "./useAsync"
 
 const DEFAULT_OPTIONS = {
-  headers: { "Content-Type": "application/json" },
+  headers: { "content-type": "application/json" },
 }
 
 export default function useFetch<T>(url: string, options = {}, dependencies = []) {

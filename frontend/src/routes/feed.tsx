@@ -171,7 +171,7 @@ export default function Feed({user}: {user?: User}) {
 </Dialog>
 
 <section className="mt-20 sm:mt-16 mb-2">
-  <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2">
+  <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2 max-w-lg">
 
 {user ? <>
 <ListTile

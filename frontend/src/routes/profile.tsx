@@ -58,6 +58,33 @@ export default function Profile({ logout }: { logout: () => void }) {
   }
 
   async function handleSaveEdit() {
+    if (!selectedPost) return;
+
+    console.log("payload:", { content: selectedPost.content });
+    console.log("post id:", selectedPost.id);
+  
+    try {
+      const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ content: selectedPost.content }),
+        headers: { 
+          "content-type": "application/json"
+        },
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        console.log(data)
+        alert(data.message || "Failed to update the post");
+        return;
+      }
+  
+      setEditDialogOpen(false);
+      recall();
+    } catch (error) {
+      console.error("Error updating post:", error);
+      alert("An error occurred while updating the post.");
+    }
   }
 
   async function handleDeletePost() {

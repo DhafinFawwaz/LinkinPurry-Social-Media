@@ -7,8 +7,12 @@ import NetworkHoverIcon from "../../assets/images/network-hover-icon.svg";
 import MessagingIcon from "../../assets/images/message-icon.svg";
 import MessagingHoverIcon from "../../assets/images/message-hover-icon.svg";
 import ProfileIcon from "../../assets/images/jobseeker_profile.svg";
-import JobsIcon from "../../assets/images/jobs-icon.svg";
-import JobsHoverIcon from "../../assets/images/jobs-hover-icon.svg";
+import HomeIcon from "../../assets/images/home_icon.svg";
+import HomeHoverIcon from "../../assets/images/home_icon_hover.svg";
+import UsersIcon from "../../assets/images/users.svg";
+import UsersHoverIcon from "../../assets/images/users-hover.svg";
+import ConnectIcon from "../../assets/images/connect.svg";
+import ConnectHoverIcon from "../../assets/images/connect-hover.svg";
 import { User } from "../../type";
 
 interface NavbarProps {
@@ -20,22 +24,22 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
         {
             name: "Feed",
             path: "/",
-            defaultIcon: JobsIcon,
-            activeIcon: JobsHoverIcon,
+            defaultIcon: HomeIcon,
+            activeIcon: HomeHoverIcon,
         },
         {
             name: "Users",
             path: "/users",
-            defaultIcon: NetworkIcon,
-            activeIcon: NetworkHoverIcon,
+            defaultIcon: UsersIcon,
+            activeIcon: UsersHoverIcon,
         },
         ...(user
             ? [
                 {
                     name: "Invitation",
                     path: "/invitation",
-                    defaultIcon: NetworkIcon,
-                    activeIcon: NetworkHoverIcon,
+                    defaultIcon: ConnectIcon,
+                    activeIcon: ConnectHoverIcon,
                 },
                 {
                     name: "Network",

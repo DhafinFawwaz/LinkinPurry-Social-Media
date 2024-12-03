@@ -29,6 +29,7 @@ async function getUserPushSubscriptionById(userId: number) {
 }
 
 const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
+const host = process.env.HOST || 'http://localhost:4000'
 
 export async function sendFeedNotification(user: JwtContent) {
 	const connections = await getAllConnectedUsers(user.id)
@@ -38,9 +39,9 @@ export async function sendFeedNotification(user: JwtContent) {
 		const notificationPayload = {
 			title: `New post from ${user.full_name}`,
 			body: ``,
-			icon: user.profile_photo_path,
+			icon: `${host}${user.profile_photo_path}`,
 			data: {
-				url: `${origin}/feed`,
+				url: `${origin}`,
 			},
 		};
 
@@ -71,7 +72,7 @@ export async function sendChatNotification(user: JwtContent, targetUserId: numbe
 		body: message,
 		icon: user.profile_photo_path,
 		data: {
-			url: `/chat/${user.id}`,
+			url: `${origin}/chat/${user.id}`,
 		},
 	};
 

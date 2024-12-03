@@ -6,16 +6,6 @@ import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
 const app = new OpenAPIHono()
 
 // TODO: try to optimize this with redis. invalidate cache when new chat is created
-// c.id,
-// c.timestamp,
-// c.message,
-// CASE 
-//     WHEN c.from_id = ${userId} THEN c.to_id
-//     ELSE c.from_id
-// END AS other_user_id,
-// u.id AS user_id,
-// u.full_name AS full_name,
-// u.profile_photo_path AS profile_photo_path
 async function findLatestChatWithId(userId: number): Promise<any[]> {
   // get all connection, join users, join chat and get the latest chat
   const chats: any[] = await db.$queryRaw`
@@ -71,7 +61,7 @@ app.openapi(
     return c.json({
       success: true,
       message: '',
-      body: chats
+      body: chats.reverse()
     })
 }
 )
@@ -179,11 +169,11 @@ app.openapi(
       return c.json({
         success: true,
         message: '',
-        body: chats
+        body: chats.reverse()
       })
     }
 
-    chats.unshift({
+    chats.push({
       id: 0,
       timestamp: new Date(),
       message: '',
@@ -196,7 +186,7 @@ app.openapi(
     return c.json({
       success: true,
       message: '',
-      body: chats
+      body: chats.reverse()
     })
 }
 )

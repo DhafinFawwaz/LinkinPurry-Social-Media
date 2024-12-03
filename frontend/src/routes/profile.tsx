@@ -10,11 +10,13 @@ import FormTextarea from '../components/form-textarea';
 import { useState } from 'react';
 import toImageSrc from '../utils/image';
 import EditIcon from '../assets/images/edit-icon.svg';
+// import OptionsIcon from '../assets/images/dots.svg';
 import useFetchApi, { fetchApi } from '../hooks/useFetchApi';
 import ProfileTile from '../components/profile/profile-tile';
 import ListTile from '../components/list-tile';
 import { useParams } from 'react-router-dom';
 import { AccessLevel } from '../type';
+import Dropdown from '../components/Dropdown';
 
 export const EditProfileSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -30,6 +32,10 @@ export default function Profile({ logout }: { logout: () => void }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset} = useForm<EditProfileSchema>({mode: "all", resolver: zodResolver(EditProfileSchema)});
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<{ id: number; content: string } | null>(null);
+
   const { user_id } = useParams<{ user_id: string }>();
   const { loading, value, recall } = useFetchApi<ProfileResponse>(`/api/profile/${user_id}`);
   // console.log("Profile", value);
@@ -38,6 +44,22 @@ export default function Profile({ logout }: { logout: () => void }) {
   const [file, setFile] = useState<File>();
   function handleImageChange(e: any) {
     setFile(e.target.files[0]);
+  }
+
+  function openEditDialog(post: { id: number; content: string }) {
+    setSelectedPost(post);
+    setEditDialogOpen(true);
+  }
+
+  function openDeleteDialog(post: { id: number; content: string }) {
+    setSelectedPost(post);
+    setDeleteDialogOpen(true);
+  }
+
+  async function handleSaveEdit() {
+  }
+
+  async function handleDeletePost() {
   }
 
   async function onSubmit(data: EditProfileSchema) {
@@ -157,6 +179,47 @@ export default function Profile({ logout }: { logout: () => void }) {
 }
 
 </Dialog>
+
+<Dialog
+  title="Edit Post"
+  open={editDialogOpen}
+  onClose={() => setEditDialogOpen(false)}
+>
+  {selectedPost && (
+    <div className="flex flex-col gap-4">
+      <textarea
+        className="w-full p-2 border border-gray-300 rounded-lg"
+        value={selectedPost.content}
+        onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
+      />
+      <button
+        onClick={handleSaveEdit}
+        className="bg-blue_primary font-semibold text-white px-4 py-2 rounded-lg"
+      >
+        Save
+      </button>
+    </div>
+  )}
+</Dialog>
+
+<Dialog
+  title="Delete Post"
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  {selectedPost && (
+    <div className="flex flex-col gap-4">
+      <p className='text-center'>Are you sure you want to delete this post?</p>
+      <button
+        onClick={handleDeletePost}
+        className="bg-red-500 font-semibold text-white px-4 py-2 rounded-lg"
+      >
+        Delete
+      </button>
+    </div>
+  )}
+</Dialog>
+
 {loading ? <></> : <>
 <section className="mt-16 mb-4">
   <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2">
@@ -180,18 +243,31 @@ export default function Profile({ logout }: { logout: () => void }) {
 {value?.body.connection === "public" ? <></> : 
       <ProfileTile title='Post'>
         <div className='flex flex-col gap-4'>
-          {value?.body.relevant_posts.map(post =>
-            <ListTile key={post.id}
-              title={value.body.name || ""} 
-              subtitle={"Write a post!"}
-              imageSrc={toImageSrc(value.body.profile_photo_path)}
-              href={`/profile/${user_id}`}
-              >
-            <div className="px-2 pb-2 text-sm">
-              {post.content}
-            </div>
-            </ListTile>
-          )}
+        {value?.body.relevant_posts.map((post) => (
+        <ListTile
+          key={post.id}
+          title={value.body.name || ""}
+          subtitle={new Date(post.updated_at).toLocaleString()}
+          imageSrc={toImageSrc(value.body.profile_photo_path)}
+          href={`/profile/${user_id}`}
+          endChildren={
+            <Dropdown
+              options={[
+                {
+                  label: "Edit",
+                  onClick: () => openEditDialog(post),
+                },
+                {
+                  label: "Delete",
+                  onClick: () => openDeleteDialog(post),
+                },
+              ]}
+            />
+          }
+        >
+          <div className="px-2 pb-2 text-sm">{post.content}</div>
+        </ListTile>
+      ))}
         </div>
       </ProfileTile>
 }

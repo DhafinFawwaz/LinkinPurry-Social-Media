@@ -60,6 +60,25 @@ export default function Profile({ logout }: { logout: () => void }) {
   }
 
   async function handleDeletePost() {
+    if (!selectedPost) return;
+  
+    try {
+      const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Failed to delete the post");
+        return;
+      }
+  
+      setDeleteDialogOpen(false);
+      recall();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("An error occurred while deleting the post.");
+    }
   }
 
   async function onSubmit(data: EditProfileSchema) {

@@ -44,7 +44,25 @@ export default function Feed({user}: {user?: User}) {
   }
 
   async function handleDeletePost() {
-    // not yet implemented
+    if (!selectedPost) return;
+  
+    try {
+      const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Failed to delete the post");
+        return;
+      }
+  
+      setDeleteDialogOpen(false);
+      initialFetch.recall();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("An error occurred while deleting the post.");
+    }
   }
 
   async function post() {
@@ -117,7 +135,7 @@ export default function Feed({user}: {user?: User}) {
 >
   {selectedPost && (
     <div className="flex flex-col gap-4">
-      <p>Are you sure you want to delete this post?</p>
+      <p className="text-center">Are you sure you want to delete this post?</p>
       <button
         onClick={handleDeletePost}
         className="bg-red-500 hover:bg-red-600 font-semibold text-white px-4 py-2 rounded-lg"

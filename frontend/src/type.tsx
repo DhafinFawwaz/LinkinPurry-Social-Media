@@ -21,7 +21,21 @@ export type User = {
     // exp: number;
 }
 
-export type ConnectionRequestsResponse = BaseResponse<User[]>
+export type ConnectionInviteResponse = BaseResponse<{
+    requests: {
+        created_at: string,
+        from: User
+    }[],
+    pending: {
+        created_at: string,
+        to: User
+    }[]
+}>
+
+export type ConnectionRequestsResponse = BaseResponse<{
+    created_at: string,
+    from: User
+}[]>
 
 export type Post = {
     id: number,

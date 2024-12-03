@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
+import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse, UserSchema } from '../schema.js'
 import { getUser, login } from './auth.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
@@ -18,24 +18,20 @@ app.openapi(
     description: 'Get all connection requests for current user',
     tags: ['Profile'],
     responses: {
-      200: DefaultJsonArrayResponse("Getting all connection requests for current user successful", {
-        from_id: z.number(),
-        to_id: z.number(),
-        created_at: z.string(),
-        from: z.object({
-          username: z.string(),
-          work_history: z.string().nullable(),
-          skills: z.string().nullable(),
-          id: z.number(),
+      200: DefaultJsonResponse("Getting all connection requests for current user successful", {
+        requests: z.array(z.object({
+          from_id: z.number(),
+          to_id: z.number(),
           created_at: z.string(),
-          updated_at: z.string(),
-          email: z.string(),
-          password_hash: z.string(),
-          full_name: z.string().nullable(),
-          profile_photo_path: z.string(),
-        })
-      }
-      ),
+          from: z.object(UserSchema())
+        })),
+        pending: z.array(z.object({
+          from_id: z.number(),
+          to_id: z.number(),
+          created_at: z.string(),
+          to: z.object(UserSchema())
+        }))
+      }),
       401: DefaultJsonResponse("Unauthorized")
     },
     middleware: authenticated
@@ -51,10 +47,22 @@ app.openapi(
       }
     });
 
+    const pending = await db.connectionRequest.findMany({
+      where: {
+        from_id: user.id
+      },
+      include: {
+        to: true,
+      }
+    });
+
     return c.json({
         success: true,
         message: '',
-        body: requests
+        body: {
+          requests: requests,
+          pending: pending
+        }
     })
 }
 )
@@ -93,22 +101,17 @@ app.openapi(
 
     const connectionFromUser = await db.connection.findMany({
       where: {
-        from_id: user.id
+        to_id: user.id
       },
       include: {
-        to: true,
+        from: true,
       }
     });
 
-    const connections = []
-    for(let i = 0; i < connectionFromUser.length; i++) {
-      connections.push(connectionFromUser[i].to);
-    }
- 
     return c.json({
         success: true,
         message: '',
-        body: connections
+        body: connectionFromUser
     })
 }
 )

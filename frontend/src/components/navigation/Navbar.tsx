@@ -126,20 +126,24 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
             )}
 
             {/* For mobile, move other Navbar to bottom of the screen */}
-            <nav className="flex bg-white fixed bottom-0 w-full border-t border-gray-300 z-20 py-2 sm:hidden">
+            <nav className="flex bg-white fixed bottom-0 w-full border-t border-gray-300 z-20 sm:hidden">
                 <div className="flex justify-around items-center w-full">
                     {otherTabs.map((tab) => (
                         <NavLink
                             key={tab.path}
                             to={tab.path}
                             className={({ isActive }) =>
-                                `flex flex-col items-center justify-center bg-transparent group hover:bg-gray-100 duration-150 ${
+                                `flex flex-col items-center justify-center bg-transparent py-2 w-full group hover:bg-gray-100 duration-150 relative ${
                                     isActive ? "text-black font-medium" : "text-gray-500"
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
+                                    <div className={`w-full h-[2px] -translate-y-7 bg-slate-950 duration-150 absolute ${
+                                            isActive ? "scale-x-100" : "scale-x-0"
+                                        }`}
+                                    ></div>
                                     <img
                                         src={isActive ? tab.activeIcon : tab.defaultIcon}
                                         alt={tab.name}

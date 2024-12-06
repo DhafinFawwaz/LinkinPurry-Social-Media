@@ -38,7 +38,9 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
-    // get all received_requests for user and the data of the user who sent the request
+
+    // console.log(user)
+
     const requests = await db.connectionRequest.findMany({
       where: {
         to_id: user.id
@@ -125,11 +127,14 @@ async function getConnectionCount(user_id: number) {
     return parseInt(cached);
   }
 
-  return await db.connection.count({
+  const count = await db.connection.count({
     where: {
       from_id: user_id
     }
   })
+  await redis.set(`user_${user_id}_connection_count`, count)
+  
+  return count;
 }
 app.openapi(
     createRoute({
@@ -175,7 +180,7 @@ app.openapi(
       // case logged in & owner (do it early to avoid unnecessary db queries)
       if(user && user.id === user_id) {
         const connection_count = await getConnectionCount(user_id);
-        console.log(connection_count)
+        // console.log(connection_count)
         const user = await db.user.findUnique({
           where: {
             id: user_id

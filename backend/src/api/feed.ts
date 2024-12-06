@@ -50,12 +50,19 @@ app.openapi(
     }), async (c) => {
 
     try {
-      const { limit, cursor } = c.req.valid("query");
+      // const { limit, cursor } = c.req.valid("query");
+      // const limit = c.req.query("limit") as number | undefined;
+      // const cursor = c.req.query("cursor") as number | undefined;
+      const query = c.req.query();
+      const limit_temo = query.limit;
+      const cursor_temo = query.cursor;
+      const limit = limit_temo ? Number(limit_temo) : undefined;
+      const cursor = cursor_temo ? Number(cursor_temo) : undefined;
 
       const cached = await getFeedCache(cursor, limit);
       if(cached) {
         console.log("\x1b[32m Cached \x1b[0m")
-        return c.json(JSON.parse(cached))
+        return c.json(cached)
       }
 
 

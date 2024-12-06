@@ -4,7 +4,7 @@ import Login from './routes/login'
 import Register from './routes/register'
 import Chat from './routes/chat'
 import SplashScreen from './components/splash-screen'
-import useFetchApi, { getApiUrl } from './hooks/useFetchApi'
+import useFetchApi, { fetchApi, getApiUrl } from './hooks/useFetchApi'
 import { AuthResponse } from './type'
 import { useEffect, useState } from 'react'
 import { deleteAllCookies } from './utils/cookies'
@@ -50,7 +50,17 @@ function AuthRouter() {
 
     async function logout() {
         await tryRemoveServiceWorker();
-        deleteAllCookies();
+        // deleteAllCookies(); 
+        const res = await fetchApi("/api/logout", { method: "POST" });
+        if (!res.ok) {
+            alert("Failed to logout");
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            alert("Failed to logout");
+            return;
+        }
         recall();
         navigate('/login');
     }

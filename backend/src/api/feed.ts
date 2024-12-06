@@ -19,28 +19,80 @@ app.openapi(
         })
       },
       responses: {
-        200: DefaultJsonArrayResponse("Getting list of posts successful", PostSchema()),
+        200: DefaultJsonResponse("Getting list of posts successful", {
+          feeds: z.array(z.object(PostSchema())),
+          cursor: z.number().or(z.string()).optional()
+        }),
         401: DefaultJsonResponse("Unauthorized")
       }
     }), async (c) => {
 
     try {
       const { limit, cursor } = c.req.valid("query");
-      const feeds = await db.feed.findMany({
-        take: limit || 10,
-        skip: cursor || 0,
-        orderBy: {
-          created_at: 'desc'
-        },
-        include: {
-          user: true // TODO: omit password_hash
-        }
-      });
+
+      let feeds: any[] = []
+      if(cursor) {
+        feeds = await db.feed.findMany({
+          take: limit || 10,
+          skip: 1,
+          orderBy: {
+            created_at: 'desc'
+          },
+          cursor: {
+            id: cursor || 0
+          },
+          select: {
+            id: true,                                                                                                                                                     
+            created_at: true,
+            updated_at: true,                                                                                                                             
+            content: true,                                                                                                                                                  
+            user_id: true,
+            user: {
+              select: {
+                id: true,
+                full_name: true,
+                profile_photo_path: true
+              }
+            } 
+          }
+        });
+      } else {
+        // console.log('no cursor')
+        feeds = await db.feed.findMany({
+          take: limit || 10,
+          orderBy: {
+            id: 'desc'
+          },
+          select: {
+            id: true,                                                                                                                                                     
+            created_at: true,
+            updated_at: true,                                                                                                                             
+            content: true,                                                                                                                                                  
+            user_id: true,
+            user: {
+              select: {
+                id: true,
+                full_name: true,
+                profile_photo_path: true
+              }
+            } 
+          }
+        });
+      }
+      
+      let newCursor = null;
+      if(feeds.length > 0) {
+        newCursor = feeds[feeds.length - 1].id
+      }
+      // console.log(newCursor)
 
       return c.json({
           success: true,
           message: 'Getting list of posts successful',
-          body: feeds
+          body: {
+            feeds: feeds,
+            cursor: newCursor
+          }
       })
     } catch(e) {
       console.log(e)

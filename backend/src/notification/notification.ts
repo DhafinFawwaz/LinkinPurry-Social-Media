@@ -28,8 +28,8 @@ async function getUserPushSubscriptionById(userId: number) {
 	})
 }
 
-const origin = process.env.CORS_ORIGIN || 'http://localhost:3000'
-const host = process.env.HOST || 'http://localhost:4000'
+const origin = process.env.CORS_ORIGIN || 'http://localhost:4000'
+const host = process.env.HOST || 'http://localhost:3000'
 
 export async function sendFeedNotification(user: JwtContent) {
 	const connections = await getAllConnectedUsers(user.id)

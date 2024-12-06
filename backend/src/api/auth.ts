@@ -4,7 +4,7 @@ import db from '../db/db.js'
 // import bcrypt 
 import { Jwt } from 'hono/utils/jwt';
 import bcrypt from "bcrypt";
-import { getCookie, setCookie } from 'hono/cookie';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { Context } from 'hono';
 import { authenticated, type JwtContent } from "../middlewares/authenticated.js"
 
@@ -30,7 +30,7 @@ export async function login(c: Context, id: number, username: string, email: str
   }, getSecretKey())
 
   setCookie(c, 'token', token, {
-    httpOnly: false,
+    httpOnly: true,
     secure: true,
     sameSite: "none",
     expires: new Date(exp * 1000),
@@ -270,6 +270,36 @@ app.openapi(
     }
 
 }
+)
+
+
+app.openapi(
+  createRoute({
+    method: 'post',
+    path: '/logout',
+    description: 'Logout user',
+    tags: ['Auth'],
+    responses: {
+      200: DefaultJsonResponse("Logging out user successful"),
+      401: DefaultJsonResponse("Unauthorized")
+    },
+    middleware: authenticated
+  }), (c) => {
+    
+    const token = getCookie(c, 'token');
+    if(!token) {
+      c.status(401)
+      return c.json({
+        success: false,
+        message: 'Unauthorized', // not logged in
+      })
+    }
+    deleteCookie(c, 'token');
+    return c.json({
+      success: true,
+      message: 'Logout successful',
+    })
+  }
 )
 
 export async function decodeToken(token: string) {

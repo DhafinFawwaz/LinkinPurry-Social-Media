@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/Dockerfile.dev
     volumes:
       - ./backend/src:/home/node/app/src
       - ./backend/uploads:/home/node/app/uploads
@@ -10,7 +10,7 @@ services:
       - ./backend/nodemon.json:/home/node/app/nodemon.json
       - ./backend/prisma:/home/node/app/prisma
     ports:
-      - 4000:4000
+      - 3000:3000
       - 5555:5555 # prisma studio
     depends_on:
       db:
@@ -21,7 +21,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: frontend/Dockerfile
+      dockerfile: frontend/Dockerfile.dev
     volumes:
       - ./frontend/src:/home/node/app/src
       - ./frontend/public:/home/node/app/public
@@ -33,7 +33,7 @@ services:
       - ./frontend/tsconfig.node.json:/home/node/app/tsconfig.node.json
       - ./frontend/vite.config.ts:/home/node/app/vite.config.ts
     ports:
-      - 3000:3000
+      - 4000:4000
     depends_on:
       db:
         condition: service_healthy

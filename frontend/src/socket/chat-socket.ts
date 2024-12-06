@@ -36,10 +36,10 @@ export default class ChatSocket {
     public joinChat(targetUserId: number) {
         if(this.preiousUserId !== -1 && this.preiousUserId !== targetUserId) {
             this.leaveChat(this.preiousUserId);
-            // console.log('leaving chat ' + this.preiousUserId);
+            console.log('leaving chat ' + this.preiousUserId);
         }
         this.socket.emit(CHAT_JOIN, targetUserId);
-        // console.log('joining chat ' + targetUserId);
+        console.log('joining chat ' + targetUserId);
         this.preiousUserId = targetUserId;
     }
 
@@ -127,6 +127,7 @@ export default class ChatSocket {
     }
 
     connect() {
+        console.log(this.socket.connected);
         if(!this.socket.connected)
             this.socket.connect();
     }

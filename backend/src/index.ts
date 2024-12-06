@@ -10,6 +10,7 @@ import profileRoute from './api/profile.js'
 import userRoute from './api/user.js'
 import chatRoute from './api/chat.js'
 import notificationRoute from './api/notification.js'
+import dbHealthRoute from './api/dbhealth.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
@@ -27,7 +28,8 @@ app.route('/api', profileRoute)
 app.route('/api', userRoute)
 app.route('/api', chatRoute)
 app.route('/api', notificationRoute)
-const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 4000;
+app.route('/health', dbHealthRoute)
+const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 3000;
 console.log(`Server is running on http://localhost:${port}`)
 
 const server = serve({
@@ -37,7 +39,7 @@ const server = serve({
 
 
 function getCorsOrigin(c: Context) {
-  const origins = process.env.CORS_ORIGIN || 'http://localhost:3000'
+  const origins = process.env.CORS_ORIGIN || 'http://localhost:4000'
   let host = c.req.header("Host")
   if(!host) host = "localhost"
   if(host?.includes(":")) {
@@ -48,9 +50,9 @@ function getCorsOrigin(c: Context) {
 }
 
 function getCorsOriginSocket() {
-  const origins = ['http://localhost:3000', process.env.CORS_ORIGIN || ""]
+  const origins = ['http://localhost:4000', process.env.CORS_ORIGIN || ""]
   return origins;
-  // return "http://localhost:3000";
+  // return "http://localhost:4000";
 }
 const io = new Server(server, {cors: {origin: getCorsOriginSocket(), credentials: true}});
 handleSocket(io)

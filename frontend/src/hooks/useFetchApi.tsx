@@ -8,7 +8,7 @@ export function getApiUrl() {
     if(!window.location.port) return import.meta.env.VITE_API_URL;
     const hostName = window.location.hostname;
     const protocol = window.location.protocol;
-    return `${protocol}//${hostName}:4000`
+    return `${protocol}//${hostName}:3000`
 }
 
 function getCookie(key: string) {
@@ -17,10 +17,10 @@ function getCookie(key: string) {
 }
 
 export async function fetchApi(path: string, options: RequestInit = {}) {
-    const token = getCookie("token");
+    // const token = getCookie("token");
     if(options.headers) (options.headers as any)["content-type"] = "application/json";
-    if(token) options.headers = { ...options.headers, "Authorization": `Bearer ${token}` };
-    else if(options.headers)  delete options.headers["Authorization" as keyof HeadersInit]; // Very weird that the authorization stays in the headers. so gotta delete it
+    // if(token) options.headers = { ...options.headers, "Authorization": `Bearer ${token}` };
+    // else if(options.headers)  delete options.headers["Authorization" as keyof HeadersInit]; // Very weird that the authorization stays in the headers. so gotta delete it
     const url = getApiUrl() + path;
     options.credentials = "include";
     return await fetch(url, { ...DEFAULT_OPTIONS, ...options });

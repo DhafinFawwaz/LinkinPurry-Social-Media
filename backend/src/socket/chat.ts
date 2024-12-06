@@ -105,6 +105,7 @@ export function handleSocket(io: Server) {
 			}
 
 			socket.on(CHAT_JOIN, async (targetUserId: number) => {
+				// console.log(user.id, targetUserId)
 				try {
 					if(!(await isBothUserConnected(user.id, targetUserId))) {
 						socket.emit(MESSAGE_SEND_ERROR, errorResponse("User is not connected"));

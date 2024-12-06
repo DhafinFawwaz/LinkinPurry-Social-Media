@@ -57,6 +57,21 @@ export function PostSchema() {
   };
 }
 
+export function FeedsSchema() {
+  return {
+    id: z.number().or(z.bigint()),
+    created_at: z.date(),
+    updated_at: z.date(),
+    content: z.string(),
+    user_id: z.number().or(z.bigint()),
+    user: z.object({
+      id: z.number().or(z.bigint()),
+      full_name: z.string().nullable(),
+      profile_photo_path: z.string(),
+    })
+  };
+}
+
 export function UserSchema() {
   return {
     id: z.number().or(z.bigint()),

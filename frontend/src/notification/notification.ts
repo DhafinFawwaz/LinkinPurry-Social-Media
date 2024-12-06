@@ -21,6 +21,18 @@ export function tryRegisterServiceWorker() {
 				}
 			}
 			const register = await navigator.serviceWorker.register("/sw.js");
+			
+			await new Promise((resolve) => { // wait for service worker to be activated
+				if (register.installing) {
+					register.installing.onstatechange = () => {
+						if (register.installing?.state === "activated") {
+							resolve(null);
+						}
+					};
+				} else {
+					resolve(null);
+				}
+			});
 
 			const subscription = await register.pushManager.subscribe({
 				userVisibleOnly: true,

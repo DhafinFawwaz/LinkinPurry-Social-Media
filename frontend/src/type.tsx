@@ -37,16 +37,24 @@ export type ConnectionRequestsResponse = BaseResponse<{
     from: User
 }[]>
 
+
 export type Post = {
     id: number,
     created_at: string,
     updated_at: string,
     content: string,
     user_id: number,
-    user: User,
+    user: {
+        id: number,
+        full_name: string,
+        profile_photo_path: string
+    },
 }
 
-export type PostResponse = BaseResponse<Post[]>
+export type FeedResponse = BaseResponse<{
+    cursor: number | null,
+    feeds: Post[]
+}>
 
 export type UsersResponse = BaseResponse<User[]>
 

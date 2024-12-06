@@ -57,7 +57,7 @@ export default function Chat({ user }: { user?: User}) {
 			
 			chatController.reinitialize({
 				onConnect: () => setIsConnected(true),
-				onDisconnect: () => setIsConnected(false),
+				onDisconnect: () => {setIsConnected(false); console.log('disconnected')},
 				onChatJoinSuccess: setMessagesFromResponse,
 				onChatJoinError: onErrorResponse,
 				onChatSendSuccess: setMessagesFromResponse,

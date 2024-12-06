@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import useFetchApi, { fetchApi } from "../hooks/useFetchApi";
-import { ConnectionRequestsResponse, PostResponse, User } from "../type";
+import { ConnectionRequestsResponse, FeedResponse as PostResponse, Post, User } from "../type";
 import toImageSrc from "../utils/image";
 import ListTile from "../components/list-tile";
 import Dialog from '../components/popup';
 import Dropdown from '../components/Dropdown';
 
 export default function Feed({user}: {user?: User}) {
-  const [posts, setPosts] = useState<PostResponse["body"]>([]); 
-  const [cursor, setCursor] = useState(0);
+  const [posts, setPosts] = useState<Post[]>([]); 
+  const [cursor, setCursor] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false); 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -17,7 +17,7 @@ export default function Feed({user}: {user?: User}) {
   const [selectedPost, setSelectedPost] = useState<{ id: number; content: string } | null>(null);
 
   const initialFetch = useFetchApi<PostResponse>(
-    `/api/feed?limit=10&cursor=${cursor}`,
+    `/api/feed?limit=10`,
     0,
     true,
     { method: "GET" }
@@ -25,7 +25,8 @@ export default function Feed({user}: {user?: User}) {
 
   useEffect(() => {
     if (initialFetch.value?.body) {
-      setPosts(initialFetch.value.body);
+      setPosts(initialFetch.value.body.feeds);
+      setCursor(initialFetch.value.body.cursor || 1);
     }
   }, [initialFetch.value]);
 
@@ -115,15 +116,16 @@ export default function Feed({user}: {user?: User}) {
 
   async function loadMore() {
     setLoadingMore(true);
-    const nextCursor = cursor + 10;
-    const res = await fetchApi(`/api/feed?limit=10&cursor=${nextCursor}`, {
+    const limit = 10;
+    const res = await fetchApi(`/api/feed?limit=${limit}&cursor=${cursor}`, {
       method: "GET",
     });
     
     if (res.ok) {
-      const data = await res.json();
-      setPosts((prev) => [...prev, ...data.body]);
-      setCursor(nextCursor);
+      const data: PostResponse = await res.json();
+      setPosts((prev) => [...prev, ...data.body.feeds]);
+      setCursor(data.body.cursor || 1);
+      // console.log(data.body);
     }
 
     setLoadingMore(false);
@@ -203,7 +205,7 @@ export default function Feed({user}: {user?: User}) {
         imageSrc={toImageSrc(post.user.profile_photo_path)}
         href={`/profile/${post.user.id}`}
         endChildren={
-          user?.id === post.user.id && (
+          Number(user?.id) === Number(post.user.id) && (
             <Dropdown
               options={[
                 {

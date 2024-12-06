@@ -36,7 +36,7 @@ app.openapi(
           take: limit || 10,
           skip: 1,
           orderBy: {
-            created_at: 'desc'
+            id: 'desc'
           },
           cursor: {
             id: cursor || 0

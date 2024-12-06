@@ -7,19 +7,26 @@ const prisma = new PrismaClient()
 const defaultPhotoPath = '/uploads/img/jobseeker_profile.svg';
 
 async function main() {
-    await prisma.user.deleteMany();
-    await prisma.feed.deleteMany();
-    await prisma.chat.deleteMany();
-    await prisma.connectionRequest.deleteMany();
-    await prisma.connection.deleteMany();
-    await prisma.pushSubscription.deleteMany();
+    // await prisma.user.deleteMany();
+    // await prisma.feed.deleteMany();
+    // await prisma.chat.deleteMany();
+    // await prisma.connectionRequest.deleteMany();
+    // await prisma.connection.deleteMany();
+    // await prisma.pushSubscription.deleteMany();
+    await prisma.$executeRaw`TRUNCATE TABLE "users" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "feed" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "chat" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "connection_request" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "connection" RESTART IDENTITY CASCADE;`
+    await prisma.$executeRaw`TRUNCATE TABLE "push_subscriptions" RESTART IDENTITY CASCADE;`
+
 
     // hawk tuah
-    const userCount = 100; // users
+    const userCount = 500; // users
     const feedsPerUser = 20; // feeds per user
     const chatsPerUser = 20; // chats per user
-    const connectionsPerUser = 30; // connections per user (approximately)
-    const requestsPerUser = 10; // connection requests per user (setelah filter akan jauh lebih sedikit)
+    const connectionsPerUser = 200; // connections per user (approximately)
+    const requestsPerUser = 200; // connection requests per user (setelah filter akan jauh lebih sedikit)
   
     const uniqueFirstNames = faker.helpers.uniqueArray(faker.person.firstName, userCount*2);
     const usersData = await Promise.all(

@@ -1,7 +1,7 @@
 
 import { Redis } from 'ioredis'
 
-const redis = new Redis({
+export const redis = new Redis({
 	host: (process.env.REDIS_HOST || 'localhost') as string,
 	port: (process.env.REDIS_PORT || 6379) as number
 });

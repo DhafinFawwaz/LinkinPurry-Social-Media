@@ -3,8 +3,30 @@ import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayRe
 import db from '../db/db.js'
 import { authenticated } from '../middlewares/authenticated.js'
 import { sendFeedNotification } from '../notification/notification.js'
+import { redis } from '../db/redis.js'
 
 const app = new OpenAPIHono()
+
+async function invalidateFeedCache() {
+  console.log('Invalidating cache')
+  const script = `
+    local keys = redis.call('keys', 'feeds_*')
+    if #keys > 0 then
+      return redis.call('del', unpack(keys))
+    else
+      return 0
+    end
+  `;
+  await redis.eval(script, 0);
+}
+async function getFeedCache(cursor: number|undefined, limit: number|undefined) {
+  const cached = await redis.get(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`)
+  if(cached) return JSON.parse(cached)
+  return null
+}
+async function setCacheFeed(cursor: number|undefined, limit: number|undefined, data: any) {
+  await redis.set(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`, JSON.stringify(data))
+}
 
 app.openapi(
     createRoute({
@@ -16,7 +38,7 @@ app.openapi(
         query: z.object({
             limit: z.coerce.number().optional(),
             cursor: z.coerce.number().optional()
-        })
+        }),
       },
       responses: {
         200: DefaultJsonResponse("Getting list of posts successful", {
@@ -29,6 +51,13 @@ app.openapi(
 
     try {
       const { limit, cursor } = c.req.valid("query");
+
+      const cached = await getFeedCache(cursor, limit);
+      if(cached) {
+        console.log("\x1b[32m Cached \x1b[0m")
+        return c.json(JSON.parse(cached))
+      }
+
 
       let feeds: any[] = []
       if(cursor) {
@@ -86,14 +115,18 @@ app.openapi(
       }
       // console.log(newCursor)
 
-      return c.json({
-          success: true,
-          message: 'Getting list of posts successful',
-          body: {
-            feeds: feeds,
-            cursor: newCursor
-          }
-      })
+      const res = {
+        success: true,
+        message: 'Getting list of posts successful',
+        body: {
+          feeds: feeds,
+          cursor: newCursor
+        }
+      }
+
+      setCacheFeed(cursor, limit, res)
+
+      return c.json(res)
     } catch(e) {
       console.log(e)
       c.status(422)
@@ -138,6 +171,8 @@ app.openapi(
           user_id: user.id
         }
       })
+
+      invalidateFeedCache();
 
 
       sendFeedNotification(user) // no need to await
@@ -234,6 +269,8 @@ app.openapi(
         }
       })
 
+      invalidateFeedCache();
+
       return c.json({
           success: true,
           message: 'Updating a post successful',
@@ -300,6 +337,7 @@ app.openapi(
           id: post_id
         }
       })
+      invalidateFeedCache();
 
       return c.json({
           success: true,

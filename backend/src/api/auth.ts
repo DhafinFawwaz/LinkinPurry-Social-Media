@@ -138,7 +138,7 @@ app.openapi(
       const { username, email, name, password } = c.req.valid("json");
 
       // Check if email or username is taken
-      let user = await db.user.findFirst({
+      let user = await db.user.findUnique({
         where: {
           email
         }
@@ -153,7 +153,7 @@ app.openapi(
           }
         })
       }
-      user = await db.user.findFirst({
+      user = await db.user.findUnique({
         where: {
           username
         }

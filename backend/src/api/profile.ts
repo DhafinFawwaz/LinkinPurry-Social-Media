@@ -6,6 +6,7 @@ import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
 import { deleteCookie } from 'hono/cookie'
 import fs from 'fs'
 import { join } from 'path'
+import { redis } from '../db/redis.js'
 
 const app = new OpenAPIHono()
 
@@ -118,7 +119,11 @@ app.openapi(
 
 
 async function getConnectionCount(user_id: number) {
-  // TODO: Optimize this either with denormalization or redis
+  const cached = await redis.get(`user_${user_id}_connection_count`)
+  if(cached) {
+    console.log("\x1b[32m Cached \x1b[0m")
+    return parseInt(cached);
+  }
 
   return await db.connection.count({
     where: {
@@ -170,7 +175,8 @@ app.openapi(
       // case logged in & owner (do it early to avoid unnecessary db queries)
       if(user && user.id === user_id) {
         const connection_count = await getConnectionCount(user_id);
-        const user = await db.user.findFirst({
+        console.log(connection_count)
+        const user = await db.user.findUnique({
           where: {
             id: user_id
           },
@@ -205,7 +211,7 @@ app.openapi(
       }
 
       if(!user) { // case public
-        const targetUser = await db.user.findFirst({
+        const targetUser = await db.user.findUnique({
           where: {
             id: user_id
           }
@@ -232,14 +238,16 @@ app.openapi(
           }
         })
       } else { // case logged in & (not_connected/connection_requested/connection_received/connected)
-        const connected = await db.connection.findFirst({
+        const connected = await db.connection.findUnique({
           where: {
-            from_id: user.id,
-            to_id: user_id
+            from_id_to_id: {
+              from_id: user.id,
+              to_id: user_id
+            }
           }
         })
         if(connected) {
-          const targetUser = await db.user.findFirst({
+          const targetUser = await db.user.findUnique({
             where: {
               id: user_id
             },
@@ -271,19 +279,23 @@ app.openapi(
           })
         } else { // case not_connected/connection_requested
           let connection = "not_connected"
-          const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
+          const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
             where: {
-              from_id: user.id,
-              to_id: user_id
+              from_id_to_id: {
+                from_id: user.id,
+                to_id: user_id
+              }
             }
           })
           if(connectionRequestMeToTarget) {
             connection = "connection_requested"
           } else {
-            const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+            const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
               where: {
-                from_id: user_id,
-                to_id: user.id
+                from_id_to_id: {
+                  from_id: user_id,
+                  to_id: user.id
+                }
               }
             })
             if(connectionRequestTargetToMe) {
@@ -291,7 +303,7 @@ app.openapi(
             }
           }
 
-          const targetUser = await db.user.findFirst({
+          const targetUser = await db.user.findUnique({
             where: {
               id: user_id
             },
@@ -498,10 +510,12 @@ app.openapi(
     }
 
     // check if connection already exists
-    const connection2Way = await db.connection.findFirst({
+    const connection2Way = await db.connection.findUnique({
       where: {
-        from_id: user.id,
-        to_id: target_id
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
       }
     });
     if(connection2Way) {
@@ -578,10 +592,12 @@ app.openapi(
     }
 
     // check if connection exists
-    const connection2Way = await db.connection.findFirst({
+    const connection2Way = await db.connection.findUnique({
       where: {
-        from_id: user.id,
-        to_id: target_id
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
       }
     });
     if(connection2Way) {
@@ -593,10 +609,12 @@ app.openapi(
     }
 
     // check if connection request me to target exists
-    const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
+    const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
       where: {
-        from_id: user.id,
-        to_id: target_id
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
       }
     });
     if(connectionRequestMeToTarget) {
@@ -608,10 +626,12 @@ app.openapi(
     }
 
     // check if connection request target to me exists
-    const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+    const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
       where: {
-        from_id: target_id,
-        to_id: user.id
+        from_id_to_id: {
+          from_id: target_id,
+          to_id: user.id
+        }
       }
     });
 
@@ -648,6 +668,7 @@ app.openapi(
         }
       });
     })
+    await redis.del(`user_${user.id}_connection_count`) // invalidate cache
 
     return c.json({
         success: true,
@@ -684,10 +705,12 @@ app.openapi(
     }
 
     // check if connection exists
-    const connection2Way = await db.connection.findFirst({
+    const connection2Way = await db.connection.findUnique({
       where: {
-        from_id: user.id,
-        to_id: target_id
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
       }
     })
     if(connection2Way) {
@@ -699,10 +722,12 @@ app.openapi(
     }
 
     // check if connection request me to target exists
-    const connectionRequestMeToTarget = await db.connectionRequest.findFirst({
+    const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
       where: {
-        from_id: user.id,
-        to_id: target_id
+        from_id_to_id: {
+          from_id: user.id,
+          to_id: target_id
+        }
       }
     });
     if(connectionRequestMeToTarget) {
@@ -714,10 +739,12 @@ app.openapi(
     }
 
     // check if connection request target to me exists
-    const connectionRequestTargetToMe = await db.connectionRequest.findFirst({
+    const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
       where: {
-        from_id: target_id,
-        to_id: user.id
+        from_id_to_id: {
+          from_id: target_id,
+          to_id: user.id
+        }
       }
     });
     if(!connectionRequestTargetToMe) {
@@ -840,6 +867,8 @@ app.openapi(
         })
       } catch(e) {}
     })
+
+    await redis.del(`user_${user.id}_connection_count`) // invalidate cache
 
     return c.json({
         success: true,

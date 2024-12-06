@@ -9,3 +9,13 @@ COPY --chown=node:node backend/package*.json ./
 RUN npm ci
 
 COPY --chown=node:node backend/prisma ./prisma
+
+COPY --chown=node:node . .
+
+COPY ./.env.example ./.env
+
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "index.js"]

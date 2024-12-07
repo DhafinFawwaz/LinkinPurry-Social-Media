@@ -1,5 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonRequest, DefaultJsonResponse } from '../schema.js'
+import db from '../db/db.js'
 
 const app = new OpenAPIHono()
 
@@ -14,11 +15,19 @@ app.openapi(
         422: DefaultJsonResponse("Email is taken")
       },
   
-    }), (c) => {
+    }), async (c) => {
+      try {
+        await db.$queryRaw`SELECT 1`;
         return c.json({
             success: true,
             message: 'Database connection is healthy'
         })
+      } catch (error) {
+        return c.json({
+            success: false,
+            message: 'Database connection is unhealthy'
+        })
+      }
     }    
 )    
 

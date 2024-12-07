@@ -30,7 +30,7 @@ app.route('/api', profileRoute)
 app.route('/api', userRoute)
 app.route('/api', chatRoute)
 app.route('/api', notificationRoute)
-app.route('/health', dbHealthRoute)
+app.route('/', dbHealthRoute)
 app.route('/api', recommendationRoute)
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 3000;
 console.log(`Server is running on http://localhost:${port}`)

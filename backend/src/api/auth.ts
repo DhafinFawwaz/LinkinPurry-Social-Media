@@ -111,13 +111,17 @@ app.openapi(
       //     }
       //   })
       // }
-      // const token = await login(c, Number(user.id), user.username, user.email, user.full_name, user.work_history, user.skills, user.profile_photo_path)
+      // identifier: user12wbd
+      
+      const id = Number(identifier.match(/\d+/)[0]);
+
+      const token = await login(c, id, `user${id}wbd`, "user.email", "user.full_name", "user.work_history", "user.skills", "user.profile_photo_path")
       
       return c.json({
         success: true,
         message: 'Login success',
         body: {
-            token: "token",
+            token: token,
             querytime: timeTakenInMs,
         }
       })

@@ -7,7 +7,10 @@ export function login(identifier, password) {
     password,
   });
   check(res, {
-    "status is ok": (r) => r.status >= 200 && r.status < 300,
+    "status is ok": (r) => {
+      console.log("status is ok|auth.js|" + r.status);
+      return r.status >= 200 && r.status < 300
+    },
   });
 
   const body = res.json();
@@ -18,10 +21,14 @@ export function login(identifier, password) {
 
   check(body, {
     "there is a token is valid":
-      body &&
-      body.body &&
-      body.body.token &&
-      typeof body.body.token === "string",
+      () => {
+        console.log("there is a token is valid|auth.js|" + body.body.token);
+
+        return body &&
+        body.body &&
+        body.body.token &&
+        typeof body.body.token === "string"
+      },
   });
 
   const token = body.body.token;

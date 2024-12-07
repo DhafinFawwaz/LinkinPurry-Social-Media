@@ -12,7 +12,7 @@ RUN npm rebuild bcrypt
 COPY --chown=node:node . .
 COPY ./.env.example ./.env
 
-# RUN npx prisma generate
+RUN npx prisma generate
 
 ENV PORT=3000
 

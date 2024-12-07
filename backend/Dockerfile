@@ -5,15 +5,15 @@ RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 
 COPY --chown=node:node package*.json ./
-COPY --chown=node:node prisma ./prisma
+# COPY --chown=node:node prisma ./prisma
+COPY ./.env.example ./.env
 
 RUN npm ci
-RUN npx prisma generate
-RUN npx prisma migrate deploy
+# RUN npx prisma generate
+# RUN npx prisma migrate deploy
 
 COPY --chown=node:node . .
 
-COPY ./.env.example ./.env
 
 ENV PORT=3000
 

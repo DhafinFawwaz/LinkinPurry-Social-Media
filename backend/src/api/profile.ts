@@ -55,9 +55,9 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
-
+  try {
     // console.log(user)
-
+  
     const requests = await db.connectionRequest.findMany({
       where: {
         to_id: user.id
@@ -76,7 +76,7 @@ app.openapi(
         created_at: true,
       }
     });
-
+  
     const pending = await db.connectionRequest.findMany({
       where: {
         from_id: user.id
@@ -95,7 +95,7 @@ app.openapi(
         created_at: true,
       }
     });
-
+  
     return c.json({
         success: true,
         message: '',
@@ -104,6 +104,16 @@ app.openapi(
           pending: pending
         }
     })
+  } catch(e) {
+    console.log(e)
+    c.status(500)
+    return c.json({
+      success: false,
+      message: 'Failed to get connection requests',
+      body: {}
+    })
+  }
+
 }
 )
 
@@ -138,7 +148,7 @@ app.openapi(
     middleware: authenticated
   }), async (c) => {
     const user = c.var.user;
-
+  try {
     const connectionFromUser = await db.connection.findMany({
       where: {
         to_id: user.id
@@ -163,6 +173,14 @@ app.openapi(
         message: '',
         body: connectionFromUser
     })
+  } catch(e) {
+    c.status(500)
+    return c.json({
+      success: false,
+      message: 'Failed to get connection requests',
+      body: {}
+    })
+  }
 }
 )
 

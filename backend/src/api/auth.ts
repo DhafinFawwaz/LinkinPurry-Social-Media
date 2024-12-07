@@ -65,18 +65,34 @@ app.openapi(
 // FROM users
 // WHERE username = ${identifier} OR email = ${identifier}
 // LIMIT 1;`
-      let user = await db.user.findUnique({
-        where: {
-          username: identifier
-        }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
-      })
-      if(!user) { // querying twice is faster for some reason
-        user = await db.user.findUnique({
-          where: {
-            email: identifier
-          }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
-        })
+      // let user = await db.user.findUnique({
+      //   where: {
+      //     username: identifier
+      //   }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
+      // })
+      // if(!user) { // querying twice is faster for some reason
+      //   user = await db.user.findUnique({
+      //     where: {
+      //       email: identifier
+      //     }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
+      //   })
+      // }
+      let user: User|null = null;
+      let userList: User[] = await db.$queryRaw`
+SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
+FROM users
+WHERE username = ${identifier}
+`
+      if(userList.length === 0) {
+        userList = await db.$queryRaw`
+SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
+FROM users
+WHERE email = ${identifier}        
+`
       }
+
+      user = userList[0];
+
 
       if(!user) {
         c.status(401)

@@ -85,28 +85,36 @@ app.openapi(
   const userId = c.get('user').id;
 
   // get all connections, join users, filter out users that the current user has chatted with
-  const users = await db.$queryRaw`
-SELECT DISTINCT
-    u.id,
-    u.full_name,
-    u.profile_photo_path
-FROM connection c
-JOIN users u ON c.to_id = u.id
-WHERE (c.from_id = ${userId})
-AND NOT EXISTS (
-    SELECT 1
-    FROM chat
-    WHERE (from_id = ${userId} AND to_id = u.id)
-    OR (from_id = u.id AND to_id = ${userId})
-)
-GROUP BY u.id;
-`;
-
-  return c.json({
-    success: true,
-    message: '',
-    body: users
-  })
+  try {
+    const users = await db.$queryRaw`
+  SELECT DISTINCT
+      u.id,
+      u.full_name,
+      u.profile_photo_path
+  FROM connection c
+  JOIN users u ON c.to_id = u.id
+  WHERE (c.from_id = ${userId})
+  AND NOT EXISTS (
+      SELECT 1
+      FROM chat
+      WHERE (from_id = ${userId} AND to_id = u.id)
+      OR (from_id = u.id AND to_id = ${userId})
+  )
+  GROUP BY u.id;
+  `;
+  
+    return c.json({
+      success: true,
+      message: '',
+      body: users
+    })
+  } catch (error) {
+    console.error(error);
+    return c.json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
 }
 )
 
@@ -140,6 +148,8 @@ app.openapi(
     },
     middleware: authenticated
   }), async (c) => {
+  
+  try {
     const userId = c.get('user').id;
     const { target_user_id } = c.req.valid("param");
 
@@ -190,6 +200,12 @@ app.openapi(
       message: '',
       body: chats.reverse()
     })
+  } catch (error) {
+    return c.json({
+      success: false,
+      message: 'An error occurred',
+    })
+  }
 }
 )
 

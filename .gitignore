@@ -5,6 +5,9 @@ postgres-data
 redis-data
 backend/uploads/img/*
 !backend/uploads/img/jobseeker_profile.svg
+log.txt
+log2.txt
+log3.txt
 
 
 

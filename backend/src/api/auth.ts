@@ -63,7 +63,7 @@ app.openapi(
       const start = Date.now();
       let user = await db.user.findUnique({
         where: {
-          email: identifier
+          username: identifier
         },
 
         select: {
@@ -84,7 +84,7 @@ app.openapi(
         const start2 = Date.now();
         user = await db.user.findUnique({
           where: {
-            username: identifier
+            email: identifier
           },
   
           select: {

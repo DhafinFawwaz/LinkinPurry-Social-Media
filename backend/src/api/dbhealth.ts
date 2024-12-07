@@ -12,7 +12,7 @@ app.openapi(
       tags: ['Database'],
       responses: {
         200: DefaultJsonResponse("Checking database connection successful"),
-        422: DefaultJsonResponse("Email is taken")
+        500: DefaultJsonResponse("Database is not healthy yet")
       },
   
     }), async (c) => {

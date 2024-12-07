@@ -8,24 +8,29 @@ import { redis } from '../db/redis.js'
 const app = new OpenAPIHono()
 
 async function invalidateFeedCache() {
-  console.log('Invalidating cache')
-  const script = `
-    local keys = redis.call('keys', 'feeds_*')
-    if #keys > 0 then
-      return redis.call('del', unpack(keys))
-    else
-      return 0
-    end
-  `;
-  await redis.eval(script, 0);
+  try {
+    console.log('Invalidating cache')
+    const script = `
+      local keys = redis.call('keys', 'feeds_*')
+      if #keys > 0 then
+        return redis.call('del', unpack(keys))
+      else
+        return 0
+      end
+    `;
+    await redis.eval(script, 0);
+  } catch(e) {console.log(e)}
 }
 async function getFeedCache(cursor: number|undefined, limit: number|undefined) {
-  const cached = await redis.get(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`)
-  if(cached) return JSON.parse(cached)
+  try {
+    const cached = await redis.get(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`)
+    if(cached) return JSON.parse(cached)
+  } catch(e) {console.log(e)}
   return null
 }
 async function setCacheFeed(cursor: number|undefined, limit: number|undefined, data: any) {
-  await redis.set(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`, JSON.stringify(data))
+  try {await redis.set(`feeds_${cursor ? cursor : -1}_${limit ? limit : 10}`, JSON.stringify(data))}
+  catch(e) {console.log(e)}
 }
 
 app.openapi(
@@ -61,7 +66,7 @@ app.openapi(
 
       const cached = await getFeedCache(cursor, limit);
       if(cached) {
-        console.log("\x1b[32m Cached \x1b[0m")
+        console.log("\x1b[32mCached\x1b[0m")
         return c.json(cached)
       }
 

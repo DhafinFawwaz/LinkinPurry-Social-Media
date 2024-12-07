@@ -16,6 +16,7 @@ import Network from './routes/network'
 import { tryRegisterServiceWorker, tryRemoveServiceWorker } from './notification/notification'
 import ChatUI from './routes/chat_ui'
 import ChatBase from './routes/chat-base'
+import Recommendation from './routes/recommendation'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -86,6 +87,7 @@ isAuthenticated() ? <>
     <Route path='/invitation' element={<Invitation/>}></Route>
     <Route path='/network' element={<Network/>}></Route>
     <Route path='/users' element={<Users/>}></Route>
+    <Route path='/recommendation' element={<Recommendation/>}></Route>
 </Routes>
 
 </>

@@ -10,7 +10,24 @@ import { redis } from '../db/redis.js'
 
 const app = new OpenAPIHono()
 
+async function getConnectionCountCache(user_id: number) {
+  try {
+    const cached = await redis.get(`user_${user_id}_connection_count`)
+    if(cached) return parseInt(cached);
+  } catch(e) {console.log(e)}
 
+  return null;
+}
+
+async function setConnectionCountCache(user_id: number, count: number) {
+  try {await redis.set(`user_${user_id}_connection_count`, count)}
+  catch(e) {console.log(e)}
+}
+
+async function invalidateConnectionCountCache(user_id: number) {
+  try {await redis.del(`user_${user_id}_connection_count`)}
+  catch(e) {console.log(e)}
+}
 
 app.openapi(
   createRoute({
@@ -121,10 +138,10 @@ app.openapi(
 
 
 async function getConnectionCount(user_id: number) {
-  const cached = await redis.get(`user_${user_id}_connection_count`)
+  const cached = await getConnectionCountCache(user_id);
   if(cached) {
-    console.log("\x1b[32m Cached \x1b[0m")
-    return parseInt(cached);
+    console.log("\x1b[32mCached\x1b[0m")
+    return cached;
   }
 
   const count = await db.connection.count({
@@ -132,7 +149,8 @@ async function getConnectionCount(user_id: number) {
       from_id: user_id
     }
   })
-  await redis.set(`user_${user_id}_connection_count`, count)
+
+  setConnectionCountCache(user_id, count);
   
   return count;
 }
@@ -673,7 +691,8 @@ app.openapi(
         }
       });
     })
-    await redis.del(`user_${user.id}_connection_count`) // invalidate cache
+    invalidateConnectionCountCache(user.id)
+    invalidateConnectionCountCache(target_id)
 
     return c.json({
         success: true,
@@ -873,7 +892,8 @@ app.openapi(
       } catch(e) {}
     })
 
-    await redis.del(`user_${user.id}_connection_count`) // invalidate cache
+    invalidateConnectionCountCache(user.id)
+    invalidateConnectionCountCache(target_id)
 
     return c.json({
         success: true,

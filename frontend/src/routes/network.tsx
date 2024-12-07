@@ -21,7 +21,7 @@ export default function Network() {
 
 {value?.body.map((req, i) => (<ListTile key={i}
   title={req.from.full_name!} 
-  subtitle={new Date(req.from.created_at).toLocaleString()}
+  subtitle={"Connected on " + new Date(req.from.created_at).toLocaleString()}
   imageSrc={toImageSrc(req.from.profile_photo_path)}
   href={`/profile/${req.from.id}`}
   >

@@ -87,6 +87,14 @@ export function UserSchema() {
   }
 }
 
+export function UserPrimitiveSchema() {
+  return {
+    id: z.number().or(z.bigint()),
+    full_name: z.string().nullable(),
+    profile_photo_path: z.string(),
+  }
+}
+
 export function PostSchemaWithUser() {
   return {
     id: z.number().or(z.bigint()),

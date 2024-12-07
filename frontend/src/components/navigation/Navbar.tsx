@@ -48,6 +48,12 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                     activeIcon: NetworkHoverIcon,
                 },
                 {
+                    name: "Recommendation",
+                    path: "/recommendation",
+                    defaultIcon: NetworkIcon,
+                    activeIcon: NetworkHoverIcon,
+                },
+                {
                     name: "Messaging",
                     path: "/chat",
                     defaultIcon: MessagingIcon,

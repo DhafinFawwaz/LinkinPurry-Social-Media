@@ -11,6 +11,7 @@ import userRoute from './api/user.js'
 import chatRoute from './api/chat.js'
 import notificationRoute from './api/notification.js'
 import dbHealthRoute from './api/dbhealth.js'
+import recommendationRoute from './api/recommendation.js'
 import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
@@ -30,6 +31,7 @@ app.route('/api', userRoute)
 app.route('/api', chatRoute)
 app.route('/api', notificationRoute)
 app.route('/health', dbHealthRoute)
+app.route('/api', recommendationRoute)
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 3000;
 console.log(`Server is running on http://localhost:${port}`)
 

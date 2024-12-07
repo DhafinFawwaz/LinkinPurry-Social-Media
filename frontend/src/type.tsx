@@ -38,17 +38,19 @@ export type ConnectionRequestsResponse = BaseResponse<{
 }[]>
 
 
+export type UserPrimitive = {
+    id: number,
+    full_name: string,
+    profile_photo_path: string
+}
+
 export type Post = {
     id: number,
     created_at: string,
     updated_at: string,
     content: string,
     user_id: number,
-    user: {
-        id: number,
-        full_name: string,
-        profile_photo_path: string
-    },
+    user: UserPrimitive,
 }
 
 export type FeedResponse = BaseResponse<{
@@ -96,3 +98,9 @@ export type LatestChat = {
     profile_photo_path: string,
 }
 export type LatestChatResponse = BaseResponse<LatestChat[]>
+
+
+export type RecommendationResponse = BaseResponse<{
+    users2nd: (UserPrimitive & {created_at: string, c1_id: bigint, c1_full_name: string})[],
+    users3rd: (UserPrimitive & {created_at: string, c1_id: bigint, c1_full_name: string, c2_id: bigint, c2_full_name: string})[]
+}>

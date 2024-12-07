@@ -48,7 +48,7 @@ export default function Invitation() {
   <div className="text-left w-full max-w-md font-bold">Invitations</div>
   {value?.body.requests.map((req, i) => (<ListTile key={i}
     title={req.from.full_name!} 
-    subtitle={new Date(req.created_at).toLocaleString()}
+    subtitle={"Invited on " + new Date(req.created_at).toLocaleString()}
     imageSrc={toImageSrc(req.from.profile_photo_path)}
     endChildren={<>
       <button onClick={() => deny(req.from)} className="bg-white text-black_primary font-semiboldrounded-full border border-black_primary hover:bg-white_hover h-[2rem] w-24 items-center justify-center flex rounded-full text-sm">Deny</button>
@@ -66,7 +66,7 @@ export default function Invitation() {
   <div className="text-left w-full max-w-md font-bold">Pending</div>
   {value?.body.pending.map((req, i) => (<ListTile key={i}
     title={req.to.full_name!} 
-    subtitle={new Date(req.created_at).toLocaleString()}
+    subtitle={"Asked on " + new Date(req.created_at).toLocaleString()}
     imageSrc={toImageSrc(req.to.profile_photo_path)}
     endChildren={<>
       <button disabled className="bg-background_grey text-gray-400 font-semibold h-[2rem] w-24 rounded-full border-gray-300 border text-sm">Pending</button>

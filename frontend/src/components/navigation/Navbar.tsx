@@ -70,8 +70,11 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
     ];
 
     // For mobile separation purpose
+    const messagingTab = tabs.find((tab) => tab.name === "Messaging");
     const profileTab = tabs.find((tab) => tab.name === "Me");
-    const otherTabs = tabs.filter((tab) => tab.name !== "Me");
+    const otherTabs = tabs.filter(
+        (tab) => tab.name !== "Messaging" && tab.name !== "Me"
+    );
 
     return (
         <>  
@@ -98,12 +101,9 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                 </nav>
                 )}
 
-            {/* For mobile, move profile tab to top of the screen */}
-            {profileTab && (
+            {/* For mobile, move profile & messaging tab to top of the screen */}
+            {messagingTab && profileTab && (
                 <nav className="flex justify-between bg-white fixed top-0 left-0 py-3 px-4 border-b border-gray-300 z-30 w-full sm:hidden">
-                    <div className="flex items-center gap-8">
-                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
-                    </div>
                     <NavLink
                         to={profileTab.path}
                         className={({ isActive }) =>
@@ -128,11 +128,38 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                             </>
                         )}
                     </NavLink>
+                    <div className="flex items-center gap-8">
+                        <img src={LinkinPurry} alt="LinkinPurry" className="h-10 w-auto" />
+                    </div>
+                    <NavLink
+                        to={messagingTab.path}
+                        className={({ isActive }) =>
+                            `flex flex-col items-center justify-center bg-transparent group hover:bg-gray-100 duration-150 ${
+                                isActive ? "text-black font-medium" : "text-gray-500"
+                            }`
+                        }
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <img
+                                    src={isActive ? messagingTab.activeIcon : messagingTab.defaultIcon}
+                                    alt={messagingTab.name}
+                                    className="h-8 w-8"
+                                />
+                                <span
+                                    className={`text-xs group-hover:text-black ${
+                                        isActive ? "text-black font-normal" : "text-gray-500"
+                                    }`}
+                                >
+                                </span>
+                            </>
+                        )}
+                    </NavLink>
                 </nav>
             )}
 
             {/* For mobile, move other Navbar to bottom of the screen */}
-            <nav className="flex bg-white fixed bottom-0 w-full border-t border-gray-300 z-20 sm:hidden">
+            <nav className="flex bg-white fixed bottom-0 w-full border-t border-gray-300 z-20 sm:hidden pr-4">
                 <div className="flex justify-around items-center w-full">
                     {otherTabs.map((tab) => (
                         <NavLink

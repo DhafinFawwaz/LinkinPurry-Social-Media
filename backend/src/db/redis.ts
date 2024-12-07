@@ -6,5 +6,7 @@ export const redis = new Redis({
 	port: (process.env.REDIS_PORT || 6379) as number
 });
 	redis.on('error', (err) => {
+	console.log("host: " + (process.env.REDIS_HOST || 'localhost'))
+	console.log("post: " + ((process.env.REDIS_PORT || 6379) as number))
 	console.error(err)
 });

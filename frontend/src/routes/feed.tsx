@@ -5,6 +5,8 @@ import toImageSrc from "../utils/image";
 import ListTile from "../components/list-tile";
 import Dialog from '../components/popup';
 import Dropdown from '../components/Dropdown';
+import { ToastContainer, toast, Zoom } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; 
 
 export default function Feed({user}: {user?: User}) {
   const [posts, setPosts] = useState<Post[]>([]); 
@@ -57,16 +59,16 @@ export default function Feed({user}: {user?: User}) {
   
       if (!res.ok) {
         const data = await res.json();
-        console.log(data)
-        alert(data.message || "Failed to update the post");
+        toast.error(data.message || "Failed to update the post.");
         return;
       }
-  
+
       setEditDialogOpen(false);
+      toast.success("Post updated successfully.");
       initialFetch.recall();
     } catch (error) {
       console.error("Error updating post:", error);
-      alert("An error occurred while updating the post.");
+      toast.error("An error occurred while updating the post.");
     }
   }
 
@@ -80,15 +82,16 @@ export default function Feed({user}: {user?: User}) {
   
       if (!res.ok) {
         const data = await res.json();
-        alert(data.message || "Failed to delete the post");
+        toast.error(data.message || "Failed to delete the post.");
         return;
       }
-  
+      
+      toast.success("Post deleted successfully.");
       setDeleteDialogOpen(false);
       initialFetch.recall();
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("An error occurred while deleting the post.");
+      toast.error("An error occurred while deleting the post.");
     }
   }
 
@@ -105,12 +108,12 @@ export default function Feed({user}: {user?: User}) {
     });
     if (!res.ok) {
       const data = await res.json();
-      console.log(data);
-      alert("Failed to post");
+      toast.error(data.message || "Failed to create the post.");
       return;
     }
 
     textAreaRef.current!.value = "";
+    toast.success("Post created successfully.");
     initialFetch.recall();
   }
 
@@ -125,13 +128,22 @@ export default function Feed({user}: {user?: User}) {
       const data: PostResponse = await res.json();
       setPosts((prev) => [...prev, ...data.body.feeds]);
       setCursor(data.body.cursor || 1);
-      // console.log(data.body);
+    } else {
+      toast.error("Failed to load more posts");
     }
 
     setLoadingMore(false);
   }
 
   return (<>
+<ToastContainer
+  position="bottom-left"
+  hideProgressBar={true}
+  transition={Zoom}
+  autoClose={3000} 
+  draggable
+/>
+
 <Dialog
   title="Edit Post"
   open={editDialogOpen}

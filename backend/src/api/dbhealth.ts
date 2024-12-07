@@ -26,7 +26,7 @@ app.openapi(
         c.status(500)
         return c.json({
             success: false,
-            message: 'Database connection is unhealthy'
+            message: 'Database connection to ' + process.env.DATABASE_URL + ' is not healthy'
         })
       }
     }    

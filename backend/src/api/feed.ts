@@ -50,7 +50,8 @@ app.openapi(
           feeds: z.array(z.object(PostSchema())),
           cursor: z.number().or(z.string()).optional()
         }),
-        401: DefaultJsonResponse("Unauthorized")
+        401: DefaultJsonResponse("Unauthorized"),
+        404: DefaultJsonResponse("Failed to get list of posts")
       }
     }), async (c) => {
 
@@ -141,7 +142,7 @@ app.openapi(
       return c.json(res)
     } catch(e) {
       console.log(e)
-      c.status(422)
+      c.status(404)
       return c.json({
           success: false,
           message: 'Getting list of posts failed',
@@ -161,7 +162,9 @@ app.openapi(
       }),
       responses: {
         200: DefaultJsonResponse("Creating a post successful", PostSchema()),
-        401: DefaultJsonResponse("Unauthorized")
+        400: DefaultJsonResponse("No content"),
+        401: DefaultJsonResponse("Unauthorized"),
+        500: DefaultJsonResponse("Failed to create post")
       },
       middleware: authenticated
     }), async (c) => {
@@ -170,7 +173,7 @@ app.openapi(
     try {
       const { content } = c.req.valid("json");
       if(!content) {
-        c.status(422);
+        c.status(400);
         return c.json({
           success: false,
           message: 'Content is required',
@@ -196,7 +199,7 @@ app.openapi(
       })
     } catch(e) {
       console.log(e)
-      c.status(422)
+      c.status(500)
       return c.json({
           success: false,
           message: 'Creating a post failed',
@@ -230,7 +233,10 @@ app.openapi(
       },
       responses: {
         200: DefaultJsonResponse("Updating a post successful", PostSchema()),
-        401: DefaultJsonResponse("Unauthorized")
+        400: DefaultJsonResponse("No content"),
+        401: DefaultJsonResponse("Unauthorized"),
+        404: DefaultJsonResponse("Post not found"),
+        500: DefaultJsonResponse("Failed to update post")
       },
       middleware: authenticated
     }), async (c) => {
@@ -265,7 +271,7 @@ app.openapi(
       const { content } = c.req.valid("json");
 
       if(!content) {
-        c.status(422);
+        c.status(400);
         return c.json({
           success: false,
           message: 'Content is required',
@@ -290,7 +296,7 @@ app.openapi(
       })
     } catch(e) {
       console.log(e)
-      c.status(422)
+      c.status(500)
       return c.json({
           success: false,
           message: 'Updating a post failed',
@@ -312,7 +318,9 @@ app.openapi(
       },
       responses: {
         200: DefaultJsonResponse("Deleting a post successful", PostSchema()),
-        401: DefaultJsonResponse("Unauthorized")
+        401: DefaultJsonResponse("Unauthorized"),
+        404: DefaultJsonResponse("Post not found"),
+        500: DefaultJsonResponse("Failed to delete post")
       },
       middleware: authenticated
     }), async (c) => {
@@ -358,7 +366,7 @@ app.openapi(
       })
     } catch(e) {
       console.log(e)
-      c.status(422)
+      c.status(500)
       return c.json({
           success: false,
           message: 'Deleting a post failed',

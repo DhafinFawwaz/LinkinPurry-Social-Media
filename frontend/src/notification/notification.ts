@@ -6,6 +6,7 @@ export function tryRegisterServiceWorker() {
 	if ("serviceWorker" in navigator && "Notification" in window) {
 		async function handleServiceWorker() {
 			const permission = await Notification.requestPermission();
+			console.log("Notification " + permission);
 			if (permission !== "granted") {
 				return;
 			}
@@ -13,15 +14,21 @@ export function tryRegisterServiceWorker() {
 			const registrations = await navigator.serviceWorker.getRegistrations();
 			for (const registration of registrations) {
 				if (registration.active?.scriptURL === `${window.location.origin}/sw.js`) {
+					console.log("sw.js exists")
 					if(!localStorage.getItem(notificationEndpointKey)) {
+						console.log("No endpoint found, removing service worker");
 						registration.unregister();
-						return;
+						break;
 					}
+					console.log("sw.js exists and endpoint found")
 					return;
 				}
 			}
+
+			console.log("Registering service worker...");
 			const register = await navigator.serviceWorker.register("/sw.js");
 			
+			console.log("wait...");
 			await new Promise((resolve) => { // wait for service worker to be activated
 				if (register.installing) {
 					register.installing.onstatechange = () => {
@@ -33,6 +40,7 @@ export function tryRegisterServiceWorker() {
 					resolve(null);
 				}
 			});
+			console.log("Service worker activated");
 
 			const subscription = await register.pushManager.subscribe({
 				userVisibleOnly: true,
@@ -61,6 +69,7 @@ export function tryRegisterServiceWorker() {
 export async function tryRemoveServiceWorker() {
 	if ("serviceWorker" in navigator) {
 		const endPoint = localStorage.getItem(notificationEndpointKey);
+		localStorage.removeItem(notificationEndpointKey);
 		const registrations = await navigator.serviceWorker.getRegistrations();
 		for (const registration of registrations) {
 			await registration.unregister();

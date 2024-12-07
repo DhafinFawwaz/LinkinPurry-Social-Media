@@ -1,7 +1,17 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function NotFound() {
+
+    const [is500ms, setIs500ms] = useState(false);
+    useEffect(() => {
+      setTimeout(() => {
+        setIs500ms(true);
+      }, 500)
+    }, [])
+
     return <>
+    {!is500ms ? <></> :
 <section className="sm:bg-background_grey bg-white"> {/* Fallback */}
   <div className="flex min-h-dvh min-h-screen items-center justify-center px-5 mx-auto">
     <div className="w-full flex justify-center">
@@ -15,5 +25,6 @@ export default function NotFound() {
     </div>    
   </div>    
 </section>    
+}
 </>
 }

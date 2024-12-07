@@ -10,13 +10,14 @@ import FormTextarea from '../components/form-textarea';
 import { useEffect, useState } from 'react';
 import toImageSrc from '../utils/image';
 import EditIcon from '../assets/images/edit-icon.svg';
-// import OptionsIcon from '../assets/images/dots.svg';
 import useFetchApi, { fetchApi } from '../hooks/useFetchApi';
 import ProfileTile from '../components/profile/profile-tile';
 import ListTile from '../components/list-tile';
 import { useParams } from 'react-router-dom';
 import { AccessLevel } from '../type';
 import Dropdown from '../components/Dropdown';
+import { ToastContainer, toast, Zoom } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const EditProfileSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -60,58 +61,52 @@ export default function Profile({ logout }: { logout: () => void }) {
   async function handleSaveEdit() {
     if (!selectedPost) return;
 
-    console.log("payload:", { content: selectedPost.content });
-    console.log("post id:", selectedPost.id);
-  
     try {
       const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
         method: "PUT",
         body: JSON.stringify({ content: selectedPost.content }),
-        headers: { 
-          "content-type": "application/json"
+        headers: {
+          "content-type": "application/json",
         },
       });
-  
+
       if (!res.ok) {
         const data = await res.json();
-        console.log(data)
-        alert(data.message || "Failed to update the post");
+        toast.error(data.message || "Failed to update the post");
         return;
       }
-  
+
+      toast.success("Post updated successfully!");
       setEditDialogOpen(false);
       recall();
     } catch (error) {
       console.error("Error updating post:", error);
-      alert("An error occurred while updating the post.");
+      toast.error("An error occurred while updating the post.");
     }
   }
 
   async function handleDeletePost() {
     if (!selectedPost) return;
-  
+
     try {
-      const res = await fetchApi(`/api/feed/${selectedPost.id}`, {
-        method: "DELETE",
-      });
-  
+      const res = await fetchApi(`/api/feed/${selectedPost.id}`, { method: "DELETE" });
+
       if (!res.ok) {
         const data = await res.json();
-        alert(data.message || "Failed to delete the post");
+        toast.error(data.message || "Failed to delete the post");
         return;
       }
-  
+
+      toast.success("Post deleted successfully!");
       setDeleteDialogOpen(false);
       recall();
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("An error occurred while deleting the post.");
+      toast.error("An error occurred while deleting the post.");
     }
   }
 
   async function onSubmit(data: EditProfileSchema) {
-    console.log(data);
-    console.log(file);
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("name", data.name || "");
@@ -119,18 +114,25 @@ export default function Profile({ logout }: { logout: () => void }) {
     formData.append("skills", data.skills || "");
     if (file) formData.append("profile_photo", file);
 
-    const res = await fetchApi(`/api/profile/${user_id}`, {
-      method: "PUT",
-      body: formData,
-    })
-    if(!res.ok) {
-      alert("Failed to update profile");
-      return
-    }
+    try {
+      const res = await fetchApi(`/api/profile/${user_id}`, {
+        method: "PUT",
+        body: formData,
+      });
 
-    recall();
-    setIsDialogOpen(false);
-    setFile(undefined);
+      if (!res.ok) {
+        toast.error("Failed to update profile");
+        return;
+      }
+
+      toast.success("Profile updated successfully!");
+      recall();
+      setIsDialogOpen(false);
+      setFile(undefined);
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while updating the profile.");
+    }
   }
   function onEditButtonClick() {
     setIsDialogOpen(true);
@@ -149,51 +151,83 @@ export default function Profile({ logout }: { logout: () => void }) {
   }
 
   async function onConnect() {
-    const res = await fetchApi(`/api/profile/${user_id}/connect`, { method: "POST" })
-    if(!res.ok) {
-      alert("Failed to connect to user");
-      return
-    }
+    try {
+      const res = await fetchApi(`/api/profile/${user_id}/connect`, { method: "POST" });
 
-    recall();
+      if (!res.ok) {
+        toast.error("Failed to connect to user");
+        return;
+      }
+
+      toast.success("Request sent!");
+      recall();
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while connecting to the user.");
+    }
   }
 
   async function onDisconnect() {
-    const res = await fetchApi(`/api/profile/${user_id}/disconnect`, { method: "DELETE" });
-    if(!res.ok) {
-      alert("Failed to disconnect from user");
-      return;
+    try {
+      const res = await fetchApi(`/api/profile/${user_id}/disconnect`, { method: "DELETE" });
+
+      if (!res.ok) {
+        toast.error("Failed to disconnect from user");
+        return;
+      }
+
+      toast.success("Disconnected successfully!");
+      recall();
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while disconnecting from the user.");
     }
-  
-    recall();
   }
 
   async function accept(user_id: number) {
-    const res = await fetchApi(`/api/profile/${user_id}/accept`, {
-      method: "POST",
-    })
-    if(!res.ok) {
-      alert("Accepting failed");
-      return;
-    }
+    try {
+      const res = await fetchApi(`/api/profile/${user_id}/accept`, { method: "POST" });
 
-    recall();
+      if (!res.ok) {
+        toast.error("Accepting failed");
+        return;
+      }
+
+      toast.success("Request accepted!");
+      recall();
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while accepting the request.");
+    }
   }
 
   async function deny(user_id: number) {
-    const res = await fetchApi(`/api/profile/${user_id}/deny`, {
-      method: "DELETE",
-    })
-    if(!res.ok) {
-      alert("Denying failed");
-      return;
-    }
+    try {
+      const res = await fetchApi(`/api/profile/${user_id}/deny`, { method: "DELETE" });
 
-    recall();
+      if (!res.ok) {
+        toast.error("Denying failed");
+        return;
+      }
+
+      toast.success("Request denied!");
+      recall();
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while denying the request.");
+    }
   }
 
 
   return (<>
+<ToastContainer
+  position="bottom-left"
+  hideProgressBar={true}
+  transition={Zoom}
+  autoClose={3000} 
+  draggable
+/>
+
 <Dialog title='Edit Profile' open={isDialogOpen} onClose={() => {setIsDialogOpen(false)}}>
 {loading ? <></> : <>
   <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-0 mt-2">

@@ -10,6 +10,9 @@ RUN npm ci
 
 COPY --chown=node:node backend/prisma ./prisma
 
+RUN npx prisma generate
+RUN npx prisma migrate deploy
+
 COPY --chown=node:node . .
 
 COPY ./.env.example ./.env

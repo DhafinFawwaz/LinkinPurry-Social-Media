@@ -8,6 +8,8 @@ export function login(identifier, password) {
     password,
   });
   const end = new Date();
+  console.log("api time: " + end - start);
+
   check(res, {
     "status is ok login": (r) => {
       console.log("status is ok|auth.js|" + r.status);
@@ -21,13 +23,13 @@ export function login(identifier, password) {
     console.log(body);
   }
 
+  console.log("query time: " + body.body.querytime);
+
   check(body, {
     "there is a token is valid":
       () => {
         try{
           console.log("there is a token is valid|auth.js|" + body.body.token);
-          console.log("query time" + body.body.querytime);
-          console.log("api time" + end - start);
 
         } catch(e){}
 

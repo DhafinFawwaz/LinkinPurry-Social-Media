@@ -51,7 +51,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
                       </span>
                       <span className="text-sm font-bold text-gray-700">{user.full_name}</span>
                     </div>
-                    <div className="text-base text-gray-900 ml-11">{msg.message}</div>
+                    <div className="text-base text-gray-900 ml-11 text-right break-all">{msg.message}</div>
                   </div>
                   <img
                     src={toImageSrc(user.profile_photo_path)}
@@ -74,7 +74,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
                         {format(new Date(msg.timestamp), 'hh:mm a')}
                       </span>
                     </div>
-                    <div className="text-base text-gray-900 mr-11">{msg.message}</div>
+                    <div className="text-base text-gray-900 mr-11 break-all">{msg.message}</div>
                   </div>
                 </div>
               }

@@ -24,6 +24,7 @@ const protectedRoutes = new Map<string, string>([
     ["/network", "/login"],
     ["/chat", "/login"],
     ["/invitation", "/login"],
+    ["/recommendation", "/login"],
 ]);
 const notAuthenticatedRoutes = new Map<string, string>([
     ["/login", "/"],

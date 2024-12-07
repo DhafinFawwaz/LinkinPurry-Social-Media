@@ -23,6 +23,7 @@ app.openapi(
             message: 'Database connection is healthy'
         })
       } catch (error) {
+        c.status(500)
         return c.json({
             success: false,
             message: 'Database connection is unhealthy'

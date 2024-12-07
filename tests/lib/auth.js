@@ -7,7 +7,7 @@ export function login(identifier, password) {
     password,
   });
   check(res, {
-    "status is ok": (r) => {
+    "status is ok login": (r) => {
       console.log("status is ok|auth.js|" + r.status);
       return r.status >= 200 && r.status < 300
     },
@@ -22,7 +22,7 @@ export function login(identifier, password) {
   check(body, {
     "there is a token is valid":
       () => {
-        console.log("there is a token is valid|auth.js|" + body.body.token);
+        console.log("there is a token is valid|auth.js|" + body);
 
         return body &&
         body.body &&

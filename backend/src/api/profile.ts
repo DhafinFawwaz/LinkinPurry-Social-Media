@@ -197,7 +197,6 @@ app.openapi(
 
       // case logged in & owner (do it early to avoid unnecessary db queries)
       if(user && user.id === user_id) {
-        const connection_count = await getConnectionCount(user_id);
         // console.log(connection_count)
         const user = await db.user.findUnique({
           where: {
@@ -216,6 +215,7 @@ app.openapi(
             body: {}
           })
         }
+        const connection_count = await getConnectionCount(user_id);
 
         return c.json({
           success: true,

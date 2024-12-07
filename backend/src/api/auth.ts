@@ -68,6 +68,17 @@ app.openapi(
               username: identifier
             }
           ]
+        },
+
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          password_hash: true,
+          full_name: true,
+          work_history: true,
+          skills: true,
+          profile_photo_path: true,
         }
       })
       if(!user) {

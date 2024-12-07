@@ -25,10 +25,10 @@ export default function Network() {
 
   async function deny(user: User) {
     const res = await fetchApi(`/api/profile/${user.id}/deny`, {
-      method: "POST",
+      method: "DELETE",
     })
     if(!res.ok) {
-      alert("Accepting failed");
+      alert("Denying failed");
       return;
     }
 

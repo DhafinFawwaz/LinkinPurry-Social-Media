@@ -17,6 +17,7 @@ import { tryRegisterServiceWorker, tryRemoveServiceWorker } from './notification
 import ChatUI from './routes/chat_ui'
 import ChatBase from './routes/chat-base'
 import Recommendation from './routes/recommendation'
+import NotFound from './routes/not-found'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -88,6 +89,7 @@ isAuthenticated() ? <>
     <Route path='/network' element={<Network/>}></Route>
     <Route path='/users' element={<Users/>}></Route>
     <Route path='/recommendation' element={<Recommendation/>}></Route>
+    <Route path='/*' element={<NotFound/>}></Route>
 </Routes>
 
 </>
@@ -108,7 +110,8 @@ isAuthenticated() ? <>
     <Route path='/login' element={<Login onLogin={recall}/>}></Route>
     <Route path='/register' element={<Register onRegister={recall}/>}></Route>
     <Route path='/users' element={<Users/>}></Route>
-</Routes>
+    <Route path='/*' element={<NotFound/>}></Route>
+    </Routes>
 
 </>
 }

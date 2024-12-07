@@ -114,10 +114,17 @@ export default function Profile({ logout }: { logout: () => void }) {
     formData.append("skills", data.skills || "");
     if (file) formData.append("profile_photo", file);
 
+    console.log("Data", data);
+    console.log("FormData", formData);
+    console.log("FormData", formData.get("username"));
+
     try {
       const res = await fetchApi(`/api/profile/${user_id}`, {
         method: "PUT",
         body: formData,
+        headers: {
+          "content-type": "multipart/form-data",
+        }
       });
 
       if (!res.ok) {

@@ -3,6 +3,8 @@ node_modules
 .DS_Store
 postgres-data
 redis-data
+backend/uploads/img/*
+!backend/uploads/img/jobseeker_profile.svg
 
 
 

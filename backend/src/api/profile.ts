@@ -421,8 +421,9 @@ app.openapi(
       }
 
       try {
-        const {  username, name, work_history, skills } = c.req.valid("form");
+        const { username, name, work_history, skills } = c.req.valid("form");
         
+        console.log(username)
         const { profile_photo } = await c.req.parseBody()
         
         if(profile_photo) {

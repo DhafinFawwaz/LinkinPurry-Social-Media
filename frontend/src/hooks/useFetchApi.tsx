@@ -18,11 +18,13 @@ function getCookie(key: string) {
 
 export async function fetchApi(path: string, options: RequestInit = {}) {
     // const token = getCookie("token");
-    if(options.headers) (options.headers as any)["content-type"] = "application/json";
+    if(options.headers && !("content-type" in options.headers)) (options.headers as any)["content-type"] = "application/json";
+    if(options.headers && ((options.headers as any)["content-type"] == "multipart/form-data")) delete (options.headers as any)["content-type"]; // weird that multipart/form-data needs to be removed if we need to use it. for some reason we need to let it hanle FormData automatically
     // if(token) options.headers = { ...options.headers, "Authorization": `Bearer ${token}` };
     // else if(options.headers)  delete options.headers["Authorization" as keyof HeadersInit]; // Very weird that the authorization stays in the headers. so gotta delete it
     const url = getApiUrl() + path;
     options.credentials = "include";
+    // console.log(options.headers)
     return await fetch(url, { ...DEFAULT_OPTIONS, ...options });
 }
 

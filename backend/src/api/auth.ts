@@ -58,6 +58,9 @@ app.openapi(
   }), async (c) => {
     try {
       const { identifier, password } = c.req.valid("json");
+
+      // timer
+      const start = Date.now();
       let user = await db.user.findFirst({
         where: {
           OR: [
@@ -81,6 +84,8 @@ app.openapi(
           profile_photo_path: true,
         }
       })
+      const end = Date.now();
+      const timeTakenInMs = end - start;
       if(!user) {
         c.status(401)
         return c.json({
@@ -109,6 +114,7 @@ app.openapi(
         message: 'Login success',
         body: {
             token: token,
+            querytime: timeTakenInMs,
         }
       })
     } catch(e) {

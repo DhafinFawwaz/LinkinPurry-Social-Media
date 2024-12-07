@@ -4,8 +4,8 @@ RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
 WORKDIR /home/node/app
 
-COPY --chown=node:node backend/package*.json ./
-COPY --chown=node:node backend/prisma ./prisma
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node prisma ./prisma
 
 RUN npm ci
 RUN npx prisma generate

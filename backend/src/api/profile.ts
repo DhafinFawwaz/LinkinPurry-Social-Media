@@ -315,17 +315,29 @@ app.openapi(
               from_id: user.id,
               to_id: user_id
             }
+          },
+          // include: {
+          //   to: {
+          //     include: {
+          //       feeds: true,
+          //     }
+          //   }
+          // }
+          select: {
+            to: {
+              select: {
+                username: true,
+                full_name: true,
+                work_history: true,
+                skills: true,
+                profile_photo_path: true,
+                feeds: true
+              }
+            }
           }
         })
         if(connected) {
-          const targetUser = await db.user.findUnique({
-            where: {
-              id: user_id
-            },
-            include: {
-              feeds: true,
-            }
-          })
+          const targetUser = connected.to;
           if(!targetUser) { // case target user not found
             c.status(404);
             return c.json({
@@ -350,16 +362,30 @@ app.openapi(
           })
         } else { // case not_connected/connection_requested
           let connection = "not_connected"
+          let targetUser = null;
           const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
             where: {
               from_id_to_id: {
                 from_id: user.id,
                 to_id: user_id
               }
+            },
+            select: {
+              to: {
+                select: {
+                  username: true,
+                  full_name: true,
+                  work_history: true,
+                  skills: true,
+                  profile_photo_path: true,
+                  feeds: true
+                }
+              }
             }
           })
           if(connectionRequestMeToTarget) {
             connection = "connection_requested"
+            targetUser = connectionRequestMeToTarget.to;
           } else {
             const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
               where: {
@@ -367,21 +393,44 @@ app.openapi(
                   from_id: user_id,
                   to_id: user.id
                 }
+              },
+              select: {
+                from: {
+                  select: {
+                    username: true,
+                    full_name: true,
+                    work_history: true,
+                    skills: true,
+                    profile_photo_path: true,
+                    feeds: true
+                  }
+                }
               }
             })
             if(connectionRequestTargetToMe) {
               connection = "connection_received"
+              targetUser = connectionRequestTargetToMe.from;
             }
           }
 
-          const targetUser = await db.user.findUnique({
-            where: {
-              id: user_id
-            },
-            include: {
-              feeds: true,
-            }
-          })
+          if(!targetUser) {
+            targetUser = await db.user.findUnique({
+              where: {
+                id: user_id,
+              },
+              include: {
+                feeds: true,
+              }
+            })
+          }
+          // const targetUser = await db.user.findUnique({
+          //   where: {
+          //     id: user_id
+          //   },
+          //   include: {
+          //     feeds: true,
+          //   }
+          // })
           if(!targetUser) { // case target user not found
             c.status(404);
             return c.json({

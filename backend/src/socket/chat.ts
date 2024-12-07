@@ -88,6 +88,9 @@ const MESSAGE_SEND_ERROR = 'message:send|error';
 
 const MESSAGE_RECEIVED = 'message:received';
 
+const TYPING_RECEIVED = 'typing:received';
+const TYPING_SEND = 'typing:send';
+
 export function handleSocket(io: Server) {
 	io.on(CONNECT, async(socket) => {
 		try {
@@ -142,6 +145,15 @@ export function handleSocket(io: Server) {
 					socket.emit(CHAT_LEAVE_SUCCESS, successResponse("Left chat", {room: roomKey}));
 				} catch (e) {
 					socket.emit(CHAT_LEAVE_ERROR, errorResponse("Failed to leave chat"));
+				}
+			})
+
+			socket.on(TYPING_SEND, async (targetUserId: number) => {
+				const roomKey = getRoomKey(user.id, targetUserId);
+				try {
+					io.to(roomKey).emit(TYPING_RECEIVED, user.id);
+				} catch (e) {
+					console.log(e);
 				}
 			})
 

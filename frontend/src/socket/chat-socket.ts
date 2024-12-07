@@ -18,6 +18,9 @@ const MESSAGE_SEND_ERROR = 'message:send|error';
 
 const MESSAGE_RECEIVED = 'message:received';
 
+const TYPING_RECEIVED = 'typing:received';
+const TYPING_SEND = 'typing:send';
+
 export default class ChatSocket {
     private socket: Socket;
     private onConnect?: () => void;
@@ -30,6 +33,7 @@ export default class ChatSocket {
     private _str_onChatLeaveSuccess?: (res: string) => void;
     private _str_onChatLeaveError?: (res: string) => void;
     private _str_onMessageReceived?: (res: string) => void;
+    private _str_onTypingReceived?: (res: number) => void;
 
     private preiousUserId: number = -1;
 
@@ -45,6 +49,10 @@ export default class ChatSocket {
 
     public sendMessage(targetUserId: number, message: string) {
         this.socket.emit(MESSAGE_SEND, targetUserId, message);
+    }
+
+    public sendTyping(targetUserId: number) {
+        this.socket.emit(TYPING_SEND, targetUserId);
     }
 
     public leaveChat(targetUserId: number) {
@@ -68,7 +76,8 @@ export default class ChatSocket {
         onChatSendError,
         onChatLeaveSuccess,
         onChatLeaveError,
-        onMessageReceived
+        onMessageReceived,
+        onTypingReceived,
     }:{
         onConnect: () => void,
         onDisconnect: () => void,
@@ -78,7 +87,8 @@ export default class ChatSocket {
         onChatSendError: (res: ChatErrorResponse) => void,
         onChatLeaveSuccess: (res: ChatResponse) => void,
         onChatLeaveError: (res: ChatErrorResponse) => void,
-        onMessageReceived: (res: ChatResponse) => void
+        onMessageReceived: (res: ChatResponse) => void,
+        onTypingReceived: (targetUserId: number) => void,
     }) {
         this.unsubscribe();
         this.onConnect = onConnect;
@@ -90,11 +100,12 @@ export default class ChatSocket {
         this._str_onChatLeaveSuccess = r => onChatLeaveSuccess(this.fromJson(r));
         this._str_onChatLeaveError = r => onChatLeaveError(this.fromJson(r));
         this._str_onMessageReceived = r => onMessageReceived(this.fromJson(r));
+        this._str_onTypingReceived = (r) => onTypingReceived(r);
         this.subscribe();
     }
 
     private subscribe() {
-        if(!this.onConnect || !this.onDisconnect || !this._str_onChatJoinSuccess || !this._str_onChatJoinError || !this._str_onChatSendSuccess || !this._str_onChatSendError || !this._str_onChatLeaveSuccess || !this._str_onChatLeaveError || !this._str_onMessageReceived) {
+        if(!this.onConnect || !this.onDisconnect || !this._str_onChatJoinSuccess || !this._str_onChatJoinError || !this._str_onChatSendSuccess || !this._str_onChatSendError || !this._str_onChatLeaveSuccess || !this._str_onChatLeaveError || !this._str_onMessageReceived || !this._str_onTypingReceived) {
             throw new Error('ChatSocket: not all handlers are set');
         }
         this.socket.on(CONNECT, this.onConnect);
@@ -106,6 +117,7 @@ export default class ChatSocket {
         this.socket.on(CHAT_LEAVE_SUCCESS, this._str_onChatLeaveSuccess);
         this.socket.on(CHAT_LEAVE_ERROR, this._str_onChatLeaveError);
         this.socket.on(MESSAGE_RECEIVED, this._str_onMessageReceived);
+        this.socket.on(TYPING_RECEIVED, this._str_onTypingReceived);
         
         // for debugging
         // socket.onAny((event, ...args) => {
@@ -123,11 +135,12 @@ export default class ChatSocket {
         this.socket.off(CHAT_LEAVE_SUCCESS, this._str_onChatLeaveSuccess);
         this.socket.off(CHAT_LEAVE_ERROR, this._str_onChatLeaveError);
         this.socket.off(MESSAGE_RECEIVED, this._str_onMessageReceived);
+        this.socket.off(TYPING_RECEIVED, this._str_onTypingReceived);
         this.leaveChat(this.preiousUserId);
     }
 
     connect() {
-        console.log(this.socket.connected);
+        // console.log(this.socket.connected);
         if(!this.socket.connected)
             this.socket.connect();
     }

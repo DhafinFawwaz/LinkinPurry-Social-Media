@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import socket from '../socket/socket';
 import { useParams } from 'react-router-dom';
 import { ChatErrorResponse, ChatMessage, ChatResponse, LatestChat, LatestChatResponse, User } from '../type';
@@ -8,6 +8,7 @@ import ChatList from '../components/chat/ChatList';
 import ChatWindow from '../components/chat/ChatWindow';
 import PopUp from '../components/popup';
 import NewChat from '../components/chat/new-chat';
+import { debounce, throttle } from '../hooks/useDebounce';
 
 export default function Chat({ user }: { user?: User}) {
 	const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
@@ -21,6 +22,7 @@ export default function Chat({ user }: { user?: User}) {
 	const [chats, setChats] = useState<LatestChatResponse | null>(null);
 	function setMessagesFromResponse(res: ChatResponse) {
 		console.log("chat joined ", res);
+		setIsOpposingUserTyping(false);
 		setChats((prev) => {
 			if (!prev) return prev; // Ensure prevValue exists
 			const userId = parseInt(param.user_id!);
@@ -36,6 +38,23 @@ export default function Chat({ user }: { user?: User}) {
 		console.log(res);
 	}
 
+	
+	// 2 second window to show typing
+	const [isOpposingUserTyping, setIsOpposingUserTyping] = useState(false);
+	const throttleSendTyping = throttle(() => {
+		chatController.sendTyping(parseInt(param.user_id!));
+	}, 2000);
+	const debounceSetIsOpposingUserTyping = debounce(() => {
+		setIsOpposingUserTyping(false);
+	}, 4000);
+
+
+	function onTypingReceived(targetUserId: number) {
+		// console.log('typing received', targetUserId);
+		if(targetUserId !== parseInt(param.user_id!)) return;
+		setIsOpposingUserTyping(true);
+		debounceSetIsOpposingUserTyping();
+	}
 
 	useEffect(() => {
 		console.log('chat component mounted');
@@ -57,7 +76,7 @@ export default function Chat({ user }: { user?: User}) {
 			
 			chatController.reinitialize({
 				onConnect: () => setIsConnected(true),
-				onDisconnect: () => {setIsConnected(false); console.log('disconnected')},
+				onDisconnect: () => {setIsConnected(false); /*console.log('disconnected')*/},
 				onChatJoinSuccess: setMessagesFromResponse,
 				onChatJoinError: onErrorResponse,
 				onChatSendSuccess: setMessagesFromResponse,
@@ -65,6 +84,7 @@ export default function Chat({ user }: { user?: User}) {
 				onChatLeaveSuccess: r => {},
 				onChatLeaveError: onErrorResponse,
 				onMessageReceived: setMessagesFromResponse,
+				onTypingReceived: onTypingReceived,
 			});
 			chatController.joinChat(parseInt(param.user_id!));
 		})()
@@ -123,9 +143,9 @@ export default function Chat({ user }: { user?: User}) {
 {!messages?.message ? <>
 
 </> : <>
-<ChatWindow chatDetails={messages?.details!} messages={messages?.message!} user={user!}>
+<ChatWindow chatDetails={messages?.details!} messages={messages?.message!} user={user!} isTyping={isOpposingUserTyping}>
 	<form onSubmit={ onSubmit } className='w-full flex'>
-		<input type="text" name="" id="" ref={inputRef} placeholder='Type a message' className='p-2 mr-2 border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-3 text-sm text-gray-900 focus:outline-none focus:ring-0 focus:border-blue-600 focus:bg-[#e8f0fe] hover:border-blue-600'/>
+		<input onChange={e => throttleSendTyping()} type="text" name="" id="" ref={inputRef} placeholder='Type a message' className='p-2 mr-2 border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pb-2.5 pt-3 text-sm text-gray-900 focus:outline-none focus:ring-0 focus:border-blue-600 focus:bg-[#e8f0fe] hover:border-blue-600'/>
 		<button type="submit" className='bg-blue_primary text-white font-semibold py-2 px-4 rounded-full hover:bg-blue_hover'>Send</button>
 	</form>
 </ChatWindow>

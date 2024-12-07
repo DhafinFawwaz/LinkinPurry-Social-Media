@@ -3,7 +3,7 @@ import { format, isToday } from 'date-fns';
 import { ChatMessage, LatestChat, User } from '../../type';
 import toImageSrc from '../../utils/image';
 
-export default function ChatWindow({ chatDetails, messages, user, children }: { chatDetails: LatestChat; messages: ChatMessage[]; user: User; children: React.ReactNode })
+export default function ChatWindow({ chatDetails, messages, user, isTyping, children }: { chatDetails: LatestChat; messages: ChatMessage[]; user: User; isTyping: boolean; children: React.ReactNode })
   {
 
   const scrollViewRef = useRef<HTMLDivElement>(null);
@@ -81,6 +81,31 @@ export default function ChatWindow({ chatDetails, messages, user, children }: { 
             </React.Fragment>
           );
         })}
+        
+        {!isTyping ? <></> : 
+          <div className="flex items-start space-x-3">
+            <img
+              src={toImageSrc(user.profile_photo_path)}
+              alt={`${chatDetails.full_name}'s avatar`}
+              className="w-8 h-8 rounded-full"
+            />
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-bold text-gray-700">{chatDetails.full_name}</span>
+                <span className="text-xs text-gray-500">
+                </span>
+              </div>
+              <div className="text-base text-gray-900 mr-11">
+                  <div className="typingIndicatorBubble -translate-x-1.5 w-8 h-6">
+                    <div className="typingIndicatorBubbleDot"></div>
+                    <div className="typingIndicatorBubbleDot"></div>
+                    <div className="typingIndicatorBubbleDot"></div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        }
+        
       </div>
 
       <div className="p-4 border-t flex bottom-0 w-full z-20 bg-white">

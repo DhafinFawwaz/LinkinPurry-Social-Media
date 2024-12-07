@@ -60,18 +60,25 @@ app.openapi(
     try {
       const { identifier, password } = c.req.valid("json");
 
-      // timer
-      const start = Date.now();
-      const userList: User[] = await db.$queryRaw`
-SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
-FROM users
-WHERE username = ${identifier} OR email = ${identifier}
-LIMIT 1;`
+//       const userList: User[] = await db.$queryRaw`
+// SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
+// FROM users
+// WHERE username = ${identifier} OR email = ${identifier}
+// LIMIT 1;`
+      let user = await db.user.findUnique({
+        where: {
+          username: identifier
+        }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
+      })
+      if(!user) { // querying twice is faster for some reason
+        user = await db.user.findUnique({
+          where: {
+            email: identifier
+          }, select: { id: true, username: true, email: true, password_hash: true, full_name: true, work_history: true, skills: true, profile_photo_path: true }
+        })
+      }
 
-      const end = Date.now();
-
-      const timeTakenInMs = end - start;
-      if(userList.length === 0) {
+      if(!user) {
         c.status(401)
         return c.json({
           success: false,
@@ -81,7 +88,6 @@ LIMIT 1;`
           }
         })
       }
-      const user = userList[0];
 
       const isPasswordValid = await bcrypt.compare(password, user.password_hash);
       if(!isPasswordValid) {
@@ -106,7 +112,6 @@ LIMIT 1;`
         message: 'Login success',
         body: {
             token: token,
-            querytime: timeTakenInMs,
         }
       })
     } catch(e) {

@@ -159,12 +159,12 @@ export default function Profile({ logout }: { logout: () => void }) {
   }
 
   async function onDisconnect() {
-    const res = await fetchApi(`/api/profile/${user_id}/disconnect`, { method: "POST" })
+    const res = await fetchApi(`/api/profile/${user_id}/disconnect`, { method: "DELETE" });
     if(!res.ok) {
-      alert("Failed to disconnect to user");
-      return
+      alert("Failed to disconnect from user");
+      return;
     }
-
+  
     recall();
   }
 
@@ -182,10 +182,10 @@ export default function Profile({ logout }: { logout: () => void }) {
 
   async function deny(user_id: number) {
     const res = await fetchApi(`/api/profile/${user_id}/deny`, {
-      method: "POST",
+      method: "DELETE",
     })
     if(!res.ok) {
-      alert("Accepting failed");
+      alert("Denying failed");
       return;
     }
 

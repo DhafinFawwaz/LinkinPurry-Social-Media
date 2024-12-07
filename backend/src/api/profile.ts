@@ -701,11 +701,11 @@ app.openapi(
 }
 )
 
- app.openapi(
+app.openapi(
   createRoute({
-    method: 'post',
+    method: 'delete',
     path: '/profile/:user_id/deny',
-    description: 'Accept connection request from another user',
+    description: 'Deny connection request from another user',
     tags: ['Profile'],
     request: {
       params: z.object({
@@ -713,7 +713,7 @@ app.openapi(
       })
     },
     responses: {
-      200: DefaultJsonResponse("Accept connection request from another user successful"),
+      200: DefaultJsonResponse("Deny connection request from another user successful"),
       401: DefaultJsonResponse("Unauthorized")
     },
     middleware: authenticated
@@ -798,7 +798,7 @@ app.openapi(
 
 app.openapi(
   createRoute({
-    method: 'post',
+    method: 'delete',
     path: '/profile/:user_id/disconnect',
     description: 'Disconnect another user',
     tags: ['Profile'],

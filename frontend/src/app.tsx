@@ -48,6 +48,9 @@ function AuthRouter() {
         } else {
             const redirectProtectedPath = protectedRoutes.get(location.pathname);
             if (redirectProtectedPath) navigate(redirectProtectedPath);
+            else if (location.pathname.match(/\/chat\/\d+/)) { // only this case so lets not put too much effort
+                navigate("/login");
+            }
         }
     }, [loading])
 

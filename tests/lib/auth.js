@@ -6,12 +6,8 @@ export function login(identifier, password) {
     identifier,
     password,
   });
-
   check(res, {
-    "status is ok login": (r) => {
-      console.log("status is ok|auth.js|" + r.status);
-      return r.status >= 200 && r.status < 300
-    },
+    "status is ok": (r) => r.status >= 200 && r.status < 300,
   });
 
   const body = res.json();
@@ -20,20 +16,12 @@ export function login(identifier, password) {
     console.log(body);
   }
 
-  
   check(body, {
     "there is a token is valid":
-    () => {
-      try{
-          console.log("query time: " + body.body.querytime);
-          console.log("there is a token is valid|auth.js|" + body.body.token);
-        } catch(e){}
-
-        return body &&
-        body.body &&
-        body.body.token &&
-        typeof body.body.token === "string"
-      },
+      body &&
+      body.body &&
+      body.body.token &&
+      typeof body.body.token === "string",
   });
 
   const token = body.body.token;

@@ -23,12 +23,8 @@ export default function () {
   const res = get("/api/profile/" + userId, { token });
 
   check(res, {
-    "status is ok": (r) => {
-      console.log("status is ok|profile.js|" + r.status);
-      return r.status === 200
-    },
+    "status is ok": (r) => r.status === 200,
   });
-  
 
   const data = res.json();
 
@@ -47,10 +43,7 @@ export default function () {
   });
 
   check(otherProfile, {
-    "other profile is ok": (p) => {
-      console.log("other profile is ok|" + p.status);
-      return p.status === 200
-    },
+    "other profile is ok": (p) => p.status === 200,
   });
 
   const otherProfileData = otherProfile.json().body;

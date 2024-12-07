@@ -60,7 +60,7 @@ connected_users2 AS (
     SELECT DISTINCT ON (c.to_id) c.to_id AS user_id, c1_id, c1_full_name, u.id as c2_id, u.full_name as c2_full_name
     FROM connection c
     JOIN connected_users1 c1 ON c1.user_id = c.from_id
-    JOIN users u ON c.from_id = u.id
+    JOIN users u ON c.to_id = u.id
     WHERE c.to_id != ${currentUserId}
 ),
 connected_users3 AS (

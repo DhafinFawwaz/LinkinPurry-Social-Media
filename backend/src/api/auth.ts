@@ -63,61 +63,61 @@ app.openapi(
       const start = Date.now();
       await db.$queryRaw`SELECT 1`;
       const end = Date.now();
-      
 
 
-      let user = await db.user.findFirst({
-        where: {
-          OR: [
-            {
-              email: identifier
-            },
-            {
-              username: identifier
-            }
-          ]
-        },
 
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          password_hash: true,
-          full_name: true,
-          work_history: true,
-          skills: true,
-          profile_photo_path: true,
-        }
-      })
+      // let user = await db.user.findFirst({
+      //   where: {
+      //     OR: [
+      //       {
+      //         email: identifier
+      //       },
+      //       {
+      //         username: identifier
+      //       }
+      //     ]
+      //   },
+
+      //   select: {
+      //     id: true,
+      //     username: true,
+      //     email: true,
+      //     password_hash: true,
+      //     full_name: true,
+      //     work_history: true,
+      //     skills: true,
+      //     profile_photo_path: true,
+      //   }
+      // })
       const timeTakenInMs = end - start;
-      if(!user) {
-        c.status(401)
-        return c.json({
-          success: false,
-          message: 'Login failed, user not found',
-          errors: {
-            identifier: 'Username or email not found',
-          }
-        })
-      }
-      const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-      if(!isPasswordValid) {
-        c.status(401)
-        return c.json({
-          success: false,
-          message: 'Login failed, password is incorrect',
-          errors: {
-            password: 'Password is incorrect',
-          }
-        })
-      }
-      const token = await login(c, Number(user.id), user.username, user.email, user.full_name, user.work_history, user.skills, user.profile_photo_path)
+      // if(!user) {
+      //   c.status(401)
+      //   return c.json({
+      //     success: false,
+      //     message: 'Login failed, user not found',
+      //     errors: {
+      //       identifier: 'Username or email not found',
+      //     }
+      //   })
+      // }
+      // const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+      // if(!isPasswordValid) {
+      //   c.status(401)
+      //   return c.json({
+      //     success: false,
+      //     message: 'Login failed, password is incorrect',
+      //     errors: {
+      //       password: 'Password is incorrect',
+      //     }
+      //   })
+      // }
+      // const token = await login(c, Number(user.id), user.username, user.email, user.full_name, user.work_history, user.skills, user.profile_photo_path)
       
       return c.json({
         success: true,
         message: 'Login success',
         body: {
-            token: token,
+            token: "token",
             querytime: timeTakenInMs,
         }
       })

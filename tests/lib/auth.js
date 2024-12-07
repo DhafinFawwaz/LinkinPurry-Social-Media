@@ -8,7 +8,6 @@ export function login(identifier, password) {
     password,
   });
   const end = new Date();
-  console.log("api time: " + end - start);
 
   check(res, {
     "status is ok login": (r) => {
@@ -23,6 +22,7 @@ export function login(identifier, password) {
     console.log(body);
   }
 
+  console.log("api time: " + end - start);
   console.log("query time: " + body.body.querytime);
 
   check(body, {

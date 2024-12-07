@@ -22,7 +22,9 @@ export function login(identifier, password) {
   check(body, {
     "there is a token is valid":
       () => {
-        console.log("there is a token is valid|auth.js|" + body);
+        try{
+          console.log("there is a token is valid|auth.js|" + body.body.token);
+        } catch(e){}
 
         return body &&
         body.body &&

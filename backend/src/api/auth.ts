@@ -85,7 +85,7 @@ app.openapi(
         c.status(401)
         return c.json({
           success: false,
-          message: 'Login failed',
+          message: 'Login failed, user not found',
           errors: {
             identifier: 'Username or email not found',
           }
@@ -96,7 +96,7 @@ app.openapi(
         c.status(401)
         return c.json({
           success: false,
-          message: 'Login failed',
+          message: 'Login failed, password is incorrect',
           errors: {
             password: 'Password is incorrect',
           }
@@ -115,7 +115,7 @@ app.openapi(
       c.status(401)
       return c.json({
         success: false,
-        message: 'Login failed',
+        message: 'Login failed, ' + e,
       })
     }
   }

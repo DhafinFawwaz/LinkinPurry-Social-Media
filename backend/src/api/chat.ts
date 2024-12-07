@@ -134,7 +134,9 @@ app.openapi(
         from: z.object(UserSchema()),
         to: z.object(UserSchema()),
       }),
+      400: DefaultJsonResponse("Invalid chat"),
       401: DefaultJsonResponse("Unauthorized"),
+      404: DefaultJsonResponse("User not found"),
     },
     middleware: authenticated
   }), async (c) => {

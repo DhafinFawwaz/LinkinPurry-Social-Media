@@ -15,7 +15,8 @@ app.openapi(
       tags: ['Recommendation'],
       responses: {
         200: DefaultJsonArrayResponse("Getting recommendation successful", UserPrimitiveSchema()),
-        401: DefaultJsonResponse("Unauthorized")
+        401: DefaultJsonResponse("Unauthorized"),
+        500: DefaultJsonResponse("Failed to get recommendation")
       },
       middleware: authenticated
     }), async (c) => {
@@ -88,7 +89,7 @@ WHERE cu1.user_id IS NULL;
         
     } catch(e) {
       console.log(e)
-      c.status(422)
+      c.status(500)
       return c.json({
           success: false,
           message: 'Getting recommendation failed',

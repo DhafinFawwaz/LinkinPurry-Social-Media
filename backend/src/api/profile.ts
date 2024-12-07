@@ -601,7 +601,9 @@ app.openapi(
     },
     responses: {
       200: DefaultJsonResponse("Accept connection request from another user successful"),
-      401: DefaultJsonResponse("Unauthorized")
+      400: DefaultJsonResponse("Failed to accept connection request"),
+      401: DefaultJsonResponse("Unauthorized"),
+      404: DefaultJsonResponse("Failed to find connection request")
     },
     middleware: authenticated
   }), async (c) => {
@@ -660,7 +662,7 @@ app.openapi(
     });
 
     if(!connectionRequestTargetToMe) {
-      c.status(400);
+      c.status(404);
       return c.json({
         success: false,
         message: 'Connection request not found',
@@ -715,7 +717,9 @@ app.openapi(
     },
     responses: {
       200: DefaultJsonResponse("Deny connection request from another user successful"),
-      401: DefaultJsonResponse("Unauthorized")
+      400: DefaultJsonResponse("Failed to deny connection request"),
+      401: DefaultJsonResponse("Unauthorized"),
+      404: DefaultJsonResponse("Failed to find connection request")
     },
     middleware: authenticated
   }), async (c) => {
@@ -773,7 +777,7 @@ app.openapi(
       }
     });
     if(!connectionRequestTargetToMe) {
-      c.status(400);
+      c.status(404);
       return c.json({
         success: false,
         message: 'Connection request not found',
@@ -810,7 +814,9 @@ app.openapi(
     },
     responses: {
       200: DefaultJsonResponse("Disconnecting another user successful"),
-      401: DefaultJsonResponse("Unauthorized")
+      400: DefaultJsonResponse("Failed to disconnect"),
+      401: DefaultJsonResponse("Unauthorized"),
+      404: DefaultJsonResponse("Failed to find connection")
     },
     middleware: authenticated
   }), async (c) => {
@@ -863,7 +869,7 @@ app.openapi(
       }
     })
     if(!connection2Way) {
-      c.status(400);
+      c.status(404);
       return c.json({
         success: false,
         message: 'Connection not found',

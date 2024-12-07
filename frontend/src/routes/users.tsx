@@ -36,7 +36,7 @@ export default function Users() {
     <>
     {value?.body.map((user, i) => (<ListTile key={i}
       title={user.full_name!} 
-      subtitle={new Date(user.created_at).toLocaleString()}
+      subtitle={"Joined on " + new Date(user.created_at).toLocaleString()}
       imageSrc={toImageSrc(user.profile_photo_path)}
       href={`/profile/${user.id}`}
       >

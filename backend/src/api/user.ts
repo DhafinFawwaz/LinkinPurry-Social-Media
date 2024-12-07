@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse } from '../schema.js'
+import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse, UserSchema } from '../schema.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
 
@@ -17,7 +17,7 @@ app.openapi(
       })
     },
     responses: {
-      200: DefaultJsonArrayResponse("Getting users successful", PostSchema()),
+      200: DefaultJsonArrayResponse("Getting users successful", UserSchema()),
       401: DefaultJsonResponse("Unauthorized")
     },
   }), async (c) => {
@@ -28,7 +28,12 @@ app.openapi(
           contains: search,
           mode: "insensitive",
         },
-      },
+      }, select: {
+        id: true,
+        full_name: true,
+        profile_photo_path: true,
+        created_at: true,
+      }
     });
     return c.json({
       success: true,

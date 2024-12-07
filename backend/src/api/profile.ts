@@ -62,8 +62,18 @@ app.openapi(
       where: {
         to_id: user.id
       },
-      include: {
-        from: true,
+      // include: {
+      //   from: true,
+      // }
+      select: {
+        from: {
+          select: {
+            id: true,
+            full_name: true,
+            profile_photo_path: true,
+          }
+        },
+        created_at: true,
       }
     });
 
@@ -71,8 +81,18 @@ app.openapi(
       where: {
         from_id: user.id
       },
-      include: {
-        to: true,
+      // include: {
+      //   to: true,
+      // }
+      select: {
+        to: {
+          select: {
+            id: true,
+            full_name: true,
+            profile_photo_path: true,
+          }
+        },
+        created_at: true,
       }
     });
 
@@ -123,8 +143,18 @@ app.openapi(
       where: {
         to_id: user.id
       },
-      include: {
-        from: true,
+      // include: {
+      //   from: true,
+      // }
+      select: {
+        from: {
+          select: {
+            id: true,
+            full_name: true,
+            profile_photo_path: true,
+          }
+        },
+        created_at: true,
       }
     });
 

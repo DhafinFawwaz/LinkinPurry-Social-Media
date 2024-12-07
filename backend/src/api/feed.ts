@@ -249,7 +249,7 @@ app.openapi(
       const post = await db.feed.findUnique({
         where: {
           id: post_id
-        }
+        }, select: { user_id: true }
       })
 
       if(!post) {
@@ -333,7 +333,7 @@ app.openapi(
       const post = await db.feed.findUnique({
         where: {
           id: post_id
-        }
+        }, select: { user_id: true }
       })
 
       if(!post) {

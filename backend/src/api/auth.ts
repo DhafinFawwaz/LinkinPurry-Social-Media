@@ -150,7 +150,7 @@ app.openapi(
       let user = await db.user.findUnique({
         where: {
           email
-        }
+        }, select: { id: true }
       })
       if(user) {
         c.status(422)
@@ -165,7 +165,7 @@ app.openapi(
       user = await db.user.findUnique({
         where: {
           username
-        }
+        }, select: { id: true }
       })
       if(user) {
         c.status(422)

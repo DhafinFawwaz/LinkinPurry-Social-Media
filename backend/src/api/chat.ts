@@ -154,7 +154,7 @@ app.openapi(
     const targetUser = await db.user.findUnique({
       where: {
         id: target_user_id
-      }
+      }, select: { id: true, full_name: true, profile_photo_path: true }
     })
     if(!targetUser) {
       c.status(404)

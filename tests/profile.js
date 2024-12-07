@@ -50,7 +50,7 @@ export default function () {
 
   check(otherProfile, {
     "other profile is ok": (p) => {
-      console.log("other profile is ok|" + r.status);
+      console.log("other profile is ok|" + p.status);
       return p.status === 200
     },
   });

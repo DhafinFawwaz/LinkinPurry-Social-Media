@@ -62,16 +62,16 @@ app.openapi(
 
       // timer
       const start = Date.now();
-      const user: User = await db.$queryRaw`
+      const userList: User[] = await db.$queryRaw`
 SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
 FROM users
 WHERE username = ${identifier} OR email = ${identifier}
-      `
+LIMIT 1;`
+
       const end = Date.now();
 
-
       const timeTakenInMs = end - start;
-      if(!user) {
+      if(userList.length === 0) {
         c.status(401)
         return c.json({
           success: false,
@@ -81,6 +81,8 @@ WHERE username = ${identifier} OR email = ${identifier}
           }
         })
       }
+      const user = userList[0];
+
       const isPasswordValid = await bcrypt.compare(password, user.password_hash);
       if(!isPasswordValid) {
         c.status(401)

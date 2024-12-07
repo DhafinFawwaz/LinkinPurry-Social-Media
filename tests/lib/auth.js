@@ -22,13 +22,14 @@ export function login(identifier, password) {
     console.log(body);
   }
 
-  console.log("api time: " + end - start);
-  console.log("query time: " + body.body.querytime);
-
+  
   check(body, {
     "there is a token is valid":
-      () => {
-        try{
+    () => {
+      try{
+          console.log("api time: " + end - start);
+          console.log("query time: " + body.body.querytime);
+          console.log("query time2: " + body.body.querytime2);
           console.log("there is a token is valid|auth.js|" + body.body.token);
 
         } catch(e){}

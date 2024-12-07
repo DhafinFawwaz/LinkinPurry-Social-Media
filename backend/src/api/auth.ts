@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import type { Context } from 'hono';
 import { authenticated, type JwtContent } from "../middlewares/authenticated.js"
+import type { User } from '@prisma/client';
 
 const app = new OpenAPIHono()
 
@@ -61,46 +62,13 @@ app.openapi(
 
       // timer
       const start = Date.now();
-      let user = await db.user.findUnique({
-        where: {
-          username: identifier
-        },
-
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          password_hash: true,
-          full_name: true,
-          work_history: true,
-          skills: true,
-          profile_photo_path: true,
-        }
-      })
+      const user: User = await db.$queryRaw`
+SELECT id, username, email, password_hash, full_name, work_history, skills, profile_photo_path
+FROM users
+WHERE username = ${identifier} OR email = ${identifier}
+      `
       const end = Date.now();
-      let timeTakenInMs2 = 0;
 
-      if(!user) {
-        const start2 = Date.now();
-        user = await db.user.findUnique({
-          where: {
-            email: identifier
-          },
-  
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            password_hash: true,
-            full_name: true,
-            work_history: true,
-            skills: true,
-            profile_photo_path: true,
-          }
-        })
-        const end2 = Date.now();
-        timeTakenInMs2 = end2 - start2;
-      }
 
       const timeTakenInMs = end - start;
       if(!user) {
@@ -137,7 +105,6 @@ app.openapi(
         body: {
             token: token,
             querytime: timeTakenInMs,
-            querytime2: timeTakenInMs2
         }
       })
     } catch(e) {

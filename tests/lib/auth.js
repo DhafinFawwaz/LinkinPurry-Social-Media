@@ -2,12 +2,10 @@ import { check } from "k6";
 import { post } from "./request.js";
 
 export function login(identifier, password) {
-  const start = new Date();
   const res = post("/api/login", {
     identifier,
     password,
   });
-  const end = new Date();
 
   check(res, {
     "status is ok login": (r) => {
@@ -27,11 +25,8 @@ export function login(identifier, password) {
     "there is a token is valid":
     () => {
       try{
-          console.log("api time: " + end - start);
           console.log("query time: " + body.body.querytime);
-          console.log("query time2: " + body.body.querytime2);
           console.log("there is a token is valid|auth.js|" + body.body.token);
-
         } catch(e){}
 
         return body &&

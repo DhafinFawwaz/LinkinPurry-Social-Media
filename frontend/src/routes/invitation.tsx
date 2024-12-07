@@ -3,7 +3,8 @@ import useFetchApi, { fetchApi } from "../hooks/useFetchApi";
 import { ConnectionInviteResponse, ConnectionRequestsResponse, User } from "../type";
 import toImageSrc from "../utils/image";
 import ListTile from "../components/list-tile";
-
+import { ToastContainer, toast, Zoom } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; 
 
 export default function Invitation() {
   const { loading, value, error, recall } = useFetchApi<ConnectionInviteResponse>(
@@ -16,10 +17,11 @@ export default function Invitation() {
       method: "POST",
     })
     if(!res.ok) {
-      alert("Accepting failed");
+      toast.error("Accepting failed. Please try again.");
       return;
     }
 
+    toast.success(`Accepted ${user.full_name}'s request.`);
     recall();
   }
 
@@ -28,16 +30,25 @@ export default function Invitation() {
       method: "DELETE",
     });
     if(!res.ok) {
-      alert("Denying failed");
+      toast.error("Denying failed. Please try again.");
       return;
     }
-  
+    
+    toast.success(`Denied ${user.full_name}'s request.`);
     recall();
   }
 
 
 
   return (<>
+<ToastContainer
+  position="bottom-left"
+  hideProgressBar={true}
+  transition={Zoom}
+  autoClose={3000} 
+  draggable
+/>
+
 <section className="mt-16 mb-2">
   <div className="flex flex-col min-h-dvh min-h-screen items-center px-2 sm:px-5 mx-auto gap-2 pt-4 sm:pt-0 max-w-lg">
 {loading ? 

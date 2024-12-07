@@ -76,7 +76,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Post updated successfully!");
+      toast.success("Post updated successfully.");
       setEditDialogOpen(false);
       recall();
     } catch (error) {
@@ -97,7 +97,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Post deleted successfully!");
+      toast.success("Post deleted successfully.");
       setDeleteDialogOpen(false);
       recall();
     } catch (error) {
@@ -125,7 +125,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Profile updated successfully!");
+      toast.success("Profile updated successfully.");
       recall();
       setIsDialogOpen(false);
       setFile(undefined);
@@ -159,7 +159,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Request sent!");
+      toast.success("Request sent.");
       recall();
     } catch (error) {
       console.error(error);
@@ -176,7 +176,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Disconnected successfully!");
+      toast.success("Connection removed.");
       recall();
     } catch (error) {
       console.error(error);
@@ -193,7 +193,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Request accepted!");
+      toast.success("Request accepted.");
       recall();
     } catch (error) {
       console.error(error);
@@ -210,7 +210,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         return;
       }
 
-      toast.success("Request denied!");
+      toast.success("Request denied.");
       recall();
     } catch (error) {
       console.error(error);

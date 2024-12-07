@@ -32,15 +32,18 @@ async function main() {
     const usersData = await Promise.all(
         Array.from({ length: userCount }).map(async (e, i) => {
             const saltRound = 10;
-            const password = "password123";
+            // const password = "password123";
+            const password = `password${i+1}`;
             const hashedPassword = await bcrypt.hash(password, saltRound);
-            const firstName = uniqueFirstNames.pop()! + "_" + i; // faker.helpers.uniqueArray is probably bugged
+            // const firstName = uniqueFirstNames.pop()! + "_" + i; // faker.helpers.uniqueArray is probably bugged
+            const firstName = `user${i+1}wbd`; // faker.helpers.uniqueArray is probably bugged
             const lastName = faker.person.lastName();
             const fullName = `${firstName} ${lastName}`;
             const email = faker.internet.email({
                 firstName: firstName,
                 lastName: lastName,
             });
+
             return {
                 username: firstName,
                 email: email,

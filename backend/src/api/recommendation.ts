@@ -77,12 +77,9 @@ WHERE cu1.user_id IS NULL;
         `;
 
 
-        console.log(recommendation3rd[0])
-
-
         return c.json({
             success: true,
-            message: 'Getting 2nd recommendation successful',
+            message: 'Getting recommendation successful',
             body: {
                 users2nd: recommendation2nd,
                 users3rd: recommendation3rd
@@ -94,7 +91,7 @@ WHERE cu1.user_id IS NULL;
       c.status(422)
       return c.json({
           success: false,
-          message: 'Getting list of posts failed',
+          message: 'Getting recommendation failed',
       })
     }
   }

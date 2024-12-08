@@ -188,7 +188,7 @@ app.openapi(
 async function getConnectionCount(user_id: number) {
   const cached = await getConnectionCountCache(user_id);
   if(cached) {
-    console.log("\x1b[32mCached\x1b[0m")
+    // console.log("\x1b[32mCached\x1b[0m")
     return cached;
   }
 

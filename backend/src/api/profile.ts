@@ -242,170 +242,360 @@ app.openapi(
     }), async (c) => {
       const user = await getUser(c) as JwtContent;
       const { user_id } = c.req.valid("param");
-
-      // case logged in & owner (do it early to avoid unnecessary db queries)
-      if(user && user.id === user_id) {
-        // console.log(connection_count)
-        const user = await db.user.findUnique({
-          where: {
-            id: user_id
-          },
-          include: {
-            feeds: true,
-          }
-        });
-        if(!user) { // happens when user is deleted but someone still has the token in their browser. Logout the user
-          c.status(400);
-          deleteCookie(c, "token");
-          return c.json({
-            success: false,
-            message: 'User not found. Account might have been deleted',
-            body: {}
-          })
-        }
-        const connection_count = await getConnectionCount(user_id);
-
-        return c.json({
-          success: true,
-          message: '',
-          body: {
-            username: user.username,
-            name: user.full_name,
-            work_history: user.work_history,
-            skills: user.skills,
-            connection_count: connection_count,
-            profile_photo_path: user.profile_photo_path,
-            relevant_posts: user.feeds,
-            connection: "owner",
-          }
-        })
-      }
-
-      if(!user) { // case public
-        const targetUser = await db.user.findUnique({
-          where: {
-            id: user_id
-          }
-        })
-        if(!targetUser) { // case target user not found
+      
+      if(!user) { // public
+        const result: any[] = await db.$queryRaw`
+WITH target_user AS (
+  SELECT
+    id,
+    username,
+    full_name,
+    work_history,
+    skills,
+    profile_photo_path,
+    (
+      SELECT COUNT(*)
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count
+  FROM users
+  WHERE id = ${user_id}
+)
+SELECT
+  tu.*,
+  'public' as connection
+FROM target_user tu
+        `;
+        if (result.length === 0) {
           c.status(404);
           return c.json({
             success: false,
             message: 'User not found',
             body: {}
-          })
+          });
         }
+
+        const userProfile = result[0];
+
         return c.json({
           success: true,
           message: '',
           body: {
-            username: targetUser.username,
-            name: targetUser.full_name,
-            work_history: targetUser.work_history,
-            skills: targetUser.skills,
-            connection_count: await getConnectionCount(user_id),
-            profile_photo_path: targetUser.profile_photo_path,
-            connection: "public",
+            username: userProfile.username,
+            name: userProfile.full_name,
+            work_history: userProfile.work_history,
+            skills: userProfile.skills,
+            connection_count: userProfile.connection_count,
+            profile_photo_path: userProfile.profile_photo_path,
+            connection: userProfile.connection,
           }
-        })
-      } else { // case logged in & (not_connected/connection_requested/connection_received/connected)
-        const connected = await db.connection.findUnique({
-          where: {
-            from_id_to_id: {
-              from_id: user.id,
-              to_id: user_id
-            }
-          }
-        })
-        if(connected) {
-          const targetUser = await db.user.findUnique({
-            where: {
-              id: user_id
-            },
-            include: {
-              feeds: true,
-            }
-          })
-          if(!targetUser) { // case target user not found
-            c.status(404);
-            return c.json({
-              success: false,
-              message: 'User not found',
-              body: {}
-            })
-          }
-          return c.json({
-            success: true,
-            message: '',
-            body: {
-              username: targetUser.username,
-              name: targetUser.full_name,
-              work_history: targetUser.work_history,
-              skills: targetUser.skills,
-              connection_count: await getConnectionCount(user_id),
-              profile_photo_path: targetUser.profile_photo_path,
-              relevant_posts: targetUser.feeds,
-              connection: "connected",
-            }
-          })
-        } else { // case not_connected/connection_requested
-          let connection = "not_connected"
-          const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
-            where: {
-              from_id_to_id: {
-                from_id: user.id,
-                to_id: user_id
-              }
-            }
-          })
-          if(connectionRequestMeToTarget) {
-            connection = "connection_requested"
-          } else {
-            const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
-              where: {
-                from_id_to_id: {
-                  from_id: user_id,
-                  to_id: user.id
-                }
-              }
-            })
-            if(connectionRequestTargetToMe) {
-              connection = "connection_received"
-            }
-          }
+        });
+      }      
 
-          const targetUser = await db.user.findUnique({
-            where: {
-              id: user_id
-            },
-            include: {
-              feeds: true,
-            }
-          })
-          if(!targetUser) { // case target user not found
-            c.status(404);
-            return c.json({
-              success: false,
-              message: 'User not found',
-              body: {}
-            })
-          }
+      if(user.id === user_id) { // owner
+        const result: any[] = await db.$queryRaw`
+WITH target_user AS (
+  SELECT
+    id,
+    username,
+    full_name,
+    work_history,
+    skills,
+    profile_photo_path,
+    (
+      SELECT COUNT(*)
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count,
+    (
+      SELECT json_agg(feed.*)
+      FROM feed
+      WHERE feed.user_id = users.id
+    ) as relevant_posts
+  FROM users
+  WHERE id = ${user_id}
+)
+SELECT
+  tu.*,
+  'owner' as connection
+FROM target_user tu
+        `;
+        if (result.length === 0) {
+          c.status(404);
           return c.json({
-            success: true,
-            message: '',
-            body: {
-              username: targetUser.username,
-              name: targetUser.full_name,
-              work_history: targetUser.work_history,
-              skills: targetUser.skills,
-              connection_count: await getConnectionCount(user_id),
-              profile_photo_path: targetUser.profile_photo_path,
-              relevant_posts: targetUser.feeds,
-              connection: connection,
-            }
-          })
+            success: false,
+            message: 'User not found',
+            body: {}
+          });
         }
+
+        const userProfile = result[0];
+
+        return c.json({
+          success: true,
+          message: '',
+          body: {
+            username: userProfile.username,
+            name: userProfile.full_name,
+            work_history: userProfile.work_history,
+            skills: userProfile.skills,
+            connection_count: userProfile.connection_count,
+            profile_photo_path: userProfile.profile_photo_path,
+            relevant_posts: userProfile.relevant_posts,
+            connection: userProfile.connection,
+          }
+        });
+
       }
+
+      try {
+        const result: any[] = await db.$queryRaw`
+WITH target_user AS (
+  SELECT 
+    id, 
+    username, 
+    full_name, 
+    work_history, 
+    skills, 
+    profile_photo_path,
+    (
+      SELECT COUNT(*) 
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count,
+    (
+      SELECT json_agg(feed.*)
+      FROM feed
+      WHERE feed.user_id = users.id
+    ) as relevant_posts
+  FROM users
+  WHERE id = ${user_id}
+),
+connection_status AS (
+  SELECT 
+    CASE 
+      WHEN EXISTS (
+        SELECT 1 
+        FROM connection 
+        WHERE (from_id = ${user.id} AND to_id = ${user_id}) OR (from_id = ${user_id} AND to_id = ${user.id})
+      ) THEN 'connected'
+      WHEN EXISTS (
+        SELECT 1 
+        FROM connection_request
+        WHERE from_id = ${user.id} AND to_id = ${user_id}
+      ) THEN 'connection_requested'
+      WHEN EXISTS (
+        SELECT 1 
+        FROM connection_request
+        WHERE from_id = ${user_id} AND to_id = ${user.id}
+      ) THEN 'connection_received'
+      ELSE 'not_connected'
+    END as status
+)
+SELECT 
+  tu.*,
+  cs.status as connection
+FROM target_user tu, connection_status cs
+      `;
+
+        if (result.length === 0) {
+          c.status(404);
+          return c.json({
+            success: false,
+            message: 'User not found',
+            body: {}
+          });
+        }
+
+        const userProfile = result[0];
+
+        return c.json({
+          success: true,
+          message: '',
+          body: {
+            username: userProfile.username,
+            name: userProfile.full_name,
+            work_history: userProfile.work_history,
+            skills: userProfile.skills,
+            connection_count: userProfile.connection_count,
+            profile_photo_path: userProfile.profile_photo_path,
+            relevant_posts: userProfile.relevant_posts,
+            connection: userProfile.connection,
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        c.status(500);
+        return c.json({
+          success: false,
+          message: 'Internal server error',
+          body: {}
+        });
+      }
+
+      // // case logged in & owner (do it early to avoid unnecessary db queries)
+      // if(user && user.id === user_id) {
+      //   // console.log(connection_count)
+      //   const user = await db.user.findUnique({
+      //     where: {
+      //       id: user_id
+      //     },
+      //     include: {
+      //       feeds: true,
+      //     }
+      //   });
+      //   if(!user) { // happens when user is deleted but someone still has the token in their browser. Logout the user
+      //     c.status(400);
+      //     deleteCookie(c, "token");
+      //     return c.json({
+      //       success: false,
+      //       message: 'User not found. Account might have been deleted',
+      //       body: {}
+      //     })
+      //   }
+      //   const connection_count = await getConnectionCount(user_id);
+
+      //   return c.json({
+      //     success: true,
+      //     message: '',
+      //     body: {
+      //       username: user.username,
+      //       name: user.full_name,
+      //       work_history: user.work_history,
+      //       skills: user.skills,
+      //       connection_count: connection_count,
+      //       profile_photo_path: user.profile_photo_path,
+      //       relevant_posts: user.feeds,
+      //       connection: "owner",
+      //     }
+      //   })
+      // }
+
+      // if(!user) { // case public
+      //   const targetUser = await db.user.findUnique({
+      //     where: {
+      //       id: user_id
+      //     }
+      //   })
+      //   if(!targetUser) { // case target user not found
+      //     c.status(404);
+      //     return c.json({
+      //       success: false,
+      //       message: 'User not found',
+      //       body: {}
+      //     })
+      //   }
+      //   return c.json({
+      //     success: true,
+      //     message: '',
+      //     body: {
+      //       username: targetUser.username,
+      //       name: targetUser.full_name,
+      //       work_history: targetUser.work_history,
+      //       skills: targetUser.skills,
+      //       connection_count: await getConnectionCount(user_id),
+      //       profile_photo_path: targetUser.profile_photo_path,
+      //       connection: "public",
+      //     }
+      //   })
+      // } else { // case logged in & (not_connected/connection_requested/connection_received/connected)
+      //   const connected = await db.connection.findUnique({
+      //     where: {
+      //       from_id_to_id: {
+      //         from_id: user.id,
+      //         to_id: user_id
+      //       }
+      //     }
+      //   })
+      //   if(connected) {
+      //     const targetUser = await db.user.findUnique({
+      //       where: {
+      //         id: user_id
+      //       },
+      //       include: {
+      //         feeds: true,
+      //       }
+      //     })
+      //     if(!targetUser) { // case target user not found
+      //       c.status(404);
+      //       return c.json({
+      //         success: false,
+      //         message: 'User not found',
+      //         body: {}
+      //       })
+      //     }
+      //     return c.json({
+      //       success: true,
+      //       message: '',
+      //       body: {
+      //         username: targetUser.username,
+      //         name: targetUser.full_name,
+      //         work_history: targetUser.work_history,
+      //         skills: targetUser.skills,
+      //         connection_count: await getConnectionCount(user_id),
+      //         profile_photo_path: targetUser.profile_photo_path,
+      //         relevant_posts: targetUser.feeds,
+      //         connection: "connected",
+      //       }
+      //     })
+      //   } else { // case not_connected/connection_requested
+      //     let connection = "not_connected"
+      //     const connectionRequestMeToTarget = await db.connectionRequest.findUnique({
+      //       where: {
+      //         from_id_to_id: {
+      //           from_id: user.id,
+      //           to_id: user_id
+      //         }
+      //       }
+      //     })
+      //     if(connectionRequestMeToTarget) {
+      //       connection = "connection_requested"
+      //     } else {
+      //       const connectionRequestTargetToMe = await db.connectionRequest.findUnique({
+      //         where: {
+      //           from_id_to_id: {
+      //             from_id: user_id,
+      //             to_id: user.id
+      //           }
+      //         }
+      //       })
+      //       if(connectionRequestTargetToMe) {
+      //         connection = "connection_received"
+      //       }
+      //     }
+
+      //     const targetUser = await db.user.findUnique({
+      //       where: {
+      //         id: user_id
+      //       },
+      //       include: {
+      //         feeds: true,
+      //       }
+      //     })
+      //     if(!targetUser) { // case target user not found
+      //       c.status(404);
+      //       return c.json({
+      //         success: false,
+      //         message: 'User not found',
+      //         body: {}
+      //       })
+      //     }
+      //     return c.json({
+      //       success: true,
+      //       message: '',
+      //       body: {
+      //         username: targetUser.username,
+      //         name: targetUser.full_name,
+      //         work_history: targetUser.work_history,
+      //         skills: targetUser.skills,
+      //         connection_count: await getConnectionCount(user_id),
+      //         profile_photo_path: targetUser.profile_photo_path,
+      //         relevant_posts: targetUser.feeds,
+      //         connection: connection,
+      //       }
+      //     })
+      //   }
+      // }
   }
 )
 

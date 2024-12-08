@@ -252,12 +252,12 @@ WITH target_user AS (
     full_name,
     work_history,
     skills,
-    profile_photo_path--,
-    -- (
-    --   SELECT COUNT(*)
-    --   FROM connection
-    --   WHERE from_id = users.id OR to_id = users.id
-    -- ) as connection_count
+    profile_photo_path,
+    (
+      SELECT COUNT(*)
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count
   FROM users
   WHERE id = ${user_id}
 )
@@ -285,8 +285,8 @@ FROM target_user tu
             name: userProfile.full_name,
             work_history: userProfile.work_history,
             skills: userProfile.skills,
-            connection_count: await getConnectionCount(user_id),
-            // connection_count: userProfile.connection_count,
+            // connection_count: await getConnectionCount(user_id),
+            connection_count: userProfile.connection_count,
             profile_photo_path: userProfile.profile_photo_path,
             connection: userProfile.connection,
           }
@@ -303,11 +303,11 @@ WITH target_user AS (
     work_history,
     skills,
     profile_photo_path,
-    -- (
-    --   SELECT COUNT(*)
-    --   FROM connection
-    --   WHERE from_id = users.id OR to_id = users.id
-    -- ) as connection_count,
+    (
+      SELECT COUNT(*)
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count,
     (
       SELECT json_agg(feed.*)
       FROM feed
@@ -340,8 +340,8 @@ FROM target_user tu
             name: userProfile.full_name,
             work_history: userProfile.work_history,
             skills: userProfile.skills,
-            // connection_count: userProfile.connection_count,
-            connection_count: await getConnectionCount(user_id),
+            connection_count: userProfile.connection_count,
+            // connection_count: await getConnectionCount(user_id),
             profile_photo_path: userProfile.profile_photo_path,
             relevant_posts: userProfile.relevant_posts,
             connection: userProfile.connection,
@@ -360,11 +360,11 @@ WITH target_user AS (
     work_history, 
     skills, 
     profile_photo_path,
-    -- (
-    --   SELECT COUNT(*) 
-    --   FROM connection
-    --   WHERE from_id = users.id OR to_id = users.id
-    -- ) as connection_count,
+    (
+      SELECT COUNT(*) 
+      FROM connection
+      WHERE from_id = users.id OR to_id = users.id
+    ) as connection_count,
     (
       SELECT json_agg(feed.*)
       FROM feed
@@ -419,8 +419,8 @@ FROM target_user tu, connection_status cs
             name: userProfile.full_name,
             work_history: userProfile.work_history,
             skills: userProfile.skills,
-            // connection_count: userProfile.connection_count,
-            connection_count: await getConnectionCount(user_id),
+            connection_count: userProfile.connection_count,
+            // connection_count: await getConnectionCount(user_id),
             profile_photo_path: userProfile.profile_photo_path,
             relevant_posts: userProfile.relevant_posts,
             connection: userProfile.connection,

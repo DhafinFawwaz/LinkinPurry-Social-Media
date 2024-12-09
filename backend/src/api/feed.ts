@@ -67,7 +67,7 @@ app.openapi(
 
       const cached = await getFeedCache(cursor, limit);
       if(cached) {
-        // console.log("\x1b[32mCached\x1b[0m")
+        console.log("\x1b[32m[redis] Accessing Feed Cached\x1b[0m")
         return c.json(cached)
       }
 

@@ -153,12 +153,16 @@ docker run -it backend-tests
 ## ✨ Bonus
 
 ### Bonus: UI/UX Seperti LinkedIn
+![Linkedin like UI/UX](screenshots/linkedin-like-ui-ux.png)
 
 ### Bonus: Caching
+![Caching with Redis](screenshots/caching.png)
 
 ### Bonus: Connection Recommendation
+![Recommendation](screenshots/recommendation.png)
 
 ### Bonus: Typing Indicator
+![Typing Indicator](screenshots/typing-indicator.png)
 
 ### Bonus: Google Lighthouse
 

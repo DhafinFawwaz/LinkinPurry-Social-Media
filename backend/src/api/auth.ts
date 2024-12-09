@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonRequest, DefaultJsonResponse } from '../schema.js'
+import { DefaultJsonErrorResponse, DefaultJsonRequest, DefaultJsonResponse } from '../schema.js'
 import db from '../db/db.js'
 // import bcrypt 
 import { Jwt } from 'hono/utils/jwt';
@@ -54,7 +54,7 @@ app.openapi(
       200: DefaultJsonResponse("Login to an account successful", {
         token: z.string()
       }),
-      401: DefaultJsonResponse("Invalid credentials")
+      401: DefaultJsonErrorResponse("Invalid credentials")
     }
   }), async (c) => {
     try {

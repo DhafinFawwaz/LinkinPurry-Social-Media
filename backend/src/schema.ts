@@ -32,6 +32,22 @@ export function DefaultJsonArrayResponse(description: string, body?: z.ZodRawSha
     }
   }
 }
+export function DefaultJsonErrorResponse(description: string) {
+  const schema: { success: z.ZodBoolean, message: z.ZodString, error: z.ZodAny } = {
+    success: z.boolean(),
+    message: z.string(),
+    error: z.any()
+  }
+  return {
+    description: description,
+    content: {
+      'application/json': {
+        schema: z.object(schema)
+      }
+    }
+  }
+}
+
 
 export function DefaultJsonRequest(description: string | undefined = undefined, body: z.ZodRawShape) {
   return {

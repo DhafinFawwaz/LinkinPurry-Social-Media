@@ -28,11 +28,11 @@ cd ./if-3310-2024-2-k02-06
 Rename all .env.example files to .env
 ```bash
 cd ./frontend
-mv .env.example .env
+mv .env.example.dev .env
 cd ../backend
-mv .env.example .env
+mv .env.example.dev .env
 cd ../
-mv .env.example .env
+mv .env.example.dev .env
 ```
 
 ## 🔨 Running the Server

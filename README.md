@@ -28,12 +28,18 @@ cd ./if-3310-2024-2-k02-06
 Rename all .env.example files to .env
 ```bash
 cd ./frontend
-mv .env.example.dev .env
+mv .env.example .env
 cd ../backend
 mv .env.example.dev .env
 cd ../
-mv .env.example.dev .env
+mv .env.example .env
 ```
+
+For details:
+- `.env.example`: database
+- `frontend/.env.example`: frontend
+- `backend/.env.example.local`: backend, development version
+- `backend/.env.example`: backend, used in Github Action
 
 ## 🔨 Running the Server
 Make sure you have docker installed on your machine. 
@@ -48,6 +54,24 @@ npx tsx prisma/seed.ts
 ```
 
 Now, you can access the server at `http://localhost:4000`.
+
+Another tips, if you want the frontend to have hot reload, go to docker-compose.yaml and change from
+```
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+```
+to
+```
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+```
+
+Don't forget to remove the docker container and image for the frontend and rebuild the frontend container again.
+
 
 ## 📷 API Documentation
 API Documentation can be accessed at `http://localhost:4000/doc`. Here's a screenshot.

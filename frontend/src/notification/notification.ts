@@ -16,6 +16,15 @@ export function tryRegisterServiceWorker({ onNotGranted }: { onNotGranted?: (mes
 			for (const registration of registrations) {
 				if (registration.active?.scriptURL === `${window.location.origin}/sw.js`) {
 					console.log("sw.js exists")
+
+					const subscription = await registration.pushManager.getSubscription();
+					// check if expired
+					if(subscription && subscription.expirationTime && subscription.expirationTime < Date.now()) {
+						console.log("Subscription expired, removing service worker");
+						registration.unregister();
+						break;
+					}
+
 					if(!localStorage.getItem(notificationEndpointKey)) {
 						console.log("No endpoint found, removing service worker");
 						registration.unregister();
@@ -47,6 +56,7 @@ export function tryRegisterServiceWorker({ onNotGranted }: { onNotGranted?: (mes
 				userVisibleOnly: true,
 				applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
 			});
+			console.log("expirationTime: "+subscription.expirationTime);
 			
 			const res = await fetchApi(`/api/notification/subscribe`, {
 				method: "POST",

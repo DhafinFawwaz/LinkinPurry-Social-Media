@@ -1,0 +1,55 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.dev
+    volumes:
+      - ./backend/src:/home/node/app/src
+      - ./backend/uploads:/home/node/app/uploads
+      - ./backend/tsconfig.json:/home/node/app/tsconfig.json
+      - ./backend/nodemon.json:/home/node/app/nodemon.json
+      - ./backend/prisma:/home/node/app/prisma
+    ports:
+      - 3000:3000
+      - 5555:5555 # prisma studio
+    env_file: backend/.env
+    command: sh -c "npx prisma generate && npm run dev"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+    volumes:
+      - ./frontend/src:/home/node/app/src
+      - ./frontend/public:/home/node/app/public
+      - ./frontend/eslint.config.js:/home/node/app/eslint.config.js
+      - ./frontend/index.html:/home/node/app/index.html
+      - ./frontend/postcss.config.js:/home/node/app/postcss.config.js
+      - ./frontend/tailwind.config.js:/home/node/app/tailwind.config.js
+      - ./frontend/tsconfig.app.json:/home/node/app/tsconfig.app.json
+      - ./frontend/tsconfig.node.json:/home/node/app/tsconfig.node.json
+      - ./frontend/vite.config.ts:/home/node/app/vite.config.ts
+    ports:
+      - 4000:4000
+    env_file: frontend/.env
+
+  redis:
+    image: redis:7.4.0-alpine
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # tests:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.tests
+  #   environment:
+  #     - SERVER_ENDPOINT=http://localhost:3000
+  #   command: sh -c "npm run test:profile && npm run test:feed"

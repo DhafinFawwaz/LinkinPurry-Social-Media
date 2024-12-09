@@ -29,7 +29,7 @@ export type EditProfileSchema = z.infer<typeof EditProfileSchema>;
 
 
 
-export default function Profile({ logout }: { logout: () => void }) {
+export default function Profile({ logout, onProfileEdited }: { logout: () => void, onProfileEdited: () => void }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset} = useForm<EditProfileSchema>({mode: "all", resolver: zodResolver(EditProfileSchema)});
 
@@ -51,8 +51,9 @@ export default function Profile({ logout }: { logout: () => void }) {
         toast.error("Invalid file type. Please upload an image.");
         return;
       }
-    } catch (error) {
       setFile(file);
+    } catch (error) {
+      
     }
   }
 
@@ -165,6 +166,7 @@ export default function Profile({ logout }: { logout: () => void }) {
       }
 
       toast.success("Profile updated successfully.");
+      onProfileEdited();
       recall();
       setIsDialogOpen(false);
       setFile(undefined);
@@ -308,7 +310,7 @@ export default function Profile({ logout }: { logout: () => void }) {
   {selectedPost && (
     <div className="flex flex-col gap-4">
       <textarea
-        className="w-full p-2 border border-gray-300 rounded-lg"
+        className="w-full p-2 border border-gray-300 rounded-lg hover:border-blue-600 focus:border-blue-600 focus:bg-blue-50 focus:outline-none"
         value={selectedPost.content}
         onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
       />
@@ -332,7 +334,7 @@ export default function Profile({ logout }: { logout: () => void }) {
       <p className='text-center'>Are you sure you want to delete this post?</p>
       <button
         onClick={handleDeletePost}
-        className="bg-red-500 font-semibold text-white px-4 py-2 rounded-lg"
+        className="bg-red-500 hover:bg-red-600 font-semibold text-white px-4 py-2 rounded-lg"
       >
         Delete
       </button>

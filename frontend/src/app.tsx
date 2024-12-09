@@ -86,7 +86,7 @@ isAuthenticated() ? <>
 />
 <Routes>
     <Route path='/' element={<Feed user={value?.body}/>}></Route>
-    <Route path='/profile/:user_id' element={<Profile logout={logout}/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile logout={logout} onProfileEdited={recall}/>}></Route>
     <Route path='/chat' element={<ChatBase/>}></Route>
     <Route path='/chat/:user_id' element={<Chat user={value?.body}/>}></Route>
     <Route path='/invitation' element={<Invitation/>}></Route>
@@ -110,7 +110,7 @@ isAuthenticated() ? <>
 />
 <Routes>
     <Route path='/' element={<Feed/>}></Route>
-    <Route path='/profile/:user_id' element={<Profile logout={logout}/>}></Route>
+    <Route path='/profile/:user_id' element={<Profile logout={logout} onProfileEdited={recall}/>}></Route>
     <Route path='/login' element={<Login onLogin={recall}/>}></Route>
     <Route path='/register' element={<Register onRegister={recall}/>}></Route>
     <Route path='/users' element={<Users/>}></Route>

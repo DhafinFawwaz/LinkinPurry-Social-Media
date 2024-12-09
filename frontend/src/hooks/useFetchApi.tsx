@@ -26,9 +26,9 @@ export async function fetchApi(path: string, options: RequestInit = {}) {
     options.credentials = "include";
     // console.log(options.headers)
     const res = await fetch(url, { ...DEFAULT_OPTIONS, ...options });
-    if(res.status === 401) {
-        window.location.reload();
-    }
+    // if(res.status === 401) {
+    //     if(window.location.pathname !== "/login") window.location.href = "/login";
+    // }
     return res;
 }
 

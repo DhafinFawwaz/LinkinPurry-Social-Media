@@ -152,7 +152,7 @@ export default function Feed({user}: {user?: User}) {
   {selectedPost && (
     <div className="flex flex-col gap-4">
       <textarea
-        className="w-full p-2 border border-gray-300 rounded-lg"
+        className="w-full p-2 border border-gray-300 rounded-lg hover:border-blue-600 focus:border-blue-600 focus:bg-blue-50 focus:outline-none"
         value={selectedPost.content}
         onChange={(e) => setSelectedPost({ ...selectedPost, content: e.target.value })}
       />

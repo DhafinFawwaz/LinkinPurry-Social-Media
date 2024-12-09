@@ -78,6 +78,28 @@ export async function InvalidateChatCache(user1Id: number, user2Id: number) {
 	try {await redis.del(`chats-${small_id}-${big_id}`, `latest-chat-${small_id}`, `latest-chat-${big_id}`);}
 	catch(e) {console.log(e)}
 }
+export async function InvalidateChatCacheAllWithUser(userId: number) {
+    console.log("\x1b[33m[redis] Invalidating Chat Cache\x1b[0m")
+	try {
+		const patterns = [
+			`chats-${userId}-*`,
+			`chats-*-${userId}`,
+			`latest-chat-${userId}`,
+		];
+	
+		const pipeline = redis.pipeline();
+		for (const pattern of patterns) {
+			const keys = await redis.keys(pattern);
+			if (keys.length > 0) {
+				console.log(keys)
+				pipeline.del(...keys);
+			}
+		}
+		await pipeline.exec();
+	} catch(e) {console.log(e)}
+	// chats-${userId}-* or chats-*-${userId} or latest-chat-${userId}
+}
+
 async function sendChat(fromId: number, toId: number, message: string) {
 	await db.chat.create({
 		data: {

@@ -63,7 +63,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
                 :
                 <div className="flex items-start space-x-3">
                   <img
-                    src={toImageSrc(user.profile_photo_path)}
+                    src={toImageSrc(chatDetails.profile_photo_path)}
                     alt={`${chatDetails.full_name}'s avatar`}
                     className="w-8 h-8 rounded-full"
                   />
@@ -85,7 +85,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
         {!isTyping ? <></> : 
           <div className="flex items-start space-x-3">
             <img
-              src={toImageSrc(user.profile_photo_path)}
+              src={toImageSrc(chatDetails.profile_photo_path)}
               alt={`${chatDetails.full_name}'s avatar`}
               className="w-8 h-8 rounded-full"
             />

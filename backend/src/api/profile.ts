@@ -7,7 +7,7 @@ import { deleteCookie } from 'hono/cookie'
 import fs from 'fs'
 import { join } from 'path'
 import { redis } from '../db/redis.js'
-import { InvalidateChatCache } from '../socket/chat.js'
+import { InvalidateChatCache, InvalidateChatCacheAllWithUser } from '../socket/chat.js'
 import { invalidateFeedCache } from './feed.js'
 import { fileTypeFromBuffer } from 'file-type'
 
@@ -747,6 +747,9 @@ app.openapi(
           });
 
           await login(c, Number(user.id), updatedUser.username, updatedUser.email, updatedUser.full_name, updatedUser.work_history, updatedUser.skills, updatedUser.profile_photo_path)
+          await invalidateFeedCache()
+          await InvalidateChatCacheAllWithUser(user.id)
+          
           return c.json({
             success: true,
             message: '',
@@ -772,9 +775,8 @@ app.openapi(
           });
 
           await login(c, Number(user.id), updatedUser.username, updatedUser.email, updatedUser.full_name, updatedUser.work_history, updatedUser.skills, updatedUser.profile_photo_path)
-          
-          console.log("\x1b[33m[redis] Invalidating Feed Cache\x1b[0m")
           await invalidateFeedCache()
+          await InvalidateChatCacheAllWithUser(user.id)
           
           return c.json({
             success: true,

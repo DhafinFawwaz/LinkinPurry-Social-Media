@@ -50,7 +50,82 @@ npx tsx prisma/seed.ts
 Now, you can access the server at `http://localhost:4000`.
 
 ## 📷 API Documentation
-<img src="screenshots/APIdoc.png"/>
+API Documentation can be accessed at `http://localhost:4000/doc`. Here's a screenshot.
+![API Documentation](screenshots/APIdoc.png)
+
+## ⏳ Load Test
+
+### Github
+![Load Test Github](screenshots/load-test-github.png)
+Before the Github Action limit is exceeded in the Organization, this project manage to finish the load test for the feeds.
+
+### Local
+![Load Test Local](screenshots/load-test-local-profile.png)
+![Load Test Local](screenshots/load-test-local-feed.png)
+The load test is done locally using k6. You can try it your self by following these steps:
+1. Install k6
+
+```bash
+winget install k6 --source winget
+```
+
+2. Run the backend server. Please be aware that if you have tried the development server and redis is used, you may need to clear the redis by deleting the `redis-data` folder.
+
+```
+docker compose up
+```
+
+3. Run the load test
+
+Command Prompt:
+
+```bash
+cd tests
+set SERVER_ENDPOINT="http://localhost:3000"; npm run test:profile
+set SERVER_ENDPOINT="http://localhost:3000"; npm run test:feed
+```
+
+Powershell:
+
+```bash
+cd tests
+$env:SERVER_ENDPOINT="http://localhost:3000"; npm run test:profile
+$env:SERVER_ENDPOINT="http://localhost:3000"; npm run test:feed
+```
+
+### Docker
+![Load Test Docker](screenshots/load-test-docker-profile.png)
+![Load Test Docker](screenshots/load-test-docker-feed.png)
+The load test is done in a docker container using k6. You can try it your self by following these steps:
+
+1. Pull and run the database
+
+```bash
+docker run -p 5432:5432 -d nicholasliem/wbd-m2-db-image:latest
+```
+
+2. Modify the .env file to be the following (use the host.docker.internal, comment the other DATABASE_URL)
+```bash
+# DATABASE_URL=postgresql://user:supersecretpassword@db/job?schema=public
+# DATABASE_URL=postgresql://user:supersecretpassword@localhost:5432/job?schema=public
+DATABASE_URL=postgresql://dbuser:dbpassword@host.docker.internal:5432/maindb?schema=public
+```
+
+3. Run the backend server. Please be aware that if you have tried the development server and redis is used, you may need to clear the redis by deleting the `redis-data` folder.
+```bash
+docker-compose -f docker-compose.test.yml up
+```
+
+4. Build the tests
+```bash
+docker build -f Dockerfile.tests -t backend-tests .
+```
+
+5. Run the tests
+```bash
+docker run -it backend-tests
+```
+
 
 ## 📄 Pembagian Tugas
 | Fitur                                              | NIM |
@@ -76,3 +151,14 @@ Now, you can access the server at `http://localhost:4000`.
 | Bonus: Google Lighthouse                           |     |
 
 ## ✨ Bonus
+
+### Bonus: UI/UX Seperti LinkedIn
+
+### Bonus: Caching
+
+### Bonus: Connection Recommendation
+
+### Bonus: Typing Indicator
+
+### Bonus: Google Lighthouse
+

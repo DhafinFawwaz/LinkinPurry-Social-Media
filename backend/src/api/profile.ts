@@ -10,6 +10,7 @@ import { redis } from '../db/redis.js'
 import { InvalidateChatCache, InvalidateChatCacheAllWithUser } from '../socket/chat.js'
 import { invalidateFeedCache } from './feed.js'
 import { fileTypeFromBuffer } from 'file-type'
+import { bodyLimit } from 'hono/body-limit'
 
 const app = new OpenAPIHono()
 

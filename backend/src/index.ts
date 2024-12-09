@@ -16,6 +16,7 @@ import { handleSocket } from './socket/chat.js'
 import { Server } from 'socket.io'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { logger } from 'hono/logger'
+import { bodyLimit } from 'hono/body-limit'
 
 const app = new OpenAPIHono()
 // app.use(logger())
@@ -24,6 +25,16 @@ app.use('/*', async (c, next) => cors({origin: getCorsOrigin(c), credentials: tr
 app.get('/doc', swaggerUI({ url: '/api/doc' }))
 app.doc('/api/doc', { info: { title: 'API Documentation', version: 'v1' }, openapi: '3.1.0'})
 app.use('/uploads/img/*', serveStatic({ root: './' }))
+
+app.use(bodyLimit({
+  maxSize: 1024 * 1024 * 10, // 10MB
+  onError: (c) => {
+    c.status(413)
+    console.log("Received really big request")
+    return c.json({ success: false, message: "Maximum size reached" })
+  }
+}))
+
 app.route('/api', authRoute)
 app.route('/api', feedRoute)
 app.route('/api', profileRoute)

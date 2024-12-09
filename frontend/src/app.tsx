@@ -18,6 +18,7 @@ import ChatUI from './routes/chat_ui'
 import ChatBase from './routes/chat-base'
 import Recommendation from './routes/recommendation'
 import NotFound from './routes/not-found'
+import { toast, ToastContainer, Zoom } from 'react-toastify'
 
 // [currentPath, redirectPath]]
 const protectedRoutes = new Map<string, string>([
@@ -42,7 +43,9 @@ function AuthRouter() {
     useEffect(() => {
         if(loading) return;
         if (isAuthenticated()) {
-            tryRegisterServiceWorker();
+            tryRegisterServiceWorker({
+                onNotGranted: toast.error
+            });
             const redirectNotAuthenticatedPath = notAuthenticatedRoutes.get(location.pathname);
             if (redirectNotAuthenticatedPath) navigate(redirectNotAuthenticatedPath);
         } else {
@@ -72,6 +75,14 @@ function AuthRouter() {
     }
 
     return <>
+<ToastContainer
+  position="bottom-left"
+  hideProgressBar={true}
+  transition={Zoom}
+  autoClose={3000} 
+  draggable
+/>
+
 {loading ? <SplashScreen></SplashScreen> :
 isAuthenticated() ? <>
 

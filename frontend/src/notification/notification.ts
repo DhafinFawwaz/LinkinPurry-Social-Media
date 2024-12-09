@@ -2,12 +2,13 @@ import { fetchApi, getApiUrl } from "../hooks/useFetchApi";
 
 const notificationEndpointKey = "notification-endpoint";
 
-export function tryRegisterServiceWorker() {
+export function tryRegisterServiceWorker({ onNotGranted }: { onNotGranted?: (message: string) => void } = {}) {
 	if ("serviceWorker" in navigator && "Notification" in window) {
 		async function handleServiceWorker() {
 			const permission = await Notification.requestPermission();
 			console.log("Notification " + permission);
 			if (permission !== "granted") {
+				if(onNotGranted) onNotGranted("Please allow notifications to receive updates");
 				return;
 			}
 
@@ -62,6 +63,7 @@ export function tryRegisterServiceWorker() {
 		};
 		handleServiceWorker();
 	} else {
+		if(onNotGranted) onNotGranted("Service Worker or Notifications API not supported");
 		console.log("Service Worker or Notifications API not supported");
 	}
 }

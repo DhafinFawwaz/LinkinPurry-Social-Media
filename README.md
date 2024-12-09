@@ -154,25 +154,25 @@ docker run -it backend-tests
 ## 📄 Pembagian Tugas
 | Fitur                                              | NIM |
 | -------------------------------------------------- | --- |
-| Login                                              |     |
-| Register                                           |     |
-| Profile                                            |     |
-| Feed                                               |     |
-| Daftar Pengguna                                    |     |
-| Permintaan Koneksi                                 |     |
-| Daftar Koneksi                                     |     |
-| Chat                                               |     |
-| Authentication and Authorization                   |     |
-| Websocket                                          |     |
-| Notifikasi                                         |     |
-| Stress and Load test                               |     |
-| Responsifitas                                      |     |
-| Docker                                             |     |
-| Bonus: UI/UX Seperti LinkedIn                      |     |
-| Bonus: Caching                                     |     |
-| Bonus: Connection Recommendation                   |     |
-| Bonus: Typing Indicator                            |     |
-| Bonus: Google Lighthouse                           |     |
+| Login                                              |13522084|
+| Register                                           |13522084|
+| Profile                                            |13522084, 13522074|
+| Feed                                               |13522084, 13522074|
+| Daftar Pengguna                                    |13522064|
+| Permintaan Koneksi                                 |13522084|
+| Daftar Koneksi                                     |13522084|
+| Chat                                               |13522084, 13522074|
+| Authentication and Authorization                   |13522084|
+| Websocket                                          |13522084|
+| Notifikasi                                         |13522084|
+| Stress and Load test                               |13522084|
+| Responsivitas                                      |13522074, 13522084|
+| Docker                                             |13522084|
+| Bonus: UI/UX Seperti LinkedIn                      |13522074, 13522084, 13522064|
+| Bonus: Caching                                     |13522084|
+| Bonus: Connection Recommendation                   |13522084|
+| Bonus: Typing Indicator                            |13522084|
+| Bonus: Google Lighthouse                           |13522074|
 
 ## ✨ Bonus
 

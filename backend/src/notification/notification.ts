@@ -50,6 +50,7 @@ export async function sendFeedNotification(user: JwtContent) {
 				endpoint: s.endpoint,
 				keys: s.keys as any
 			}
+			console.log("Sending feed notification to", c.from.id)
 			targets.push(webpush.sendNotification(subscription, JSON.stringify(notificationPayload)))
 		}
 	}
@@ -76,12 +77,15 @@ export async function sendChatNotification(user: JwtContent, targetUserId: numbe
 		},
 	};
 
+	// console.log("targetUser.push_subscriptions: ", targetUser.push_subscriptions.length)
+
 	const targets = [];
 	for(const s of targetUser.push_subscriptions) {
 		const subscription: PushSubscription = {
 			endpoint: s.endpoint,
 			keys: s.keys as any
 		}
+		console.log("Sending chat notification to", targetUser.id)
 		targets.push(webpush.sendNotification(subscription, JSON.stringify(notificationPayload)))
 	}
 	try {

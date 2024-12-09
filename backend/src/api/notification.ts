@@ -44,6 +44,8 @@ app.openapi(
             keys: subscription.keys
           }
         })
+
+        console.log(`${user.id} subscribed to notifications`)
         return c.json({
             success: true,
             message: "Subscribed to notifications"

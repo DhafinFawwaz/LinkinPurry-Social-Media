@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../components/form-input";
 import { fetchApi } from "../hooks/useFetchApi";
+import { toast, ToastContainer, Zoom } from "react-toastify";
 
 export const LoginSchema = z.object({
   identifier: z.string().min(1, "Email or Username is required"),
@@ -24,18 +25,33 @@ export default function Login({ onLogin: onLogin }: { onLogin?: () => void }) {
       const responseData = await response.json();
       if (responseData.errors) {
         const errors = responseData.errors;
-        if(errors.identifier) setError("identifier", { type: "server", message: errors.identifier,});
-        if(errors.password) setError("password", { type: "server", message: errors.password,});
+        if(errors.identifier) {
+          setError("identifier", { type: "server", message: errors.identifier,});
+          toast.error("Please enter a valid usename or email.");
+        }
+        if(errors.password) {
+          setError("password", { type: "server", message: errors.password,});
+          toast.error("Please enter a valid password.");
+        }
       } else {
         if (onLogin) onLogin();
       }
     } catch (e) {
-      alert(e);
+      // alert(e);
+      toast.error("Error. Please try again later.");
     }
   };
 
   return (
 <>
+<ToastContainer
+  position="bottom-left"
+  hideProgressBar={true}
+  transition={Zoom}
+  autoClose={3000} 
+  draggable
+/>
+
 <section className="sm:bg-background_grey bg-white"> {/* Fallback */}
   <div className="flex min-h-dvh min-h-screen items-center justify-center px-5 mx-auto">
     <div className="w-full rounded-2xl md:mt-0 sm:max-w-md bg-white sm:border border-gray-300 p-0 sm:p-8">

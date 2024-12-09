@@ -40,20 +40,20 @@ const server = serve({
   port
 })
 
-
+const customIp = process.env.CORS_ORIGIN_2 || "192.168.100.6:4000"
 function getCorsOrigin(c: Context) {
   const origins = process.env.CORS_ORIGIN || 'http://localhost:4000'
   let host = c.req.header("Host")
   if(!host) host = "localhost"
   if(host?.includes(":")) {
     const [hostname, port] = host.split(":")
-    return [hostname+":"+port, hostname, host, origins];
+    return [hostname+":"+port, hostname, host, origins, customIp];
   }
-  return [host, origins];
+  return [host, origins, customIp];
 }
 
 function getCorsOriginSocket() {
-  const origins = ['http://localhost:4000', process.env.CORS_ORIGIN || ""]
+  const origins = ['http://localhost:4000', customIp, process.env.CORS_ORIGIN || ""]
   return origins;
   // return "http://localhost:4000";
 }

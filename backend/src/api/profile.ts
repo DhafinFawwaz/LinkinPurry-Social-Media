@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
-import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse, UserSchema } from '../schema.js'
+import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse, UserSchema, DefaultJsonErrorResponse } from '../schema.js'
 import { getUser, login } from './auth.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
@@ -7,6 +7,9 @@ import { deleteCookie } from 'hono/cookie'
 import fs from 'fs'
 import { join } from 'path'
 import { redis } from '../db/redis.js'
+import { InvalidateChatCache } from '../socket/chat.js'
+import { invalidateFeedCache } from './feed.js'
+import { fileTypeFromBuffer } from 'file-type'
 
 const app = new OpenAPIHono()
 
@@ -25,6 +28,8 @@ async function setConnectionCountCache(user_id: number, count: number) {
 }
 
 async function invalidateConnectionCountCache(user_id: number) {
+  console.log("\x1b[33m[redis] Invalidating Connection Count Cache\x1b[0m")
+
   try {await redis.del(`user_${user_id}_connection_count`)}
   catch(e) {console.log(e)}
 }
@@ -610,6 +615,13 @@ function getProfilePhotoPathPrefixId(user_id: number, image_name: string) {
 
 const defaultPhotoPath = baseImgPath + "jobseeker_profile.svg"
 
+async function isImage(buffer: Buffer) {
+  const fileType = await fileTypeFromBuffer(buffer);
+  if (!fileType) return false;
+  const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  return imageMimeTypes.includes(fileType.mime);
+}
+
 app.openapi(
     createRoute({
       method: 'put',
@@ -646,6 +658,12 @@ app.openapi(
         }),
         401: DefaultJsonResponse("Unauthorized"),
         400: DefaultJsonResponse("Invalid profile photo"),
+        422: DefaultJsonErrorResponse("Username is taken", {
+          username: z.string()
+        }),
+        423: DefaultJsonErrorResponse("Invalid image", {
+          profile_photo: z.string()
+        }),
         500: DefaultJsonResponse("Failed to edit profile")
       },
       middleware: authenticated
@@ -663,11 +681,47 @@ app.openapi(
 
       try {
         const { username, name, work_history, skills } = c.req.valid("form");
+        // check if username is taken
+        const existingUser = await db.user.findUnique({
+          where: {
+            username: username
+          }
+        })
+        if(existingUser && Number(existingUser.id) !== user.id) {
+          c.status(422);
+          return c.json({
+            success: false,
+            message: 'Username is taken',
+            errors: {
+              username: "Username is taken"
+            }
+          })
+        }
         
-        console.log(username)
         const { profile_photo } = await c.req.parseBody()
         
         if(profile_photo) {
+
+          const image = profile_photo as File
+          const buffer = await image.arrayBuffer()
+          if(!await isImage(Buffer.from(buffer))) {
+            c.status(400);
+            return c.json({
+              success: false,
+              message: 'Invalid profile photo',
+              errors: {
+                profile_photo: "Invalid image"
+              }
+            })
+          }
+          const profile_photo_path = getProfilePhotoPathPrefixId(user.id, image.name);
+          if(profile_photo_path === "jobseeker_profile.svg") {
+            c.status(400);
+            return c.json({
+              success: false,
+              message: 'Invalid profile photo', // hehe
+            })
+          }
           
           if(user.profile_photo_path !== defaultPhotoPath) { // delete old profile photo
             fs.unlink(join(process.cwd(), user.profile_photo_path), (err) => {
@@ -675,9 +729,6 @@ app.openapi(
             })
           }
           
-          const image = profile_photo as File
-          const buffer = await image.arrayBuffer()
-          const profile_photo_path = getProfilePhotoPathPrefixId(user.id, image.name);
           fs.writeFile(join(process.cwd(), profile_photo_path), Buffer.from(buffer), (err) => {
             if (err) throw err
           })
@@ -721,6 +772,10 @@ app.openapi(
           });
 
           await login(c, Number(user.id), updatedUser.username, updatedUser.email, updatedUser.full_name, updatedUser.work_history, updatedUser.skills, updatedUser.profile_photo_path)
+          
+          console.log("\x1b[33m[redis] Invalidating Feed Cache\x1b[0m")
+          await invalidateFeedCache()
+          
           return c.json({
             success: true,
             message: '',
@@ -937,6 +992,7 @@ app.openapi(
     })
     invalidateConnectionCountCache(user.id)
     invalidateConnectionCountCache(target_id)
+    InvalidateChatCache(user.id, target_id)
 
     return c.json({
         success: true,
@@ -1139,6 +1195,23 @@ app.openapi(
         })
       } catch(e) {}
     })
+
+    // delete all chat messages between the two users
+    await db.chat.deleteMany({
+      where: {
+        OR: [
+          {
+            from_id: user.id,
+            to_id: target_id
+          },
+          {
+            from_id: target_id,
+            to_id: user.id
+          }
+        ]
+      }
+    })
+
 
     invalidateConnectionCountCache(user.id)
     invalidateConnectionCountCache(target_id)

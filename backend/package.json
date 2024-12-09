@@ -12,6 +12,7 @@
     "@prisma/client": "^5.22.0",
     "@types/web-push": "^3.6.4",
     "bcrypt": "^5.1.1",
+    "file-type": "^19.6.0",
     "hono": "^4.6.11",
     "ioredis": "^5.4.1",
     "node-gyp": "^10.2.0",

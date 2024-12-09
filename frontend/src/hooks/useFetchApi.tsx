@@ -25,7 +25,11 @@ export async function fetchApi(path: string, options: RequestInit = {}) {
     const url = getApiUrl() + path;
     options.credentials = "include";
     // console.log(options.headers)
-    return await fetch(url, { ...DEFAULT_OPTIONS, ...options });
+    const res = await fetch(url, { ...DEFAULT_OPTIONS, ...options });
+    if(res.status === 401) {
+        window.location.reload();
+    }
+    return res;
 }
 
 async function wait(duration: number) {

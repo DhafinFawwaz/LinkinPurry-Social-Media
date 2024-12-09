@@ -7,9 +7,9 @@ import { redis } from '../db/redis.js'
 
 const app = new OpenAPIHono()
 
-async function invalidateFeedCache() {
+export async function invalidateFeedCache() {
   try {
-    console.log('Invalidating cache')
+    console.log("\x1b[33m[redis] Invalidating Feed Cache\x1b[0m")
     const script = `
       local keys = redis.call('keys', 'feeds_*')
       if #keys > 0 then

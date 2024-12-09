@@ -6,6 +6,7 @@ import { decodeToken } from '../api/auth.js';
 import { parse } from 'cookie';
 import db from '../db/db.js';
 import { sendChatNotification } from '../notification/notification.js';
+import { redis } from '../db/redis.js';
 
 function sortIds(id1: number, id2: number): [number, number]{
 	id1 = Number(id1);
@@ -35,7 +36,17 @@ function errorResponse(message: string) {
 	return JSON.stringify({success: false, message: message});
 }
 
+// invaldate when
+// - new chat is created
 async function findAllChats(user1Id: number, user2Id: number) {
+	try {
+		const cached = await redis.get(`chats-${user1Id}-${user2Id}`);
+		if(cached) {
+			console.log("\x1b[32m[redis] Getting all chats Cached\x1b[0m")
+			return JSON.parse(cached);
+		}
+	} catch(e) {console.log(e)}
+
 	const [small_id, big_id] = sortIds(user1Id, user2Id);
 	const chats = await db.chat.findMany({
 		where: {
@@ -54,7 +65,18 @@ async function findAllChats(user1Id: number, user2Id: number) {
 			timestamp: "asc"
 		}
 	})
+
+	try {redis.set(`chats-${small_id}-${big_id}`, JSON.stringify(chats));}
+	catch(e) {console.log(e)}
+	
 	return chats;
+}
+
+export async function InvalidateChatCache(user1Id: number, user2Id: number) {
+	const [small_id, big_id] = sortIds(user1Id, user2Id);
+    console.log("\x1b[33m[redis] Invalidating Chat Cache\x1b[0m")
+	try {await redis.del(`chats-${small_id}-${big_id}`, `latest-chat-${small_id}`, `latest-chat-${big_id}`);}
+	catch(e) {console.log(e)}
 }
 async function sendChat(fromId: number, toId: number, message: string) {
 	await db.chat.create({
@@ -64,6 +86,8 @@ async function sendChat(fromId: number, toId: number, message: string) {
 			message: message
 		}
 	})
+
+	await InvalidateChatCache(fromId, toId);
 }
 
 function getRoomKey(user1Id: number, user2Id: number) {

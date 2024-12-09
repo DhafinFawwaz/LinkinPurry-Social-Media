@@ -54,8 +54,11 @@ app.openapi(
       200: DefaultJsonResponse("Login to an account successful", {
         token: z.string()
       }),
-      401: DefaultJsonErrorResponse("Invalid credentials")
-    }
+      401: DefaultJsonErrorResponse("Invalid credentials", {
+        identifier: z.string(),
+        password: z.string()
+      })
+    },
   }), async (c) => {
     try {
       const { identifier, password } = c.req.valid("json");
@@ -160,7 +163,12 @@ app.openapi(
       200: DefaultJsonResponse("Register to an account", {
         token: z.string()
       }),
-      422: DefaultJsonResponse("Email is taken")
+      422: DefaultJsonErrorResponse("Email is taken", {
+        email: z.string()
+      }),
+      423: DefaultJsonErrorResponse("Username is taken", {
+        username: z.string()
+      }),
     },
 
   }), async (c) => {
@@ -189,7 +197,7 @@ app.openapi(
         }, select: { id: true }
       })
       if(user) {
-        c.status(422)
+        c.status(423)
         return c.json({
           success: false,
           message: 'Register failed',

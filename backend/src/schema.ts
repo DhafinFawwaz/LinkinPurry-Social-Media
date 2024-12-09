@@ -32,11 +32,11 @@ export function DefaultJsonArrayResponse(description: string, body?: z.ZodRawSha
     }
   }
 }
-export function DefaultJsonErrorResponse(description: string) {
-  const schema: { success: z.ZodBoolean, message: z.ZodString, error: z.ZodAny } = {
+export function DefaultJsonErrorResponse(description: string, error?: z.ZodRawShape) {
+  const schema: { success: z.ZodBoolean, message: z.ZodString, errors: any } = {
     success: z.boolean(),
     message: z.string(),
-    error: z.any()
+    errors: error ? z.object(error) : z.any()
   }
   return {
     description: description,

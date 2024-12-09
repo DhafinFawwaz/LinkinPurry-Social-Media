@@ -2,11 +2,21 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi'
 import { DefaultJsonResponse, DefaultJsonRequest, PostSchema, DefaultJsonArrayResponse, UserSchema } from '../schema.js'
 import db from '../db/db.js'
 import { authenticated, type JwtContent } from '../middlewares/authenticated.js'
+import { redis } from '../db/redis.js'
 
 const app = new OpenAPIHono()
 
 // TODO: try to optimize this with redis. invalidate cache when new chat is created
+
+// invaldate when
+// - new chat is created
 async function findLatestChatWithId(userId: number): Promise<any[]> {
+  const cached = await redis.get(`latest-chat-${userId}`);
+  if(cached) {
+    console.log("\x1b[32m[redis] Getting latest chat Cached\x1b[0m")
+    return JSON.parse(cached);
+  }
+
   // get all connection, join users, join chat and get the latest chat
   const chats: any[] = await db.$queryRaw`
 SELECT DISTINCT
@@ -31,6 +41,8 @@ WHERE c.timestamp = (
 )
 
   `;
+
+  redis.set(`latest-chat-${userId}`, JSON.stringify(chats));
   // console.log(chats);
   return chats;
 }

@@ -45,7 +45,15 @@ export default function Profile({ logout }: { logout: () => void }) {
   
   const [file, setFile] = useState<File>();
   function handleImageChange(e: any) {
-    setFile(e.target.files[0]);
+    try {
+      const file = e.target.files[0];
+      if (file.type.split("/")[0] !== "image") {
+        toast.error("Invalid file type. Please upload an image.");
+        return;
+      }
+    } catch (error) {
+      setFile(file);
+    }
   }
 
   function openEditDialog(post: { id: number; content: string }) {
@@ -126,9 +134,33 @@ export default function Profile({ logout }: { logout: () => void }) {
           "content-type": "multipart/form-data",
         }
       });
-
+      console.log("res.ok", res.ok);
       if (!res.ok) {
-        toast.error("Failed to update profile");
+
+        const data = await res.json(); 
+        console.log("data", data);
+        if(data.errors) {
+          if(data.errors.username) {
+            setError("username", { message: data.errors.username });
+            toast.error(data.errors.username);
+          } else if(data.errors.name) {
+            setError("name", { message: data.errors.name });
+            toast.error(data.errors.name);
+          } else if(data.errors.work_history) {
+            setError("work_history", { message: data.errors.work_history });
+            toast.error(data.errors.work_history);
+          } else if(data.errors.skills) {
+            setError("skills", { message: data.errors.skills });
+            toast.error(data.errors.skills);
+          } else if(data.errors.profile_photo) {
+            setError("root", { message: data.errors.profile_photo });
+            toast.error(data.errors.profile_photo);
+          } else {
+            toast.error("Failed to update profile");
+          }
+        }
+
+        else toast.error("Failed to update profile");
         return;
       }
 
@@ -252,7 +284,7 @@ export default function Profile({ logout }: { logout: () => void }) {
         </div>
       </label>
     </div>
-    <input onChange={handleImageChange} id='profile_photo_path' type="file" hidden />
+    <input onChange={handleImageChange} id='profile_photo_path' type="file" hidden accept='image/png, image/gif, image/jpeg' />
     
     <div className='grid grid-cols-2 gap-4'>
       <FormInput register={register} error={errors.username} field={"username"} type={"text"} title={"Username"} defaultValue={value?.body.username}></FormInput>

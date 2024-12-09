@@ -177,7 +177,10 @@ docker run -it backend-tests
 ## ✨ Bonus
 
 ### Bonus: UI/UX Seperti LinkedIn
+#### Desktop:
 ![Linkedin like UI/UX](screenshots/linkedin-like-ui-ux.png)
+#### Mobile:
+![Linkedin like UI/UX](screenshots/linkedin-like-ui-ux-mobile.png)
 
 ### Bonus: Caching
 ![Caching with Redis](screenshots/caching.png)
@@ -189,4 +192,14 @@ docker run -it backend-tests
 ![Typing Indicator](screenshots/typing-indicator.png)
 
 ### Bonus: Google Lighthouse
-
+![lighthouse1](screenshots/lighthouse1.png)
+![lighthouse1](screenshots/lighthouse2.png)
+![lighthouse1](screenshots/lighthouse3.png)
+![lighthouse1](screenshots/lighthouse4.png)
+![lighthouse1](screenshots/lighthouse5.png)
+![lighthouse1](screenshots/lighthouse6.png)
+![lighthouse1](screenshots/lighthouse7.png)
+![lighthouse1](screenshots/lighthouse8.png)
+![lighthouse1](screenshots/lighthouse9.png)
+![lighthouse1](screenshots/lighthouse10.png)
+![lighthouse1](screenshots/lighthouse11.png)

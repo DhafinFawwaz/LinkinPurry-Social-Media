@@ -13,6 +13,8 @@ import UsersIcon from "../../assets/images/users.svg";
 import UsersHoverIcon from "../../assets/images/users-hover.svg";
 import ConnectIcon from "../../assets/images/connect.svg";
 import ConnectHoverIcon from "../../assets/images/connect-hover.svg";
+import RecomIcon from "../../assets/images/recom.svg";
+import RecomHoverIcon from "../../assets/images/recom-hover-icon.svg";
 import { User } from "../../type";
 
 interface NavbarProps {
@@ -50,8 +52,8 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
                 {
                     name: "Recommendation",
                     path: "/recommendation",
-                    defaultIcon: NetworkIcon,
-                    activeIcon: NetworkHoverIcon,
+                    defaultIcon: RecomIcon,
+                    activeIcon: RecomHoverIcon,
                 },
                 {
                     name: "Messaging",

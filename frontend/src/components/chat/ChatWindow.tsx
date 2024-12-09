@@ -23,7 +23,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
 
   let lastDate = '';
   return ( 
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col border-t">
       <div className="p-4 border-b flex items-center">
         <h2 className="text-lg font-semibold">{chatDetails.full_name}</h2>
       </div>
@@ -51,7 +51,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
                       </span>
                       <span className="text-sm font-bold text-gray-700">{user.full_name}</span>
                     </div>
-                    <div className="text-base text-gray-900 ml-11 text-right break-all">{msg.message}</div>
+                    <div className="text-sm text-gray-900 ml-11 text-right break-all">{msg.message}</div>
                   </div>
                   <img
                     src={toImageSrc(user.profile_photo_path)}
@@ -108,7 +108,7 @@ export default function ChatWindow({ chatDetails, messages, user, isTyping, chil
         
       </div>
 
-      <div className="p-4 border-t flex bottom-0 w-full z-20 bg-white">
+      <div className="p-4 border-t flex bottom-0 mb-12 sm:mb-0 w-full z-20 bg-white">
         { children }
       </div>
     </div>

@@ -15,6 +15,7 @@
 
 ## 📄 Description
 This is a web-based application that can be used as a social media to share career information.
+
 ## 🔨 Installation
 To install this application, simply clone this repository:
 ```bash
@@ -33,6 +34,7 @@ mv .env.example .env
 cd ../
 mv .env.example .env
 ```
+
 ## 🔨 Running the Server
 Make sure you have docker installed on your machine. 
 Rename the `.env.example` files to `.env` and modify the necessary information if needed.
@@ -48,5 +50,29 @@ npx tsx prisma/seed.ts
 Now, you can access the server at `http://localhost:4000`.
 
 ## 📷 API Documentation
+<img src="screenshots/APIdoc.png"/>
 
 ## 📄 Pembagian Tugas
+| Fitur                                              | NIM |
+| -------------------------------------------------- | --- |
+| Login                                              |     |
+| Register                                           |     |
+| Profile                                            |     |
+| Feed                                               |     |
+| Daftar Pengguna                                    |     |
+| Permintaan Koneksi                                 |     |
+| Daftar Koneksi                                     |     |
+| Chat                                               |     |
+| Authentication and Authorization                   |     |
+| Websocket                                          |     |
+| Notifikasi                                         |     |
+| Stress and Load test                               |     |
+| Responsifitas                                      |     |
+| Docker                                             |     |
+| Bonus: UI/UX Seperti LinkedIn                      |     |
+| Bonus: Caching                                     |     |
+| Bonus: Connection Recommendation                   |     |
+| Bonus: Typing Indicator                            |     |
+| Bonus: Google Lighthouse                           |     |
+
+## ✨ Bonus

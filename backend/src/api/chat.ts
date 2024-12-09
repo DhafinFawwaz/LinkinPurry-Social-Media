@@ -11,11 +11,12 @@ const app = new OpenAPIHono()
 // invaldate when
 // - new chat is created
 async function findLatestChatWithId(userId: number): Promise<any[]> {
-  const cached = await redis.get(`latest-chat-${userId}`);
-  if(cached) {
-    console.log("\x1b[32m[redis] Getting latest chat Cached\x1b[0m")
-    return JSON.parse(cached);
-  }
+  // const key = `latest-chat-${userId}`;
+  // const cached = await redis.get(key);
+  // if(cached) {
+  //   console.log(`\x1b[32m[redis] Getting latest chat Cached: ${key}\x1b[0m`)
+  //   return JSON.parse(cached);
+  // }
 
   // get all connection, join users, join chat and get the latest chat
   const chats: any[] = await db.$queryRaw`
@@ -42,7 +43,7 @@ WHERE c.timestamp = (
 
   `;
 
-  redis.set(`latest-chat-${userId}`, JSON.stringify(chats));
+  // redis.set(`latest-chat-${userId}`, JSON.stringify(chats));
   // console.log(chats);
   return chats;
 }

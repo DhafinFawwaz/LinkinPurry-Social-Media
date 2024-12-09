@@ -39,15 +39,17 @@ function errorResponse(message: string) {
 // invaldate when
 // - new chat is created
 async function findAllChats(user1Id: number, user2Id: number) {
+	const [small_id, big_id] = sortIds(user1Id, user2Id);
+
 	try {
-		const cached = await redis.get(`chats-${user1Id}-${user2Id}`);
+		const key = `chats-${small_id}-${big_id}`;
+		const cached = await redis.get(key);
 		if(cached) {
-			console.log("\x1b[32m[redis] Getting all chats Cached\x1b[0m")
+			console.log(`\x1b[32m[redis] Getting all chats Cached: ${key}\x1b[0m`)
 			return JSON.parse(cached);
 		}
 	} catch(e) {console.log(e)}
 
-	const [small_id, big_id] = sortIds(user1Id, user2Id);
 	const chats = await db.chat.findMany({
 		where: {
 			OR: [

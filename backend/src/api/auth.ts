@@ -30,7 +30,6 @@ export async function login(c: Context, id: number, username: string, email: str
     exp: exp
   }, getSecretKey())
 
-  console.log(profile_photo_path)
 
   setCookie(c, 'token', token, {
     httpOnly: true,
